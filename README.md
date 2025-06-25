@@ -1,98 +1,158 @@
+<a id="readme-top"></a>
 
+<!-- PROJECT SHIELDS -->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![Unlicense License][license-shield]][license-url]
+[![MIT License][license-shield]][license-url]
 
-# 🧠 Habit-Tracker-API
 
-A backend REST API for tracking personal habits: create daily/weekly habits, perform check-ins, and track streaks. Built with **Java 21** and **Spring Boot**, it’s designed to simulate real-world backend development workflows — including CI, Docker-based environments, and API documentation.
 
-## 🏗️ Table of Contents
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/hyuseinleshov/habit-tracker-api">
+    <img src="images/logo.png" alt="Habit Tracker Logo" width="80" height="80">
+  </a>
 
-1. [About The Project](#about-the-project)  
-2. [Built With](#built-with)  
-3. [Getting Started](#getting-started)  
-    - [Prerequisites](#prerequisites)  
-    - [Installation](#installation)  
-4. [Contributing](#contributing)  
-5. [License](#license)  
-6. [Contact](#contact)  
+<h3 align="center">Habit Tracker API</h3>
 
-## 🔍 About The Project
+  <p align="center">
+    A backend REST API for tracking daily/weekly habits, check‑ins, and streaks.
+    <br />
+    <br />
+    <a href="https://github.com/hyuseinleshov/habit-tracker-api/issues/new?labels=bug">Report Bug</a>
+    &middot;
+    <a href="https://github.com/hyuseinleshov/habit-tracker-api/issues/new?labels=enhancement">Request Feature</a>
+  </p>
+</div>
 
-This API enables users to:
 
-- Register and authenticate (JWT-based)  
-- Create, view, update, and delete habits (daily or weekly)  
-- Perform check-ins for habits  
-- View current streaks and progress history  
 
-It’s a backend-first solution with a clean domain model (`User`, `Habit`, `CheckIn`, `Streak`), and is developed using best practices like layered architecture, database migrations, and Docker for local environments.
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#about-the-project">About The Project</a>
+        <ul>
+          <li><a href="#built-with">Built With</a></li>
+        </ul>
+    </li>
+    <li><a href="#getting-started">Getting Started</a>
+        <ul>
+          <li><a href="#prerequisites">Prerequisites</a></li>
+          <li><a href="#installation">Installation</a></li>
+        </ul>
+    </li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-## 🛠️ Built With
 
-- **Java** 21+  
-- **Spring Boot** (Web, Data, Security, Validation)  
-- **PostgreSQL** (via Docker)  
-- **Spring Security + JWT**  
-- **Flyway** (database migrations)  
-- **Swagger/OpenAPI** (API docs)  
-- **JUnit + Mockito** (tests)  
-- **Docker & Docker Compose**  
-- **GitHub Actions** (CI for tests & linting)
 
-## 🚀 Getting Started
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-### 🔌 Prerequisites
+Our goal is:
 
-Make sure you have installed:
+"Habit Tracker API is a Spring Boot backend that helps users manage daily and weekly habits. Users can:
+- Register/login with JWT authentication
+- Create, read, update, delete habits
+- Perform check‑ins per habit
+- View current streaks and historic stats
 
-- [ ] Java 21+  
-- [ ] Docker & Docker Compose  
-- [ ] Gradle (or use `./gradlew` wrapper)
+This project is structured with clean architecture, Docker, CI pipelines, and full API documentation—all without a UI layer."
 
-### ⚙️ Installation
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Clone the repo and start services:
 
-```bash
-git clone https://github.com/<your-org>/habit-tracker-api.git
-cd habit-tracker-api
-docker-compose up --build
-```
 
-Swagger UI will be available at:  
-```
-http://localhost:8080/swagger-ui.html
-```
+<!-- BUILT WITH -->
+### Built With
 
-## 🤝 Contributing
+* [![Java][java-shield]][java-url]
+* [![Spring Boot][spring-boot-shield]][spring-boot-url]
+* [![Gradle][gradle-shield]][gradle-url]
 
-Contributions welcome! Please follow:
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-1. Fork the project  
-2. Create a feature branch (`feature/your-feature`)  
-3. Commit your changes  
-4. Push to your branch  
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+Follow these instructions to run the project locally.
+
+### Prerequisites
+
+* Java 21+
+* Gradle (optional — you can use the included `./gradlew` wrapper)
+
+### Installation
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/hyuseinleshov/habit-tracker-api.git
+    cd habit-tracker-api
+    ```
+
+2. Build and run the application:
+
+    ```bash
+    ./gradlew bootRun
+    ```
+
+3. The API will be available at:
+
+    ```
+    http://localhost:8080/
+    ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+We welcome contributions! Follow these steps:
+
+1. Fork the project
+2. Create your branch (`feature/xyz`, `fix/abc`)
+3. Commit your changes (`feat: add xyz feature`)
+4. Push to your branch
 5. Open a Pull Request
 
-Ensure all tests pass and adhere to the branch protection rules on `main`.
+Adhere to our branch/commit conventions.
 
-## 📜 License
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Distributed under the **MIT License**. See `LICENSE` for details.
 
-## 📬 Contact
 
-- **Hyusein** – *Developer* – hl.dev.acc@gmail.com  
-- **Shenol** – *Developer* – shenolshengov41@gmail.com
+<!-- LICENSE -->
+## License
 
-Project link: [https://github.com/hyuseinleshov/habit-tracker-api](https://github.com/hyuseinleshov/habit-tracker-api)
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+## Contact
+
+- **Hyusein Leshov** – hl.dev.acc@gmail.com
+- **Shenol Shengov** – shenolshengov41@gmail.com
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/hyuseinleshov/habit-tracker-api.svg?style=for-the-badge
 [contributors-url]: https://github.com/hyuseinleshov/habit-tracker-api/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/hyuseinleshov/habit-tracker-api.svg?style=for-the-badge
@@ -102,4 +162,10 @@ Project link: [https://github.com/hyuseinleshov/habit-tracker-api](https://githu
 [issues-shield]: https://img.shields.io/github/issues/hyuseinleshov/habit-tracker-api.svg?style=for-the-badge
 [issues-url]: https://github.com/hyuseinleshov/habit-tracker-api/issues
 [license-shield]: https://img.shields.io/github/license/hyuseinleshov/habit-tracker-api.svg?style=for-the-badge
-[license-url]: https://github.com/hyuseinleshov/habit-tracker-api/blob/master/LICENSE.txt
+[license-url]: https://github.com/hyuseinleshov/habit-tracker-api/blob/main/LICENSE
+[java-shield]: https://img.shields.io/badge/Java-DE0A26?logo=openjdk&logoColor=white&style=for-the-badge
+[java-url]: https://www.oracle.com/java/
+[spring-boot-shield]: https://img.shields.io/badge/Spring%20Boot-6DB33F?logo=springboot&logoColor=white&style=for-the-badge
+[spring-boot-url]: https://spring.io/projects/spring-boot
+[gradle-shield]: https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white&style=for-the-badge
+[gradle-url]: https://gradle.org/
