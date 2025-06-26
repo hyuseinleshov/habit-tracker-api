@@ -1,3 +1,23 @@
 spring:
  application:
   name: habit-tracker-api
+ datasource:
+  url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+  password: ${POSTGRES_PASSWORD}
+  username: ${POSTGRES_USER}
+  driver-class-name: org.postgresql.Driver
+ jpa:
+  open-in-view: false
+  show-sql: true
+  hibernate:
+   ddl-auto: update
+  properties:
+   hibernate:
+    format_sql: true
+
+
+
+
+
+
+
