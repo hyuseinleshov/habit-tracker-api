@@ -19,7 +19,7 @@ public class HabitEntity extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2000)
     private String description;
 
     @Enumerated(EnumType.STRING)
