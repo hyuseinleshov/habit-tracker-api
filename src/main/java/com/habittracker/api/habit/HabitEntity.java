@@ -13,7 +13,7 @@ import lombok.Setter;
 public class HabitEntity extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(nullable = false)
     private UserEntity user;
 
     @Column(nullable = false)

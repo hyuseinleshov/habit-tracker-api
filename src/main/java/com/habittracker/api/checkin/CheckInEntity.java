@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 public class CheckInEntity extends BaseEntity {
 
-    @ManyToOne()
-    @JoinColumn(name = "habit_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(nullable = false)
     private HabitEntity habit;
 }
