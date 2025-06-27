@@ -27,5 +27,5 @@ public class HabitEntity extends BaseEntity {
     private Frequency frequency;
 
     @Column(nullable = false)
-    private boolean archived = false;
+    private boolean archived;
 }
