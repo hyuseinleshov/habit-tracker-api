@@ -12,20 +12,20 @@ import lombok.Setter;
 @Setter
 public class HabitEntity extends BaseEntity {
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private UserEntity user;
+  @ManyToOne
+  @JoinColumn(nullable = false)
+  private UserEntity user;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(length = 2000)
-    private String description;
+  @Column(length = 2000)
+  private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Frequency frequency;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Frequency frequency;
 
-    @Column(nullable = false)
-    private boolean archived;
+  @Column(nullable = false)
+  private boolean archived;
 }

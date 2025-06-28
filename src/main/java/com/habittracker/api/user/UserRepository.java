@@ -1,9 +1,7 @@
 package com.habittracker.api.user;
 
 import com.habittracker.api.checkin.CheckInEntity;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.UUID;
-
-public interface UserRepository extends JpaRepository<CheckInEntity, UUID> {
-}
+public interface UserRepository extends JpaRepository<CheckInEntity, UUID> {}
