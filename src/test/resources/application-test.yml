@@ -7,6 +7,12 @@ spring:
  jpa:
   database-platform: org.hibernate.dialect.H2Dialect
 
+jwt:
+ secret: test-secret
+ issuer: test-issuer
+ expiration-duration: PT1M
+ not-before-leeway-duration: PT20M
+ clock-skew-seconds: 50
 
 
 
