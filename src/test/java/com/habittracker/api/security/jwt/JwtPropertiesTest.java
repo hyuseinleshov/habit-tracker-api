@@ -20,8 +20,8 @@ public class JwtPropertiesTest {
     private static final String TEST_JWT_SECRET = "test-secret";
     private static final String TEST_JWT_ISSUER = "test-issuer";
     private static final Duration TEST_JWT_EXPIRATION_DURATION = Duration.of(1, ChronoUnit.MINUTES);
-    private static final Duration TEST_JWT_NOT_BEFORE_LEEWAY_DURATION = Duration.of(20, ChronoUnit.SECONDS);
-    private static final Integer TEST_JWT_CLOCK_SKEW_SECONDS = 60;
+    private static final Duration TEST_JWT_NOT_BEFORE_LEEWAY_DURATION = Duration.of(20, ChronoUnit.MINUTES);
+    private static final Integer TEST_JWT_CLOCK_SKEW_SECONDS = 50;
 
     @Test
     void jwtPropertiesAreLoadedSuccessfully() {
