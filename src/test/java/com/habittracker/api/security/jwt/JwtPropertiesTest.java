@@ -1,0 +1,36 @@
+package com.habittracker.api.security.jwt;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@SpringBootTest
+@ActiveProfiles("test")
+public class JwtPropertiesTest {
+
+    @Autowired
+    private JwtProperties jwtProperties;
+
+    private static final String TEST_JWT_SECRET = "test-secret";
+    private static final String TEST_JWT_ISSUER = "test-issuer";
+    private static final Duration TEST_JWT_EXPIRATION_DURATION = Duration.of(1, ChronoUnit.MINUTES);
+    private static final Duration TEST_JWT_NOT_BEFORE_LEEWAY_DURATION = Duration.of(20, ChronoUnit.SECONDS);
+    private static final Integer TEST_JWT_CLOCK_SKEW_SECONDS = 60;
+
+    @Test
+    void jwtPropertiesAreLoadedSuccessfully() {
+        assertEquals(TEST_JWT_SECRET, jwtProperties.getSecret());
+        assertEquals(TEST_JWT_ISSUER, jwtProperties.getIssuer());
+        assertEquals(TEST_JWT_EXPIRATION_DURATION, jwtProperties.getExpirationDuration());
+        assertEquals(TEST_JWT_NOT_BEFORE_LEEWAY_DURATION, jwtProperties.getNotBeforeLeewayDuration());
+        assertEquals(TEST_JWT_CLOCK_SKEW_SECONDS, jwtProperties.getClockSkewSeconds());
+
+    }
+}
+
