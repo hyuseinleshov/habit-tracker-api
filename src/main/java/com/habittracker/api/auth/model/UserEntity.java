@@ -21,7 +21,7 @@ public class UserEntity extends BaseEntity {
 
   @ManyToMany
   @JoinTable(
-      name = "user_roles",
+      name = "users_roles",
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<RoleEntity> roles = new HashSet<>();
