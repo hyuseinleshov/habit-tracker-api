@@ -1,7 +1,7 @@
 package com.habittracker.api.habit;
 
 import com.habittracker.api.core.entity.BaseEntity;
-import com.habittracker.api.user.UserEntity;
+import com.habittracker.api.auth.model.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

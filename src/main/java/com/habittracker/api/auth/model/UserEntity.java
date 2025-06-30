@@ -1,4 +1,4 @@
-package com.habittracker.api.user;
+package com.habittracker.api.auth.model;
 
 import com.habittracker.api.core.entity.BaseEntity;
 import jakarta.persistence.Column;

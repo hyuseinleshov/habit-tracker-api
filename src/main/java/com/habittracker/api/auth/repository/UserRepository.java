@@ -1,4 +1,4 @@
-package com.habittracker.api.user;
+package com.habittracker.api.auth.repository;
 
 import com.habittracker.api.checkin.CheckInEntity;
 import java.util.UUID;
