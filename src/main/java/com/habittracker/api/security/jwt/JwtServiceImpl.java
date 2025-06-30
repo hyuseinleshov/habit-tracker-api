@@ -1,6 +1,10 @@
 package com.habittracker.api.security.jwt;
 
+import io.jsonwebtoken.Jwts;
+
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.util.Date;
 
 public class JwtServiceImpl implements JwtService{
 
@@ -12,8 +16,18 @@ public class JwtServiceImpl implements JwtService{
         this.jwtProperties = jwtProperties;
     }
 
-    @Override
     public String generateToken(String email) {
-        return "";
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .header()
+                .type("JWT")
+                .and()
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
+                .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))
+                .issuer(jwtProperties.getIssuer())
+                .signWith(secretKey)
+                .compact();
     }
 }
