@@ -1,11 +1,13 @@
 package com.habittracker.api.security.jwt;
 
 import io.jsonwebtoken.Jwts;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 
+@Service
 public class JwtServiceImpl implements JwtService{
 
     private final SecretKey secretKey;
