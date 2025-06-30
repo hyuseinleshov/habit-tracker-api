@@ -2,15 +2,15 @@ package com.habittracker.api.auth.model;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
-  private UserEntity user;
+  private final UserEntity user;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
