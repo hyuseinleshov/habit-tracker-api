@@ -1,6 +1,7 @@
 package com.habittracker.api.security.jwt;
 
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -8,6 +9,7 @@ import java.time.Instant;
 import java.util.Date;
 
 @Service
+@Slf4j
 public class JwtServiceImpl implements JwtService{
 
     private final SecretKey secretKey;
@@ -20,7 +22,7 @@ public class JwtServiceImpl implements JwtService{
 
     public String generateToken(String email) {
         Instant now = Instant.now();
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .header()
                 .type("JWT")
                 .and()
@@ -31,5 +33,7 @@ public class JwtServiceImpl implements JwtService{
                 .issuer(jwtProperties.getIssuer())
                 .signWith(secretKey)
                 .compact();
+        log.info("Generate token for user with email: {}", email);
+        return token;
     }
 }
