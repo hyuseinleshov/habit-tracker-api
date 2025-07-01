@@ -6,17 +6,19 @@ import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.crypto.SecretKey;
-
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,17 +33,8 @@ public class JwtServiceImplTest {
 
     private final SecretKey testKey = Jwts.SIG.HS256.key().build();
 
-    @Captor
-    private ArgumentCaptor<Date> dateCaptor;
-
     @Mock
     private JwtProperties jwtProperties;
-
-    @Spy
-    private JwtBuilder spyBuilder = Jwts.builder();
-
-    @Mock
-    private JwtBuilder.BuilderHeader builderHeader;
 
     private JwtServiceImpl totest;
 
@@ -59,7 +52,9 @@ public class JwtServiceImplTest {
 
     @Test
     public void generateToken_shouldBuildCorrectTokenWithTimestampsAndClaims() {
-
+        final JwtBuilder spyBuilder = spy(Jwts.builder());
+        final JwtBuilder.BuilderHeader builderHeader = mock(JwtBuilder.BuilderHeader.class);
+        final ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
 
         try (MockedStatic<Jwts> jwtsMockedStatic = mockStatic(Jwts.class)) {
             jwtsMockedStatic.when(Jwts::builder).thenReturn(spyBuilder);
