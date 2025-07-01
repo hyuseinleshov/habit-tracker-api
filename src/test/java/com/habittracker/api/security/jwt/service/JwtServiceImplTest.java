@@ -7,18 +7,21 @@ import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
+import static com.habittracker.api.security.jwt.utils.JwtTestConstant.ISSUER;
+import static com.habittracker.api.security.jwt.utils.JwtTestConstant.TEST_SECRET_KEY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -26,14 +29,11 @@ import static org.mockito.Mockito.*;
 public class JwtServiceImplTest {
 
 
-    private static final String DUMMY_EMAIL = "subject@gmail.com";
-    private static final String DUMMY_ISSUER = "test-issuer";
-    private static final Duration DUMMY_EXPIRATION_DURATION = Duration.of(15, ChronoUnit.HOURS);
-    private static final Duration DUMMY_NOT_BEFORE_LEEWAY_DURATION = Duration.of(7, ChronoUnit.MINUTES);
+    private static final String SUBJECT = "subject@gmail.com";
+    private static final Duration EXPIRATION_DURATION = Duration.of(15, ChronoUnit.HOURS);
+    private static final Duration NOT_BEFORE_LEEWAY_DURATION = Duration.of(7, ChronoUnit.MINUTES);
     private static final long TOLERANCE_SECONDS = 1;
 
-    private final SecretKey testKey = Jwts.SIG.HS256.key().build();
-    private final JwtTestUtils utils = new JwtTestUtils(testKey);
 
     @Mock
     private JwtProperties jwtProperties;
@@ -42,13 +42,13 @@ public class JwtServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        totest = new JwtServiceImpl(testKey, jwtProperties);
+        totest = new JwtServiceImpl(TEST_SECRET_KEY, jwtProperties);
     }
 
     private void setUpJwtProperties() {
-        when(jwtProperties.getIssuer()).thenReturn(DUMMY_ISSUER);
-        when(jwtProperties.getExpirationDuration()).thenReturn(DUMMY_EXPIRATION_DURATION);
-        when(jwtProperties.getNotBeforeLeewayDuration()).thenReturn(DUMMY_NOT_BEFORE_LEEWAY_DURATION);
+        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getExpirationDuration()).thenReturn(EXPIRATION_DURATION);
+        when(jwtProperties.getNotBeforeLeewayDuration()).thenReturn(NOT_BEFORE_LEEWAY_DURATION);
     }
 
     @Test
@@ -71,16 +71,16 @@ public class JwtServiceImplTest {
             doReturn(spyBuilder).when(spyBuilder).notBefore(any());
             doReturn(spyBuilder).when(spyBuilder).issuedAt(any());
 
-            totest.generateToken(DUMMY_EMAIL);
+            totest.generateToken(SUBJECT);
 
             Instant now = Instant.now();
 
-            verify(spyBuilder).subject(DUMMY_EMAIL);
-            verify(spyBuilder).issuer(DUMMY_ISSUER);
+            verify(spyBuilder).subject(SUBJECT);
+            verify(spyBuilder).issuer(ISSUER);
             verify(spyBuilder).issuedAt(dateCaptor.capture());
             verify(spyBuilder).expiration(dateCaptor.capture());
             verify(spyBuilder).notBefore(dateCaptor.capture());
-            verify(spyBuilder).signWith(testKey);
+            verify(spyBuilder).signWith(TEST_SECRET_KEY);
 
 
             List<Instant> captureTimes = dateCaptor.getAllValues().stream().map(Date::toInstant).toList();
@@ -89,64 +89,26 @@ public class JwtServiceImplTest {
             Instant notBefore = captureTimes.get(2);
 
             assertTrue(Duration.between(now, issueAt).abs().toSeconds() <= TOLERANCE_SECONDS);
-            assertTrue(Duration.between(now, expiration).minus(DUMMY_EXPIRATION_DURATION).abs().toSeconds() <= TOLERANCE_SECONDS);
-            assertTrue(Duration.between(now, notBefore).plus(DUMMY_NOT_BEFORE_LEEWAY_DURATION).abs().toSeconds() <= TOLERANCE_SECONDS);
+            assertTrue(Duration.between(now, expiration).minus(EXPIRATION_DURATION).abs().toSeconds() <= TOLERANCE_SECONDS);
+            assertTrue(Duration.between(now, notBefore).plus(NOT_BEFORE_LEEWAY_DURATION).abs().toSeconds() <= TOLERANCE_SECONDS);
         }
     }
 
-    @Test
-    public void isValid_shouldReturnFalse_whenMalformedJwtExceptionThrown() {
-        String mailFormedJwt = "mailFormedJwt";
-        assertFalse(totest.isValid(mailFormedJwt));
+
+    @ParameterizedTest
+    @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+    public void paramTest(String token) {
+        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
+        assertFalse(totest.isValid(token));
     }
 
-    @Test
-    public void isValid_shouldReturnFalse_whenSignatureExceptionThrown() {
-        String tokenWithWrongSignature = utils.tokenWithInvalidSignature();
-        assertFalse(totest.isValid(tokenWithWrongSignature));
-    }
-
-    @Test
-    public void isValid_shouldReturnFalse_whenExpiredJwtExceptionThrown() {
-        Instant now = Instant.now();
-        String expiredToken = utils.generateTestToken(DUMMY_EMAIL,
-                DUMMY_ISSUER,
-                now.minus(2, ChronoUnit.MINUTES),
-                now);
-        assertFalse(totest.isValid(expiredToken));
-    }
-
-    @Test
-    public void isValid_shouldReturnFalse_whenPrematureJwtExceptionThrown() {
-        Instant now = Instant.now();
-        String prematureToken =  utils.generateTestToken(DUMMY_EMAIL,
-                DUMMY_ISSUER,
-                now.plus(20, ChronoUnit.MINUTES),
-                now.plus(5, ChronoUnit.MINUTES));
-        assertFalse(totest.isValid(prematureToken));
-    }
-
-    @Test
-    public void isValid_shouldReturnFalse_whenIncorrectClaimExceptionThrown() {
-        when(jwtProperties.getIssuer()).thenReturn(DUMMY_ISSUER);
-        Instant now = Instant.now();
-        String incorrectClaimToken =  utils.generateTestToken(DUMMY_EMAIL,
-                "fake-issuer",
-                now.plus(20, ChronoUnit.MINUTES),
-                now.minus(5, ChronoUnit.SECONDS));
-        assertFalse(totest.isValid(incorrectClaimToken));
-    }
-
-    @Test
-    public void isValid_shouldReturnFalse_whenIllegalArgumentExceptionThrown() {
-        assertFalse(totest.isValid(""));
-        assertFalse(totest.isValid(null));
-    }
 
     @Test
     public void isValid_shouldReturnTrue_whenTokenIsValid() {
-        String validToken = utils.generateTestToken(DUMMY_EMAIL,
-                DUMMY_ISSUER);
+        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
+        String validToken = JwtTestUtils.generateValidToken();
         assertTrue(totest.isValid(validToken));
     }
 }
