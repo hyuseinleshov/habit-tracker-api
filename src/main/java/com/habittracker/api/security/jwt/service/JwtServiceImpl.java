@@ -1,6 +1,7 @@
 package com.habittracker.api.security.jwt.service;
 
 import com.habittracker.api.security.jwt.config.JwtProperties;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,5 +37,10 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
         log.info("Generate token for user with email: {}", email);
         return token;
+    }
+
+    @Override
+    public boolean isValid(String token) {
+        return false;
     }
 }

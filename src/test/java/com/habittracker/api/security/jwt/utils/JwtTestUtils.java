@@ -17,11 +17,18 @@ public final class JwtTestUtils {
 
     public String generateTestToken(String subject, String issuer, Instant expiration, Instant notBefore) {
         return Jwts.builder()
+                .header()
+                .type("JWT")
+                .and()
                 .subject(subject)
                 .issuer(issuer)
                 .expiration(Date.from(expiration))
                 .notBefore(Date.from(notBefore)).
                 signWith(key).compact();
+    }
+
+    public String tokenWithInvalidSignature() {
+        return Jwts.builder().signWith(Jwts.SIG.HS256.key().build()).compact();
     }
 
     public String generateTestToken(String subject, String issuer) {
