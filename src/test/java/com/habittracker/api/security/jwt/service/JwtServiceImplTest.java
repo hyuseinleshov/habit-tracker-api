@@ -97,7 +97,7 @@ public class JwtServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
-    public void paramTest(String token) {
+    public void isValid_shouldReturnExpectedResult_forGivenTokens(String token) {
         when(jwtProperties.getIssuer()).thenReturn(ISSUER);
         when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
         assertFalse(totest.isValid(token));
