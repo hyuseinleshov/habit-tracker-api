@@ -19,9 +19,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.ISSUER;
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.TEST_SECRET_KEY;
+import static com.habittracker.api.security.jwt.utils.JwtTestConstant.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -29,7 +29,6 @@ import static org.mockito.Mockito.*;
 public class JwtServiceImplTest {
 
 
-    private static final String SUBJECT = "subject@gmail.com";
     private static final Duration EXPIRATION_DURATION = Duration.of(15, ChronoUnit.HOURS);
     private static final Duration NOT_BEFORE_LEEWAY_DURATION = Duration.of(7, ChronoUnit.MINUTES);
     private static final long TOLERANCE_SECONDS = 1;
@@ -46,7 +45,7 @@ public class JwtServiceImplTest {
     }
 
     private void setUpJwtProperties() {
-        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
         when(jwtProperties.getExpirationDuration()).thenReturn(EXPIRATION_DURATION);
         when(jwtProperties.getNotBeforeLeewayDuration()).thenReturn(NOT_BEFORE_LEEWAY_DURATION);
     }
@@ -71,12 +70,12 @@ public class JwtServiceImplTest {
             doReturn(spyBuilder).when(spyBuilder).notBefore(any());
             doReturn(spyBuilder).when(spyBuilder).issuedAt(any());
 
-            totest.generateToken(SUBJECT);
+            totest.generateToken(TEST_SUBJECT);
 
             Instant now = Instant.now();
 
-            verify(spyBuilder).subject(SUBJECT);
-            verify(spyBuilder).issuer(ISSUER);
+            verify(spyBuilder).subject(TEST_SUBJECT);
+            verify(spyBuilder).issuer(TEST_ISSUER);
             verify(spyBuilder).issuedAt(dateCaptor.capture());
             verify(spyBuilder).expiration(dateCaptor.capture());
             verify(spyBuilder).notBefore(dateCaptor.capture());
@@ -98,7 +97,7 @@ public class JwtServiceImplTest {
     @ParameterizedTest
     @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
     public void isValid_shouldReturnExpectedResult_forGivenTokens(String token) {
-        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
         when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
         assertFalse(totest.isValid(token));
     }
@@ -106,9 +105,28 @@ public class JwtServiceImplTest {
 
     @Test
     public void isValid_shouldReturnTrue_whenTokenIsValid() {
-        when(jwtProperties.getIssuer()).thenReturn(ISSUER);
+        when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
         when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
         String validToken = JwtTestUtils.generateValidToken();
         assertTrue(totest.isValid(validToken));
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+    public void extractSubject_shouldReturnEmpty_forGivenTokens(String token) {
+        when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
+        when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
+        assertTrue(totest.extractSubject(token).isEmpty());
+    }
+
+    @Test
+    public void extractSubject_shouldReturnSubject_whenTokenIsValid() {
+        when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
+        when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
+        String token = JwtTestUtils.generateValidToken();
+        Optional<String> subjectOptional = totest.extractSubject(token);
+        assertTrue(subjectOptional.isPresent());
+        String subject = subjectOptional.get();
+        assertEquals(TEST_SUBJECT, subject);
     }
 }

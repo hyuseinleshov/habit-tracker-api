@@ -7,8 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.stream.Stream;
 
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.ISSUER;
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.TEST_SECRET_KEY;
+import static com.habittracker.api.security.jwt.utils.JwtTestConstant.*;
 
 public final class JwtTestUtils {
 
@@ -16,7 +15,6 @@ public final class JwtTestUtils {
 
     }
 
-    private static final String DUMMY_SUBJECT = "dummySubject";
 
 
     private static String generateTestToken(String issuer, Instant expiration, Instant notBefore) {
@@ -24,7 +22,7 @@ public final class JwtTestUtils {
                 .header()
                 .type("JWT")
                 .and()
-                .subject(DUMMY_SUBJECT)
+                .subject(TEST_SUBJECT)
                 .issuer(issuer)
                 .expiration(Date.from(expiration))
                 .notBefore(Date.from(notBefore)).
@@ -60,7 +58,7 @@ public final class JwtTestUtils {
 
     public static String generateValidToken() {
         Instant now = Instant.now();
-        return generateTestToken(ISSUER, now.plus(5, ChronoUnit.MINUTES),
+        return generateTestToken(TEST_ISSUER, now.plus(5, ChronoUnit.MINUTES),
                 now.minus(5, ChronoUnit.SECONDS));
     }
 }

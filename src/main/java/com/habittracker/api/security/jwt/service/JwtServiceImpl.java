@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -68,5 +69,10 @@ public class JwtServiceImpl implements JwtService {
             log.warn("JWT string is null, empty, or only whitespace and cannot be parsed.");
         }
         return false;
+    }
+
+    @Override
+    public Optional<String> extractSubject(String token) {
+        return Optional.empty();
     }
 }
