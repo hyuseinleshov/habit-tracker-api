@@ -54,25 +54,28 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public boolean isValid(String token) {
+        return extractClaims(token).isPresent();
+    }
+
+    private Optional<Claims> extractClaims(String token) {
         try {
-            Jwts.parser()
+            return Optional.of((Claims) Jwts.parser()
                     .requireIssuer(jwtProperties.getIssuer())
                     .verifyWith(secretKey)
                     .clockSkewSeconds(jwtProperties.getClockSkewSeconds())
                     .build()
                     .parse(token)
-                    .getPayload();
-            return true;
+                    .getPayload());
         } catch (JwtException ex) {
             log.warn(EXCEPTION_MESSAGES.get(ex.getClass()));
         } catch (IllegalArgumentException ignored) {
             log.warn("JWT string is null, empty, or only whitespace and cannot be parsed.");
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override
     public Optional<String> extractSubject(String token) {
-        return Optional.empty();
+        return extractClaims(token).map(Claims::getSubject);
     }
 }
