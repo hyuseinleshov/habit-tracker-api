@@ -1,4 +1,4 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.service;
 
+import com.habittracker.api.security.jwt.config.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,7 @@ import java.util.Date;
 
 @Service
 @Slf4j
-public class JwtServiceImpl implements JwtService{
+public class JwtServiceImpl implements JwtService {
 
     private final SecretKey secretKey;
     private final JwtProperties jwtProperties;

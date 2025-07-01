@@ -1,4 +1,4 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.service;
 
 public interface JwtService {
 

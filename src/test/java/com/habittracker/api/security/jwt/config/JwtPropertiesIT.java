@@ -1,23 +1,22 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @SpringBootTest
-@ActiveProfiles("test")
 public class JwtPropertiesIT {
 
     @Autowired
     private JwtProperties jwtProperties;
 
-    private static final String TEST_JWT_SECRET = "test-secret";
+    private static final String TEST_JWT_SECRET = "9NuCXLE3rpz8/lPYeIag9xs7wyRHKat8exvUmlm01S8=";
     private static final String TEST_JWT_ISSUER = "test-issuer";
     private static final Duration TEST_JWT_EXPIRATION_DURATION = Duration.of(1, ChronoUnit.MINUTES);
     private static final Duration TEST_JWT_NOT_BEFORE_LEEWAY_DURATION = Duration.of(20, ChronoUnit.MINUTES);

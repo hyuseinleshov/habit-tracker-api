@@ -1,4 +1,4 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.config;
 
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

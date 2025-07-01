@@ -1,5 +1,6 @@
-package com.habittracker.api.security.jwt;
+package com.habittracker.api.security.jwt.service;
 
+import com.habittracker.api.security.jwt.config.JwtProperties;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
