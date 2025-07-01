@@ -22,7 +22,7 @@ configurations {
 
 spotless {
     java {
-        target 'src/**/*.java test/**/*.java'
+        target 'src/**/*.java'
         importOrder()
         removeUnusedImports()
         googleJavaFormat()

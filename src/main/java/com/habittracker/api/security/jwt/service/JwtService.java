@@ -4,9 +4,9 @@ import java.util.Optional;
 
 public interface JwtService {
 
-    String generateToken(String email);
+  String generateToken(String email);
 
-    boolean isValid(String token);
+  boolean isValid(String token);
 
-    Optional<String> extractSubject(String token);
+  Optional<String> extractSubject(String token);
 }
