@@ -14,7 +14,6 @@ public class TestConfig {
   @Bean
   @ServiceConnection
   public PostgreSQLContainer<?> postgresContainer() {
-    return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE))
-        .withReuse(true);
+    return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE)).withReuse(true);
   }
 }
