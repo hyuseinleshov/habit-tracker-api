@@ -1,5 +1,6 @@
 package com.habittracker.api.checkin.repository;
 
+import com.habittracker.api.checkin.model.CheckInEntity;
 import java.util.UUID;
 
 import com.habittracker.api.checkin.model.CheckInEntity;
