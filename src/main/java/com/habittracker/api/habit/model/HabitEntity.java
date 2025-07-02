@@ -1,4 +1,4 @@
-package com.habittracker.api.habit;
+package com.habittracker.api.habit.model;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.entity.BaseEntity;
