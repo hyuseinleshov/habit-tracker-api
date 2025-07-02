@@ -1,12 +1,9 @@
 package com.habittracker.api;
 
+import com.habittracker.api.config.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class HabitTrackerApiApplicationTests {
+class HabitTrackerApiApplicationTests extends BaseIntegrationTest {
 
   @Test
   void contextLoads() {}
