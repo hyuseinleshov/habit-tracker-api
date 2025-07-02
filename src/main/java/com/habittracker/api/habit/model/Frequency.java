@@ -1,4 +1,4 @@
-package com.habittracker.api.habit;
+package com.habittracker.api.habit.model;
 
 public enum Frequency {
   DAILY,

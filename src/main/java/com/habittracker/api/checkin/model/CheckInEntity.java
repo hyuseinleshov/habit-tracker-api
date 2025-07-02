@@ -1,7 +1,7 @@
-package com.habittracker.api.checkin;
+package com.habittracker.api.checkin.model;
 
 import com.habittracker.api.core.entity.BaseEntity;
-import com.habittracker.api.habit.HabitEntity;
+import com.habittracker.api.habit.model.HabitEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
