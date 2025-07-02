@@ -1,0 +1,19 @@
+spring:
+ datasource:
+  url: jdbc:h2:mem:mydb
+  username: sa
+  password: password
+  driverClassName: org.h2.Driver
+ jpa:
+  database-platform: org.hibernate.dialect.H2Dialect
+jwt:
+ secret: 9NuCXLE3rpz8/lPYeIag9xs7wyRHKat8exvUmlm01S8=
+ issuer: test-issuer
+ expiration-duration: PT1M
+ not-before-leeway-duration: PT20M
+ clock-skew-seconds: 50
+
+
+
+
+
