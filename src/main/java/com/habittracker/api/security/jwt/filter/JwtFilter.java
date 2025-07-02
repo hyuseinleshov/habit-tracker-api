@@ -13,7 +13,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,15 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
         .flatMap(jwtService::extractSubject)
         .flatMap(this::subjectToUserDetails)
         .map(SecurityUtils::userDetailsToAuthenticationToken)
-        .ifPresent(
-            token -> {
-              try {
-                SecurityUtils.populateSecurityContext(authenticationManager, token);
-              } catch (AuthenticationException ex) {
-                log.warn("Authentication failed: invalid credentials");
-                log.debug("Authentication error details: {}", ex.getMessage());
-              }
-            });
+        .ifPresent(this::populateSecurityContext);
     filterChain.doFilter(request, response);
   }
 
@@ -57,6 +52,17 @@ public class JwtFilter extends OncePerRequestFilter {
       return Optional.of(userDetailsService.loadUserByUsername(subject));
     } catch (UsernameNotFoundException e) {
       return Optional.empty();
+    }
+  }
+
+  private void populateSecurityContext(UsernamePasswordAuthenticationToken token)
+      throws AuthenticationException {
+    try {
+      Authentication authenticate = authenticationManager.authenticate(token);
+      SecurityContextHolder.getContext().setAuthentication(authenticate);
+    } catch (AuthenticationException ex) {
+      log.warn("Authentication failed: invalid credentials");
+      log.debug("Authentication error details: {}", ex.getMessage());
     }
   }
 }
