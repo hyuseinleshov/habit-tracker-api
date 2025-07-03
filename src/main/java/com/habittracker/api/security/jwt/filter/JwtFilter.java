@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
       @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
-    JwtUtils.extractToken(request)
+                      JwtUtils.extractToken(request)
         .filter(jwtService::isValid)
         .flatMap(jwtService::extractSubject)
         .flatMap(this::subjectToUserDetails)
