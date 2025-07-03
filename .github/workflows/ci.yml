@@ -1,10 +1,11 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ "main" ]
+  repository_dispatch:
+    types: [build-event]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
