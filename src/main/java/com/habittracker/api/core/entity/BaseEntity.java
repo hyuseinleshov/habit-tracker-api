@@ -12,11 +12,11 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 public abstract class BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @CreationTimestamp
-  @Column(updatable = false, nullable = false)
-  private Instant createdAt;
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private Instant createdAt;
 }
