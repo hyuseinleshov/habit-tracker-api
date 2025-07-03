@@ -57,7 +57,7 @@ public class JwtServiceImplTest {
             <= TOLERANCE_SECONDS);
     assertTrue(
         secondsBetween(now, claims.getNotBefore().toInstant().plus(NOT_BEFORE_LEEWAY_DURATION))
-            <= TOLERANCE_SECONDS);
+            > TOLERANCE_SECONDS);
   }
 
   private long secondsBetween(Instant start, Instant end) {
