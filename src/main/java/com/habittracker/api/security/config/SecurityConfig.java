@@ -1,6 +1,6 @@
 package com.habittracker.api.security.config;
 
-import com.habittracker.api.auth.service.UserDetailsServiceImpl;
+import com.habittracker.api.security.jwt.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,13 +13,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final UserDetailsServiceImpl userDetailsService;
+  private final JwtFilter jwtFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,11 +28,8 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
-            auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated());
-
-    // TODO: Add JWT filter when ready
-    // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
+            auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
