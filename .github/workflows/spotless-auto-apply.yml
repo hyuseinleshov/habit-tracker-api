@@ -42,3 +42,11 @@ jobs:
           commit_message:
             "chore: apply spotless formatting"
           branch: ${{ github.ref_name }}
+  trigger_ci_build:
+    runs-on: ubuntu-latest
+    needs: spotless
+    steps:
+      - name: Dispatch 'build-event' to trigger ci.yml
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: build-event
