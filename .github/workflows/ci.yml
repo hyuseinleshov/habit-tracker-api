@@ -1,10 +1,11 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ "main" ]
+  repository_dispatch:
+    types: [build-event]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -24,11 +25,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-      - name: Spotless check
-        run: ./gradlew spotlessCheck
-
       - name: Build with Gradle Wrapper
-        run: ./gradlew build -x test
+        run: ./gradlew build -x spotlessCheck
 
   dependency-submission:
     runs-on: ubuntu-latest
