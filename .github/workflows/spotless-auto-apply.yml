@@ -45,11 +45,20 @@ jobs:
   trigger_ci_build:
     runs-on: ubuntu-latest
     needs: spotless
-    permissions:
-      repository_dispatch: write
-      contents: read
+    if: success()
+    permissions: # ADD THIS PERMISSIONS BLOCK TO THE 'trigger_ci_build' JOB
+      repository_dispatch: write # Grant write permission for repository_dispatch events
+      contents: read # Keep read for checkout, though often not strictly needed for just dispatch
     steps:
       - name: Dispatch 'build-event' to trigger ci.yml
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: build-event
+          client-payload: >
+            {
+              "source_workflow": "spotless.yml",
+              "triggered_by": "${{ github.actor }}",
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "spotless_check_outcome": "${{ jobs.spotless.steps.check.outcome }}"
+            }
