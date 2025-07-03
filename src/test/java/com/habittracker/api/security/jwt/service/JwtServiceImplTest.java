@@ -61,7 +61,7 @@ public class JwtServiceImplTest {
   }
 
   private long secondsBetween(Instant start, Instant end) {
-    return Duration.between(start, end).abs().toSeconds();
+      return Duration.between(start, end).abs().toSeconds();
   }
 
   @ParameterizedTest
