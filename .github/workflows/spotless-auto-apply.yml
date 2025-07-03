@@ -6,42 +6,6 @@ on:
       - main
 
 jobs:
-  spotless:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Run spotlessCheck
-        id: check
-        run: ./gradlew spotlessCheck
-        continue-on-error: true
-
-      - name: Run spotlessApply if check failed
-        if: ${{ steps.check.outcome == 'failure' }}
-        run: ./gradlew spotlessApply
-
-      - name: Commit and push changes
-        if: ${{ steps.check.outcome == 'failure' }}
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message:
-            "chore: apply spotless formatting"
-          branch: ${{ github.head_ref }}
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -78,4 +42,39 @@ jobs:
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+  spotless:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run spotlessCheck
+        id: check
+        run: ./gradlew spotlessCheck
+        continue-on-error: true
+
+      - name: Run spotlessApply if check failed
+        if: ${{ steps.check.outcome == 'failure' }}
+        run: ./gradlew spotlessApply
+
+      - name: Commit and push changes
+        if: ${{ steps.check.outcome == 'failure' }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message:
+            "chore: apply spotless formatting"
+          branch: ${{ github.head_ref }}
