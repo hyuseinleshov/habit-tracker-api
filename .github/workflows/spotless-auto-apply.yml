@@ -1,7 +1,7 @@
 name: Spotless Auto-Apply
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 

@@ -3,7 +3,7 @@ name: Java CI with Gradle
 on:
   repository_dispatch:
     types: [build-event]
-  pull_request:
+  push:
     branches:
       - main
 
