@@ -48,5 +48,4 @@ public class JwtFilter extends OncePerRequestFilter {
       return Optional.empty();
     }
   }
-
 }

@@ -8,15 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 public final class SecurityUtils {
 
-    private SecurityUtils() {
-    }
+  private SecurityUtils() {}
 
-    public static UsernamePasswordAuthenticationToken userDetailsToAuthenticationToken(
-            UserDetails userDetails) {
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
+  public static UsernamePasswordAuthenticationToken userDetailsToAuthenticationToken(
+      UserDetails userDetails) {
+    return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+  }
 
-    public static void populateSecurityContext(UsernamePasswordAuthenticationToken token) {
-        SecurityContextHolder.getContext().setAuthentication(token);
-    }
+  public static void populateSecurityContext(UsernamePasswordAuthenticationToken token) {
+    SecurityContextHolder.getContext().setAuthentication(token);
+  }
 }
