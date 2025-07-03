@@ -16,13 +16,8 @@ spring:
     format_sql: true
 
 jwt:
- secret: ${JWT_SECRET} # example of valid secret
+ secret: ${JWT_SECRET}
  issuer: ${JWT_ISSUER:jwt-issuer}
  expiration-duration: ${JWT_EXPIRATION_DURATION:PT10M}
  not-before-leeway-duration: ${JWT_NOT_BEFORE_LEEWAY_DURATION:PT15S}
  clock-skew-seconds: ${JWT_CLOCK_SKEW_SECONDS:PT25S}
-
-
-
-
-
