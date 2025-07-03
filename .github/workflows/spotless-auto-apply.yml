@@ -1,8 +1,10 @@
 name: Spotless Auto-Apply
 
 on:
-  pull_request:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["Java CI with Gradle"]
+    types:
+      - completed
 
 jobs:
   spotless:
