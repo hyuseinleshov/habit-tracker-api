@@ -1,7 +1,7 @@
 package com.habittracker.api.core.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -36,13 +36,13 @@ public class GlobalExceptionHandler {
                 request));
   }
 
-  @ExceptionHandler(ConstraintViolationException.class)
+  @ExceptionHandler(JDBCException.class)
   public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
-    HttpStatus status = HttpStatus.CONFLICT;
+    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     return ResponseEntity.status(status)
         .body(
             ApiError.from(
-                "Data conflict: A resource with the provided unique identifier already exists, or a database constraint was violated.",
+                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
                 status,
                 request));
   }
