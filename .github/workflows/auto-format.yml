@@ -1,4 +1,4 @@
-name: Auto Format
+name: Auto-Format with Spotless
 
 on:
   pull_request:
