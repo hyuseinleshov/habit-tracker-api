@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 public abstract class BaseEntity {
 
-  @Id
+   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
