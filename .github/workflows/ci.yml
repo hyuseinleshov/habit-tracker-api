@@ -7,7 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  format-and-build:
+  format:
+    name: Format Code
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,14 +39,45 @@ jobs:
         run: ./gradlew spotlessApply
       
       - name: Commit formatting changes
+        id: commit
         if: steps.check-format.outputs.format_needed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: apply spotless formatting'
           branch: ${{ github.head_ref }}
 
+      - name: Set output
+        id: output
+        run: |
+          if [ "${{ steps.check-format.outputs.format_needed }}" == "true" ]; then
+            echo "formatting_applied=true" >> $GITHUB_OUTPUT
+          else
+            echo "formatting_applied=false" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    name: Build and Test
+    needs: format
+    runs-on: ubuntu-latest
+    # Only run this job if we didn't apply formatting or if we're on main branch
+    # This avoids building the non-formatted code when formatting was applied
+    if: needs.format.outputs.formatting_applied == 'false' || github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      
       - name: Build with Gradle
-        if: github.event_name != 'pull_request' || steps.check-format.outputs.format_needed != 'true'
         run: ./gradlew build
 
   dependency-submission:
