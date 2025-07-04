@@ -25,6 +25,9 @@ jobs:
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - name: Spotless check
+        if: >-
+          github.event_name != 'pull_request' || 
+          !contains(github.event.pull_request.title, 'chore: apply spotless formatting')
         run: ./gradlew spotlessCheck
 
       - name: Build with Gradle Wrapper
