@@ -4,7 +4,12 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [ "main" ]
+  workflow_run:
+    workflows: ["Auto-Format with Gradle"]
+    types:
+      - completed
 
 jobs:
   build:
@@ -12,8 +17,14 @@ jobs:
     permissions:
       contents: read
 
+    if: >-
+      github.event_name != 'pull_request' || 
+      github.event_name == 'workflow_run'
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -25,9 +36,6 @@ jobs:
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - name: Spotless check
-        if: >-
-          github.event_name != 'pull_request' || 
-          !contains(github.event.pull_request.title, 'chore: apply spotless formatting')
         run: ./gradlew spotlessCheck
 
       - name: Build with Gradle Wrapper
