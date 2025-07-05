@@ -1,10 +1,11 @@
 package com.habittracker.api.core.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,16 +25,24 @@ public class GlobalExceptionHandler {
                 request));
   }
 
-  @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+  @ExceptionHandler({MethodArgumentNotValidException.class})
   public ResponseEntity<ApiError> handleValidationAndHttpMessageNotReadableExceptions(
-      HttpServletRequest request) {
+      MethodArgumentNotValidException ex, HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
+    Map<String, String> errors =
+        ex.getBindingResult().getFieldErrors().stream()
+            .collect(
+                HashMap::new,
+                (m, v) -> m.put(v.getField(), v.getDefaultMessage()),
+                HashMap::putAll);
+
     return ResponseEntity.status(status)
         .body(
             ApiError.from(
-                "One or more of the provided arguments are invalid. Please check the request body and parameters for errors.",
+                "Validation failed for one or more fields in your request.",
                 status,
-                request));
+                request,
+                errors));
   }
 
   @ExceptionHandler(JDBCException.class)
