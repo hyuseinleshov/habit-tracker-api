@@ -60,29 +60,23 @@ public class GlobalExceptionHandler {
                 errors));
   }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return ResponseEntity.status(status)
-                .body(
-                        ApiError.from(
-                                "Request body is missing or malformed.",
-                                status,
-                                request));
-    }
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpServletRequest request) {
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    return ResponseEntity.status(status)
+        .body(ApiError.from("Request body is missing or malformed.", status, request));
+  }
 
-    @ExceptionHandler(JDBCException.class)
-    public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        return ResponseEntity.status(status)
-                .body(
-                        ApiError.from(
-                                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
-                                status,
-                                request));
-    }
-
-
+  @ExceptionHandler(JDBCException.class)
+  public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
+    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+    return ResponseEntity.status(status)
+        .body(
+            ApiError.from(
+                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
+                status,
+                request));
+  }
 
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ApiError> handleResourceNotFoundException(
