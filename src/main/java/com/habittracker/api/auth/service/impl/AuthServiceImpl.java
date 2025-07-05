@@ -1,4 +1,4 @@
-package com.habittracker.api.auth.service;
+package com.habittracker.api.auth.service.impl;
 
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
@@ -7,6 +7,7 @@ import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
+import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;

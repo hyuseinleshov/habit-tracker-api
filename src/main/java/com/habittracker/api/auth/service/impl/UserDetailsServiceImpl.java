@@ -1,4 +1,4 @@
-package com.habittracker.api.auth.service;
+package com.habittracker.api.auth.service.impl;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.auth.repository.UserRepository;
