@@ -1,5 +1,7 @@
 package com.habittracker.api.security.config;
 
+import com.habittracker.api.security.handlers.CustomAccessDeniedHandler;
+import com.habittracker.api.security.handlers.CustomAuthenticationEntryPoint;
 import com.habittracker.api.security.jwt.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JwtFilter jwtFilter;
+  private final CustomAccessDeniedHandler accessDeniedHandler;
+  private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,7 +33,12 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .exceptionHandling(
+            configurer ->
+                configurer
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler));
     return http.build();
   }
 
