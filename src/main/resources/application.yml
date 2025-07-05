@@ -2,24 +2,15 @@ spring:
  application:
   name: habit-tracker-api
  datasource:
-  url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
-  password: ${POSTGRES_PASSWORD}
-  username: ${POSTGRES_USER}
   driver-class-name: org.postgresql.Driver
  jpa:
   open-in-view: false
   show-sql: true
-  hibernate:
-   ddl-auto: update
   properties:
    hibernate:
     format_sql: true
- web:
-  resources:
-   add-mappings: false
 
 jwt:
- secret: ${JWT_SECRET}
  issuer: ${JWT_ISSUER:jwt-issuer}
  expiration-duration: ${JWT_EXPIRATION_DURATION:PT10M}
  not-before-leeway-duration: ${JWT_NOT_BEFORE_LEEWAY_DURATION:PT15S}
