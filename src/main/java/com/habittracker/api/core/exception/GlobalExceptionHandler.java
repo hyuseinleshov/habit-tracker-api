@@ -6,6 +6,7 @@ import java.util.Map;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -59,16 +60,29 @@ public class GlobalExceptionHandler {
                 errors));
   }
 
-  @ExceptionHandler(JDBCException.class)
-  public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
-    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-    return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
-                status,
-                request));
-  }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status)
+                .body(
+                        ApiError.from(
+                                "Request body is missing or malformed.",
+                                status,
+                                request));
+    }
+
+    @ExceptionHandler(JDBCException.class)
+    public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        return ResponseEntity.status(status)
+                .body(
+                        ApiError.from(
+                                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
+                                status,
+                                request));
+    }
+
+
 
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ApiError> handleResourceNotFoundException(
@@ -94,7 +108,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status)
         .body(
             ApiError.from(
-                "An unexpected internal server error occurred. We are working to resolve this issue. Please try again later",
+                "An unexpected internal server error occurred. We are working to resolve this issue. Please try again later.",
                 status,
                 request));
   }
