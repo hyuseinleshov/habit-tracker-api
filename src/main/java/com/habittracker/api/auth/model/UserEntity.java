@@ -19,7 +19,7 @@ public class UserEntity extends BaseEntity {
   @Column(nullable = false)
   private String password;
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "users_roles",
       joinColumns = @JoinColumn(name = "user_id"),
