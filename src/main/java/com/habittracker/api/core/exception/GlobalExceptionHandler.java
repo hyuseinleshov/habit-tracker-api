@@ -3,9 +3,12 @@ package com.habittracker.api.core.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.hibernate.JDBCException;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,8 +28,27 @@ public class GlobalExceptionHandler {
                 request));
   }
 
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<ApiError> handleMethodNotSupportedException(
+      HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
+    String supportedMethods =
+        String.join(
+            ", ",
+            Objects.requireNonNull(ex.getSupportedHttpMethods()).stream()
+                .map(HttpMethod::name)
+                .toList());
+
+    String message =
+        "HTTP method '"
+            + ex.getMethod()
+            + "' is not supported for this endpoint. Supported method(s): "
+            + supportedMethods;
+    return ResponseEntity.status(status).body(ApiError.from(message, status, request));
+  }
+
   @ExceptionHandler({MethodArgumentNotValidException.class})
-  public ResponseEntity<ApiError> handleValidationAndHttpMessageNotReadableExceptions(
+  public ResponseEntity<ApiError> handleValidationException(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     Map<String, String> errors =
