@@ -1,6 +1,6 @@
 package com.habittracker.api;
 
-import com.habittracker.api.config.BaseIntegrationTest;
+import com.habittracker.api.common.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 class HabitTrackerApiApplicationTests extends BaseIntegrationTest {

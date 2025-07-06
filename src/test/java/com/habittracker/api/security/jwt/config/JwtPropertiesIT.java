@@ -2,7 +2,7 @@ package com.habittracker.api.security.jwt.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.habittracker.api.config.BaseIntegrationTest;
+import com.habittracker.api.common.BaseIntegrationTest;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
