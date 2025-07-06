@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
 
     return AuthResponse.builder()
             .token(token)
-            .email(savedUser.getEmail())  // Use entity's email directly
+            .email(savedUser.getEmail())
             .message("Register successful")
             .build();
   }
