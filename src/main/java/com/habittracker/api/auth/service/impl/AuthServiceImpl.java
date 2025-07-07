@@ -60,11 +60,11 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponse login(AuthRequest request) {
     try {
-      Authentication authentication =
+      Authentication auth =
               authManager.authenticate(
                       new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-      if (authentication.isAuthenticated()) {
+      if (auth.isAuthenticated()) {
         log.info("User authenticated: {}", request.getEmail());
         String token = jwtService.generateToken(request.getEmail());
 
