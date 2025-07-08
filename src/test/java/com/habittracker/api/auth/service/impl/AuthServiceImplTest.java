@@ -1,11 +1,14 @@
 package com.habittracker.api.auth.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthTestConstants.*;
+import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
+import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
@@ -14,7 +17,6 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.security.jwt.service.JwtService;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,15 +34,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
 
-  private static final String TEST_EMAIL = "test@example.com";
-  private static final String TEST_PASSWORD = "password123";
-  private static final String ENCODED_PASSWORD = "encodedPassword";
-  private static final String JWT_TOKEN = "jwt-token";
-  private static final String REGISTER_SUCCESS_MESSAGE = "Register successful";
-  private static final String LOGIN_SUCCESS_MESSAGE = "Login successful";
-  private static final String EMAIL_EXISTS_ERROR = "Email already exists";
-  private static final String INVALID_CREDENTIALS_ERROR = "Invalid email or password";
-
   @Mock private UserRepository userRepository;
   @Mock private RoleRepository roleRepository;
   @Mock private AuthenticationManager authManager;
@@ -52,7 +45,7 @@ class AuthServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = AuthRequest.builder().email(TEST_EMAIL).password(TEST_PASSWORD).build();
+    validRequest = createAuthRequest(TEST_EMAIL, TEST_PASSWORD);
   }
 
   @Nested
@@ -74,8 +67,8 @@ class AuthServiceImplTest {
       when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(new UserEntity()));
 
       assertThatThrownBy(() -> authService.register(validRequest))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessage(EMAIL_EXISTS_ERROR);
+          .isInstanceOf(EmailAlreadyExistsException.class)
+          .hasMessage(EMAIL_EXISTS_MESSAGE);
 
       verify(userRepository, never()).save(any());
     }
@@ -144,8 +137,7 @@ class AuthServiceImplTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid"})
     void givenInvalidEmail_whenLoggingIn_thenThrowsException(String invalidEmail) {
-      AuthRequest invalidRequest =
-          AuthRequest.builder().email(invalidEmail).password(TEST_PASSWORD).build();
+      AuthRequest invalidRequest = createAuthRequest(invalidEmail, TEST_PASSWORD);
 
       when(authManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 
@@ -171,19 +163,5 @@ class AuthServiceImplTest {
     when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
     when(auth.isAuthenticated()).thenReturn(true);
     when(jwtService.generateToken(TEST_EMAIL)).thenReturn(JWT_TOKEN);
-  }
-
-  private RoleEntity createUserRole() {
-    RoleEntity role = new RoleEntity();
-    role.setType(RoleType.USER);
-    return role;
-  }
-
-  private UserEntity createUser(String email, String password, RoleEntity role) {
-    UserEntity user = new UserEntity();
-    user.setEmail(email);
-    user.setPassword(password);
-    user.setRoles(Set.of(role));
-    return user;
   }
 }
