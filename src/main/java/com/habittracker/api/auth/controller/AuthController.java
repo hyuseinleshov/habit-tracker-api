@@ -24,14 +24,14 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest request) {
     AuthResponse response = userService.register(request);
-    log.info("User registered successfully: {}", request.getEmail());
+    log.info("User with email - {}, registered successfully", request.getEmail());
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
     AuthResponse response = userService.login(request);
-    log.info("User logged in successfully: {}", request.getEmail());
+    log.info("User with email - {}, logged in successfully", request.getEmail());
     return ResponseEntity.ok(response);
   }
 }
