@@ -43,16 +43,16 @@ public class AuthControllerIT extends BaseIntegrationTest {
   }
 
   private void createTestUsers() {
-    createUser(EXISTING_EMAIL, TEST_PASSWORD);
-    createUser(TEST_EMAIL, TEST_PASSWORD);
+    createUser(EXISTING_EMAIL);
+    createUser(TEST_EMAIL);
   }
 
-  private UserEntity createUser(String email, String password) {
+  private void createUser(String email) {
     UserEntity user = new UserEntity();
     user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(password));
+    user.setPassword(passwordEncoder.encode(TEST_PASSWORD));
     user.getRoles().add(userRole);
-    return userRepository.save(user);
+    userRepository.save(user);
   }
 
   private ResultActions doPostRequest(String endpoint, AuthRequest request) throws Exception {
