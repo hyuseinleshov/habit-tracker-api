@@ -1,5 +1,6 @@
 package com.habittracker.api.auth.controller;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static org.hamcrest.Matchers.*;
@@ -35,9 +36,6 @@ import org.springframework.test.web.servlet.ResultActions;
 @WebMvcTest(AuthController.class)
 @ContextConfiguration(classes = SecurityTestConfig.class)
 public class AuthControllerTest {
-
-  public static final String MALFORMED_JSON = "{\"email\": \"test@example.com\", \"password\":}";
-  public static final String EMPTY_JSON = "{}";
 
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;

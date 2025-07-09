@@ -1,5 +1,6 @@
 package com.habittracker.api.auth.controller;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static org.hamcrest.Matchers.*;
