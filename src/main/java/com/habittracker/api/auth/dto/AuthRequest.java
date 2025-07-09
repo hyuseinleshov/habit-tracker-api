@@ -13,11 +13,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class AuthRequest {
-  @NotBlank(message = EMAIL_REQUIRED_MESSAGE)
-  @Email(message = INVALID_EMAIL_MESSAGE)
-  private String email;
+  @NotBlank(message = EMAIL_REQUIRED_MESSAGE) @Email(message = INVALID_EMAIL_MESSAGE) private String email;
 
-  @NotBlank(message = PASSWORD_REQUIRED_MESSAGE)
-  @Size(min = 6, message = PASSWORD_LENGTH_MESSAGE)
-  private String password;
+  @NotBlank(message = PASSWORD_REQUIRED_MESSAGE) @Size(min = 6, message = PASSWORD_LENGTH_MESSAGE) private String password;
 }
