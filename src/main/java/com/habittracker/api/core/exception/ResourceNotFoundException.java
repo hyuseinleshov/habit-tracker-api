@@ -1,5 +1,7 @@
 package com.habittracker.api.core.exception;
 
+import static com.habittracker.api.core.exception.ExceptionConstants.RESOURCE_NOT_FOUND_MESSAGE;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -7,8 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public abstract class ResourceNotFoundException extends RuntimeException {
 
   public ResourceNotFoundException() {
-    super(
-        "The specific resource you requested could not be found. It may have been moved, deleted, or never existed.");
+    super(RESOURCE_NOT_FOUND_MESSAGE);
   }
 
   public ResourceNotFoundException(String message) {

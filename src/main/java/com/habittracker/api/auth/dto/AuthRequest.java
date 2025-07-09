@@ -1,5 +1,7 @@
 package com.habittracker.api.auth.dto;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,11 +13,11 @@ import lombok.Setter;
 @Setter
 @Builder
 public class AuthRequest {
-  @NotBlank(message = "Email is required")
-  @Email(message = "Email must be valid")
+  @NotBlank(message = EMAIL_REQUIRED_MESSAGE)
+  @Email(message = INVALID_EMAIL_MESSAGE)
   private String email;
-  
-  @NotBlank(message = "Password is required")
-  @Size(min = 6, message = "Password must be at least 6 characters")
+
+  @NotBlank(message = PASSWORD_REQUIRED_MESSAGE)
+  @Size(min = 6, message = PASSWORD_LENGTH_MESSAGE)
   private String password;
 }

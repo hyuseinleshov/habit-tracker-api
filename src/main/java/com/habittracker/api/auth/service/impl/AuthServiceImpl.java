@@ -1,5 +1,7 @@
 package com.habittracker.api.auth.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
+
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
@@ -34,10 +36,13 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponse register(AuthRequest request) {
-    userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
-      log.error("Email {} already exists", request.getEmail());
-      throw new EmailAlreadyExistsException("Email already exists");
-    });
+    userRepository
+        .findByEmail(request.getEmail())
+        .ifPresent(
+            user -> {
+              log.error("Email {} already exists", request.getEmail());
+              throw new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE);
+            });
 
     UserEntity user = new UserEntity();
     user.setEmail(request.getEmail());
@@ -52,35 +57,35 @@ public class AuthServiceImpl implements AuthService {
     String token = jwtService.generateToken(savedUser.getEmail());
 
     return AuthResponse.builder()
-            .token(token)
-            .email(savedUser.getEmail())
-            .message("Register successful")
-            .build();
+        .token(token)
+        .email(savedUser.getEmail())
+        .message(REGISTER_SUCCESS_MESSAGE)
+        .build();
   }
 
   @Override
   public AuthResponse login(AuthRequest request) {
     try {
       Authentication auth =
-              authManager.authenticate(
-                      new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+          authManager.authenticate(
+              new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
       if (auth.isAuthenticated()) {
         log.info("User authenticated: {}", request.getEmail());
         String token = jwtService.generateToken(request.getEmail());
 
         return AuthResponse.builder()
-                .token(token)
-                .email(request.getEmail())
-                .message("Login successful")
-                .build();
+            .token(token)
+            .email(request.getEmail())
+            .message(LOGIN_SUCCESS_MESSAGE)
+            .build();
       }
 
       log.error("Authentication failed for user with email: {}", request.getEmail());
-      throw new BadCredentialsException("Invalid email or password");
+      throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
     } catch (AuthenticationException e) {
       log.error("Authentication error: {}", e.getMessage());
-      throw new BadCredentialsException("Invalid email or password");
+      throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
     }
   }
 }

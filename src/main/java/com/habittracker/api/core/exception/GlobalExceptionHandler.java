@@ -1,5 +1,9 @@
 package com.habittracker.api.core.exception;
 
+import static com.habittracker.api.auth.utils.AuthConstants.MALFORMED_JSON_MESSAGE;
+import static com.habittracker.api.auth.utils.AuthConstants.VALIDATION_FAILED_MESSAGE;
+import static com.habittracker.api.core.exception.ExceptionConstants.*;
+
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,11 +24,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleNoHandlerFoundException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.NOT_FOUND;
     return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "The requested API endpoint was not found. Please verify the URL and try again.",
-                status,
-                request));
+        .body(ApiError.from(ENDPOINT_NOT_FOUND_MESSAGE, status, request));
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -52,30 +52,21 @@ public class GlobalExceptionHandler {
                 HashMap::putAll);
 
     return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "Validation failed for one or more fields in your request.",
-                status,
-                request,
-                errors));
+        .body(ApiError.from(VALIDATION_FAILED_MESSAGE, status, request, errors));
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     return ResponseEntity.status(status)
-        .body(ApiError.from("Request body is missing or malformed.", status, request));
+        .body(ApiError.from(MALFORMED_JSON_MESSAGE, status, request));
   }
 
   @ExceptionHandler(JDBCException.class)
   public ResponseEntity<ApiError> handleConstraintViolationException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "A database access error occurred. This may be due to connection issues, invalid SQL, or other database-related problems.",
-                status,
-                request));
+        .body(ApiError.from(DATABASE_ERROR_MESSAGE, status, request));
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
@@ -89,21 +80,13 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleIllegalArgumentException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "One of the arguments provided was illegal or inappropriate for the method. Please review the input parameters.",
-                status,
-                request));
+        .body(ApiError.from(ILLEGAL_ARGUMENT_MESSAGE, status, request));
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleGenericException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     return ResponseEntity.status(status)
-        .body(
-            ApiError.from(
-                "An unexpected internal server error occurred. We are working to resolve this issue. Please try again later.",
-                status,
-                request));
+        .body(ApiError.from(INTERNAL_SERVER_ERROR_MESSAGE, status, request));
   }
 }

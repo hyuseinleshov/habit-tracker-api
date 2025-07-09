@@ -1,5 +1,7 @@
 package com.habittracker.api.auth.exception;
 
+import static com.habittracker.api.auth.utils.AuthConstants.INVALID_CREDENTIALS_MESSAGE;
+
 import com.habittracker.api.core.exception.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,7 @@ public class AuthExceptionHandler {
   public ResponseEntity<ApiError> handleBadCredentialsException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.UNAUTHORIZED;
     return ResponseEntity.status(status)
-        .body(ApiError.from("Invalid username or password", status, request));
+        .body(ApiError.from(INVALID_CREDENTIALS_MESSAGE, status, request));
   }
 
   @ExceptionHandler(EmailAlreadyExistsException.class)
