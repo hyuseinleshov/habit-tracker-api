@@ -27,6 +27,7 @@ public final class AuthTestConstants {
   public static final String INVALID_EMAIL_MESSAGE = "Email must be valid";
   public static final String PASSWORD_REQUIRED_MESSAGE = "Password is required";
   public static final String PASSWORD_LENGTH_MESSAGE = "Password must be at least 6 characters";
+  public static final String MALFORMED_JSON_MESSAGE = "Request body is missing or malformed.";
 
   // Exception messages
   public static final String EMAIL_EXISTS_MESSAGE = "Email already exists";
