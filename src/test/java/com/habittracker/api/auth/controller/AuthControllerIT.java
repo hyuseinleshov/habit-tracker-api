@@ -64,7 +64,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
   class RegisterTests {
     @Test
     public void givenValidDetails_whenRegister_thenSuccess() throws Exception {
-      AuthRequest request = createAuthRequest(NEW_USER_EMAIL, TEST_PASSWORD);
+      AuthRequest request = new AuthRequest(NEW_USER_EMAIL, TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isCreated())
@@ -75,7 +75,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
 
     @Test
     public void givenExistingEmail_whenRegister_thenError() throws Exception {
-      AuthRequest request = createAuthRequest(EXISTING_EMAIL, TEST_PASSWORD);
+      AuthRequest request = new AuthRequest(EXISTING_EMAIL, TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isConflict())
@@ -86,7 +86,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     public void givenInvalidEmail_whenRegister_thenValidationError(String invalidEmail)
         throws Exception {
-      AuthRequest request = createAuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest request = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
@@ -96,7 +96,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
 
     @Test
     public void givenBlankEmail_whenRegister_thenValidationError() throws Exception {
-      AuthRequest request = createAuthRequest("", TEST_PASSWORD);
+      AuthRequest request = new AuthRequest("", TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
@@ -108,7 +108,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
     @ValueSource(strings = {"12345", "short", "tiny"})
     public void givenShortPassword_whenRegister_thenValidationError(String shortPassword)
         throws Exception {
-      AuthRequest request = createAuthRequest(NEW_USER_EMAIL, shortPassword);
+      AuthRequest request = new AuthRequest(NEW_USER_EMAIL, shortPassword);
 
       doPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
@@ -121,7 +121,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
   class LoginTests {
     @Test
     public void givenValidCredentials_whenLogin_thenSuccess() throws Exception {
-      AuthRequest request = createAuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      AuthRequest request = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
 
       doPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isOk())
@@ -132,7 +132,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
 
     @Test
     public void givenInvalidPassword_whenLogin_thenUnauthorized() throws Exception {
-      AuthRequest request = createAuthRequest(TEST_EMAIL, WRONG_PASSWORD);
+      AuthRequest request = new AuthRequest(TEST_EMAIL, WRONG_PASSWORD);
 
       doPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isUnauthorized())
@@ -141,7 +141,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
 
     @Test
     public void givenNonexistentUser_whenLogin_thenUnauthorized() throws Exception {
-      AuthRequest request = createAuthRequest(NONEXISTENT_EMAIL, TEST_PASSWORD);
+      AuthRequest request = new AuthRequest(NONEXISTENT_EMAIL, TEST_PASSWORD);
 
       doPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isUnauthorized())
@@ -152,7 +152,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
     @ValueSource(strings = {"", " "})
     public void givenBlankPassword_whenLogin_thenValidationError(String blankPassword)
         throws Exception {
-      AuthRequest request = createAuthRequest(TEST_EMAIL, blankPassword);
+      AuthRequest request = new AuthRequest(TEST_EMAIL, blankPassword);
 
       doPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isBadRequest())

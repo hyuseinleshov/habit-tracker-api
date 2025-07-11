@@ -37,30 +37,26 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponse register(AuthRequest request) {
     userRepository
-        .findByEmail(request.getEmail())
+        .findByEmail(request.email())
         .ifPresent(
             user -> {
-              log.error("Email {} already exists", request.getEmail());
+              log.error("Email {} already exists", request.email());
               throw new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE);
             });
 
     UserEntity user = new UserEntity();
-    user.setEmail(request.getEmail());
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setEmail(request.email());
+    user.setPassword(passwordEncoder.encode(request.password()));
 
     RoleEntity role = roleRepository.findByType(RoleType.USER).orElseThrow();
     user.setRoles(Collections.singleton(role));
 
-    log.info("Registering new user: {}", request.getEmail());
+    log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);
 
     String token = jwtService.generateToken(savedUser.getEmail());
 
-    return AuthResponse.builder()
-        .token(token)
-        .email(savedUser.getEmail())
-        .message(REGISTER_SUCCESS_MESSAGE)
-        .build();
+    return new AuthResponse(savedUser.getEmail(), token, REGISTER_SUCCESS_MESSAGE);
   }
 
   @Override
@@ -68,20 +64,16 @@ public class AuthServiceImpl implements AuthService {
     try {
       Authentication auth =
           authManager.authenticate(
-              new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+              new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
       if (auth.isAuthenticated()) {
-        log.info("User authenticated: {}", request.getEmail());
-        String token = jwtService.generateToken(request.getEmail());
+        log.info("User authenticated: {}", request.email());
+        String token = jwtService.generateToken(request.email());
 
-        return AuthResponse.builder()
-            .token(token)
-            .email(request.getEmail())
-            .message(LOGIN_SUCCESS_MESSAGE)
-            .build();
+        return new AuthResponse(request.email(), token, LOGIN_SUCCESS_MESSAGE);
       }
 
-      log.error("Authentication failed for user with email: {}", request.getEmail());
+      log.error("Authentication failed for user with email: {}", request.email());
       throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
     } catch (AuthenticationException e) {
       log.error("Authentication error: {}", e.getMessage());

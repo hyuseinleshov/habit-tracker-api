@@ -46,7 +46,7 @@ class AuthServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = createAuthRequest(TEST_EMAIL, TEST_PASSWORD);
+    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
   }
 
   @Nested
@@ -57,9 +57,9 @@ class AuthServiceImplTest {
 
       AuthResponse response = authService.register(validRequest);
 
-      assertThat(response.getEmail()).isEqualTo(TEST_EMAIL);
-      assertThat(response.getToken()).isEqualTo(JWT_TOKEN);
-      assertThat(response.getMessage()).isEqualTo(REGISTER_SUCCESS_MESSAGE);
+      assertThat(response.email()).isEqualTo(TEST_EMAIL);
+      assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.message()).isEqualTo(REGISTER_SUCCESS_MESSAGE);
       verify(userRepository).save(any(UserEntity.class));
     }
 
@@ -110,9 +110,9 @@ class AuthServiceImplTest {
 
       AuthResponse response = authService.login(validRequest);
 
-      assertThat(response.getEmail()).isEqualTo(TEST_EMAIL);
-      assertThat(response.getToken()).isEqualTo(JWT_TOKEN);
-      assertThat(response.getMessage()).isEqualTo(LOGIN_SUCCESS_MESSAGE);
+      assertThat(response.email()).isEqualTo(TEST_EMAIL);
+      assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.message()).isEqualTo(LOGIN_SUCCESS_MESSAGE);
     }
 
     @Test
@@ -138,7 +138,7 @@ class AuthServiceImplTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid"})
     void givenInvalidEmail_whenLoggingIn_thenThrowsException(String invalidEmail) {
-      AuthRequest invalidRequest = createAuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
       when(authManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 

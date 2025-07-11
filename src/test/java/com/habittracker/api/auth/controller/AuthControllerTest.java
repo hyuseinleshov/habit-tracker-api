@@ -47,19 +47,9 @@ public class AuthControllerTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = createAuthRequest(TEST_EMAIL, TEST_PASSWORD);
-    successRegisterResponse =
-        AuthResponse.builder()
-            .email(TEST_EMAIL)
-            .token(JWT_TOKEN)
-            .message(REGISTER_SUCCESS_MESSAGE)
-            .build();
-    successLoginResponse =
-        AuthResponse.builder()
-            .email(TEST_EMAIL)
-            .token(JWT_TOKEN)
-            .message(LOGIN_SUCCESS_MESSAGE)
-            .build();
+    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+    successRegisterResponse = new AuthResponse(TEST_EMAIL, JWT_TOKEN, REGISTER_SUCCESS_MESSAGE);
+    successLoginResponse = new AuthResponse(TEST_EMAIL, JWT_TOKEN, LOGIN_SUCCESS_MESSAGE);
   }
 
   private ResultActions doPostRequest(String endpoint, AuthRequest request) throws Exception {
@@ -100,7 +90,7 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = createAuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
@@ -110,7 +100,7 @@ public class AuthControllerTest {
 
     @Test
     void givenBlankEmail_whenRegister_thenReturnBadRequest() throws Exception {
-      AuthRequest invalidRequest = createAuthRequest("", TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest("", TEST_PASSWORD);
 
       doPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
@@ -122,7 +112,7 @@ public class AuthControllerTest {
     @ValueSource(strings = {"12345", "short", "tiny"})
     void givenShortPassword_whenRegister_thenReturnBadRequest(String shortPassword)
         throws Exception {
-      AuthRequest invalidRequest = createAuthRequest(TEST_EMAIL, shortPassword);
+      AuthRequest invalidRequest = new AuthRequest(TEST_EMAIL, shortPassword);
 
       doPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
@@ -200,7 +190,7 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid", "missing-at-sign.com", "user@", "@domain.com"})
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = createAuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
       doPostRequest(LOGIN_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())

@@ -17,10 +17,6 @@ public final class AuthTestUtils {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  public static AuthRequest createAuthRequest(String email, String password) {
-    return AuthRequest.builder().email(email).password(password).build();
-  }
-
   public static UserEntity createUser(String email, String password, RoleEntity role) {
     UserEntity user = new UserEntity();
     user.setEmail(email);
