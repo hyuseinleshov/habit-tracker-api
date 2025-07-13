@@ -1,8 +1,8 @@
 package com.habittracker.api.auth.controller;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
-import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestUtils.*;
+import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -11,11 +11,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habittracker.api.config.annotation.WebMvcTestWithoutJwt;
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
+import com.habittracker.api.config.annotation.WebMvcTestWithoutJwt;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
