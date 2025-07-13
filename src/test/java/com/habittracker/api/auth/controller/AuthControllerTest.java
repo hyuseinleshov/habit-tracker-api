@@ -1,7 +1,7 @@
 package com.habittracker.api.auth.controller;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
-import static com.habittracker.api.auth.utils.AuthTestConstants.*;
+import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,11 +11,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.habittracker.api.config.annotation.WebMvcTestWithoutJwt;
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
-import com.habittracker.api.config.SecurityTestConfig;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,16 +25,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-@WebMvcTest(AuthController.class)
-@ContextConfiguration(classes = SecurityTestConfig.class)
+@WebMvcTestWithoutJwt(AuthController.class)
 public class AuthControllerTest {
 
   @Autowired private MockMvc mockMvc;
