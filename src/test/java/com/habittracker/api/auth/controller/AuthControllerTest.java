@@ -13,7 +13,7 @@ import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
-import com.habittracker.api.config.annotation.WebMvcTestWithoutJwt;
+import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
 import com.habittracker.api.testutils.MockMvcTestUtils;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@WebMvcTestWithoutJwt(AuthController.class)
+@WebMvcTestWithoutSecurity(AuthController.class)
 public class AuthControllerTest {
 
   @Autowired private MockMvcTestUtils mockMvcTestUtils;

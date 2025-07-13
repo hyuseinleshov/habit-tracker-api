@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtFilter.class))
 @Import({SecurityTestConfig.class, MockMvcTestUtils.class})
 @ActiveProfiles("test")
-public @interface WebMvcTestWithoutJwt {
+public @interface WebMvcTestWithoutSecurity {
 
   @AliasFor(annotation = WebMvcTest.class)
   Class<?>[] value() default {};
