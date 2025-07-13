@@ -1,6 +1,6 @@
 package com.habittracker.api.security.jwt.service;
 
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.*;
+import static com.habittracker.api.config.constants.JwtTestConstant.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

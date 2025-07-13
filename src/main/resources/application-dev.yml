@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  web:
+    resources:
+      add-mappings: false
+
+logging:
+  level:
+    com.habittracker.api: DEBUG
+    org.springframework.security: INFO
+
+jwt:
+  secret: ${JWT_SECRET}

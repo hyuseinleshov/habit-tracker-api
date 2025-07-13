@@ -1,6 +1,6 @@
 package com.habittracker.api.security.jwt.utils;
 
-import static com.habittracker.api.security.jwt.utils.JwtTestConstant.*;
+import static com.habittracker.api.config.constants.JwtTestConstant.*;
 
 import io.jsonwebtoken.Jwts;
 import java.time.Instant;

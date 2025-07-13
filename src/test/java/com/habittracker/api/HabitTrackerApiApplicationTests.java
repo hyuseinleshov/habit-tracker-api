@@ -1,9 +1,10 @@
 package com.habittracker.api;
 
-import com.habittracker.api.config.BaseIntegrationTest;
+import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-class HabitTrackerApiApplicationTests extends BaseIntegrationTest {
+@BaseIntegrationTest
+class HabitTrackerApiApplicationTests {
 
   @Test
   void contextLoads() {}

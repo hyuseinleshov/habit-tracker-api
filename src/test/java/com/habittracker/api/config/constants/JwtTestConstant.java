@@ -1,4 +1,4 @@
-package com.habittracker.api.security.jwt.utils;
+package com.habittracker.api.config.constants;
 
 import io.jsonwebtoken.Jwts;
 import javax.crypto.SecretKey;
