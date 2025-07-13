@@ -1,4 +1,4 @@
-package com.habittracker.api.auth.utils;
+package com.habittracker.api.config.constants;
 
 public final class AuthTestConstants {
 

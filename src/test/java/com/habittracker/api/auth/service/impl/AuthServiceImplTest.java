@@ -1,7 +1,7 @@
 package com.habittracker.api.auth.service.impl;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
-import static com.habittracker.api.auth.utils.AuthTestConstants.*;
+import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
