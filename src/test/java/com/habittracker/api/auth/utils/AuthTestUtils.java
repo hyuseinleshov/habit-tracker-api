@@ -32,13 +32,10 @@ public final class AuthTestUtils {
   }
 
   public static RoleEntity getUserRoleFromRepository(RoleRepository roleRepository) {
-    return roleRepository
-        .findByType(RoleType.USER)
-        .orElseGet(
-            () -> {
-              RoleEntity role = createUserRole();
-              return roleRepository.save(role);
-            });
+    RoleEntity userRole = new RoleEntity();
+    userRole.setType(RoleType.USER);
+    roleRepository.save(userRole);
+    return roleRepository.getByType(RoleType.USER);
   }
 
   public static ResultActions performPostRequest(

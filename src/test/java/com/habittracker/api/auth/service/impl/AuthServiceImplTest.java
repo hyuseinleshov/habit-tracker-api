@@ -16,7 +16,6 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.security.jwt.service.JwtService;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -75,19 +74,10 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void givenValidCredentials_whenRoleNotFound_thenThrowsException() {
-      when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-      when(roleRepository.findByType(RoleType.USER)).thenReturn(Optional.empty());
-
-      assertThatThrownBy(() -> authService.register(validRequest))
-          .isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
     void givenValidCredentials_whenRegisteringUser_thenSavesUserWithCorrectProperties() {
       when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
       when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
-      when(roleRepository.findByType(RoleType.USER)).thenReturn(Optional.of(createUserRole()));
+      when(roleRepository.getByType(RoleType.USER)).thenReturn(createUserRole());
       when(userRepository.save(any())).thenReturn(new UserEntity());
 
       ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
@@ -152,7 +142,7 @@ class AuthServiceImplTest {
     when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
     RoleEntity role = createUserRole();
-    when(roleRepository.findByType(RoleType.USER)).thenReturn(Optional.of(role));
+    when(roleRepository.getByType(RoleType.USER)).thenReturn(role);
 
     UserEntity savedUser = createUser(TEST_EMAIL, ENCODED_PASSWORD, role);
     when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);

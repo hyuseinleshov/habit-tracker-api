@@ -53,9 +53,7 @@ public class DataInitializer implements CommandLineRunner {
       log.info("Initializing users");
 
       // Create regular user
-      RoleEntity userRole =
-          roleRepository
-              .getByType(RoleType.USER);
+      RoleEntity userRole = roleRepository.getByType(RoleType.USER);
 
       UserEntity regularUser = new UserEntity();
       regularUser.setEmail("user@example.com");
@@ -65,9 +63,7 @@ public class DataInitializer implements CommandLineRunner {
       log.info("Created regular user: {}", regularUser.getEmail());
 
       // Create admin user
-      RoleEntity adminRole =
-          roleRepository
-              .getByType(RoleType.ADMIN);
+      RoleEntity adminRole = roleRepository.getByType(RoleType.ADMIN);
 
       UserEntity adminUser = new UserEntity();
       adminUser.setEmail("admin@example.com");
