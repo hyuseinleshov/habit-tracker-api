@@ -55,8 +55,7 @@ public class DataInitializer implements CommandLineRunner {
       // Create regular user
       RoleEntity userRole =
           roleRepository
-              .findByType(RoleType.USER)
-              .orElseThrow(() -> new IllegalStateException("User role not found"));
+              .getByType(RoleType.USER);
 
       UserEntity regularUser = new UserEntity();
       regularUser.setEmail("user@example.com");
@@ -68,8 +67,7 @@ public class DataInitializer implements CommandLineRunner {
       // Create admin user
       RoleEntity adminRole =
           roleRepository
-              .findByType(RoleType.ADMIN)
-              .orElseThrow(() -> new IllegalStateException("Admin role not found"));
+              .getByType(RoleType.ADMIN);
 
       UserEntity adminUser = new UserEntity();
       adminUser.setEmail("admin@example.com");
