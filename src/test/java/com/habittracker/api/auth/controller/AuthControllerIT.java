@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.common.BaseIntegrationTest;
+import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.testutils.AuthTestUtils;
 import com.habittracker.api.testutils.MockMvcTestUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public class AuthControllerIT extends BaseIntegrationTest {
+@BaseIntegrationTest
+public class AuthControllerIT {
 
   @Autowired private AuthTestUtils authTestUtils;
   @Autowired private MockMvcTestUtils mockMvcTestUtils;

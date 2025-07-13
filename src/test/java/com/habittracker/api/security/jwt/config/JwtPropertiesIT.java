@@ -2,13 +2,14 @@ package com.habittracker.api.security.jwt.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.habittracker.api.common.BaseIntegrationTest;
+import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class JwtPropertiesIT extends BaseIntegrationTest {
+@BaseIntegrationTest
+public class JwtPropertiesIT {
 
   @Autowired private JwtProperties jwtProperties;
 
