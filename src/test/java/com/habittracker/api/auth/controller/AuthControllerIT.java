@@ -1,63 +1,32 @@
 package com.habittracker.api.auth.controller;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
-import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.auth.model.RoleEntity;
-import com.habittracker.api.auth.model.UserEntity;
-import com.habittracker.api.auth.repository.RoleRepository;
-import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.common.BaseIntegrationTest;
+import com.habittracker.api.testutils.AuthTestUtils;
+import com.habittracker.api.testutils.MockMvcTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class AuthControllerIT extends BaseIntegrationTest {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private UserRepository userRepository;
-  @Autowired private RoleRepository roleRepository;
-  @Autowired private PasswordEncoder passwordEncoder;
-
-  private RoleEntity userRole;
+  @Autowired private AuthTestUtils authTestUtils;
+  @Autowired private MockMvcTestUtils mockMvcTestUtils;
 
   @BeforeEach
   public void setUp() {
-    setupUserRole();
-    createTestUsers();
-  }
-
-  private void setupUserRole() {
-    userRole = getUserRoleFromRepository(roleRepository);
-  }
-
-  private void createTestUsers() {
-    createUser(EXISTING_EMAIL);
-    createUser(TEST_EMAIL);
-  }
-
-  private void createUser(String email) {
-    UserEntity user = new UserEntity();
-    user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(TEST_PASSWORD));
-    user.getRoles().add(userRole);
-    userRepository.save(user);
-  }
-
-  private ResultActions doPostRequest(String endpoint, AuthRequest request) throws Exception {
-    return performPostRequest(mockMvc, endpoint, request);
+    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD);
+    authTestUtils.createAndSaveUser(EXISTING_EMAIL, TEST_PASSWORD);
   }
 
   @Nested
@@ -66,7 +35,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenValidDetails_whenRegister_thenSuccess() throws Exception {
       AuthRequest request = new AuthRequest(NEW_USER_EMAIL, TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(NEW_USER_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
@@ -77,7 +47,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenExistingEmail_whenRegister_thenError() throws Exception {
       AuthRequest request = new AuthRequest(EXISTING_EMAIL, TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isConflict())
           .andExpect(jsonPath("$.message", is(EMAIL_EXISTS_MESSAGE)));
     }
@@ -88,7 +59,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
         throws Exception {
       AuthRequest request = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", is(INVALID_EMAIL_MESSAGE)));
@@ -98,7 +70,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenBlankEmail_whenRegister_thenValidationError() throws Exception {
       AuthRequest request = new AuthRequest("", TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", is(EMAIL_REQUIRED_MESSAGE)));
@@ -110,7 +83,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
         throws Exception {
       AuthRequest request = new AuthRequest(NEW_USER_EMAIL, shortPassword);
 
-      doPostRequest(REGISTER_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.password", is(PASSWORD_LENGTH_MESSAGE)));
@@ -123,7 +97,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenValidCredentials_whenLogin_thenSuccess() throws Exception {
       AuthRequest request = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
 
-      doPostRequest(LOGIN_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
@@ -134,7 +109,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenInvalidPassword_whenLogin_thenUnauthorized() throws Exception {
       AuthRequest request = new AuthRequest(TEST_EMAIL, WRONG_PASSWORD);
 
-      doPostRequest(LOGIN_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isUnauthorized())
           .andExpect(jsonPath("$.message", is(INVALID_CREDENTIALS_MESSAGE)));
     }
@@ -143,7 +119,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
     public void givenNonexistentUser_whenLogin_thenUnauthorized() throws Exception {
       AuthRequest request = new AuthRequest(NONEXISTENT_EMAIL, TEST_PASSWORD);
 
-      doPostRequest(LOGIN_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isUnauthorized())
           .andExpect(jsonPath("$.message", is(INVALID_CREDENTIALS_MESSAGE)));
     }
@@ -154,7 +131,8 @@ public class AuthControllerIT extends BaseIntegrationTest {
         throws Exception {
       AuthRequest request = new AuthRequest(TEST_EMAIL, blankPassword);
 
-      doPostRequest(LOGIN_ENDPOINT, request)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(

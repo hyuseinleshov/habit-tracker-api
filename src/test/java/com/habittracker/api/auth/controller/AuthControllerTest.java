@@ -1,13 +1,11 @@
 package com.habittracker.api.auth.controller;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
-import static com.habittracker.api.auth.utils.AuthTestUtils.*;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +14,7 @@ import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutJwt;
+import com.habittracker.api.testutils.MockMvcTestUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,16 +24,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTestWithoutJwt(AuthController.class)
 public class AuthControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private MockMvcTestUtils mockMvcTestUtils;
   @Autowired private ObjectMapper objectMapper;
   @MockitoBean private AuthService authService;
 
@@ -49,23 +45,14 @@ public class AuthControllerTest {
     successLoginResponse = new AuthResponse(TEST_EMAIL, JWT_TOKEN, LOGIN_SUCCESS_MESSAGE);
   }
 
-  private ResultActions doPostRequest(String endpoint, AuthRequest request) throws Exception {
-    return performPostRequest(mockMvc, endpoint, request);
-  }
-
-  private ResultActions doPostRequestWithRawJson(String endpoint, String jsonContent)
-      throws Exception {
-    return mockMvc.perform(
-        post(endpoint).contentType(MediaType.APPLICATION_JSON).content(jsonContent));
-  }
-
   @Nested
   class RegisterTests {
     @Test
     void givenValidRequest_whenRegister_thenReturnCreatedWithToken() throws Exception {
       when(authService.register(any(AuthRequest.class))).thenReturn(successRegisterResponse);
 
-      doPostRequest(REGISTER_ENDPOINT, validRequest)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, validRequest)
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
@@ -79,7 +66,8 @@ public class AuthControllerTest {
       when(authService.register(any(AuthRequest.class)))
           .thenThrow(new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE));
 
-      doPostRequest(REGISTER_ENDPOINT, validRequest)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, validRequest)
           .andExpect(status().isConflict())
           .andExpect(jsonPath("$.message", is(EMAIL_EXISTS_MESSAGE)));
     }
@@ -89,7 +77,8 @@ public class AuthControllerTest {
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
       AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, invalidRequest)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", is(INVALID_EMAIL_MESSAGE)));
@@ -99,7 +88,8 @@ public class AuthControllerTest {
     void givenBlankEmail_whenRegister_thenReturnBadRequest() throws Exception {
       AuthRequest invalidRequest = new AuthRequest("", TEST_PASSWORD);
 
-      doPostRequest(REGISTER_ENDPOINT, invalidRequest)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", is(EMAIL_REQUIRED_MESSAGE)));
@@ -111,7 +101,8 @@ public class AuthControllerTest {
         throws Exception {
       AuthRequest invalidRequest = new AuthRequest(TEST_EMAIL, shortPassword);
 
-      doPostRequest(REGISTER_ENDPOINT, invalidRequest)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.password", is(PASSWORD_LENGTH_MESSAGE)));
@@ -128,7 +119,8 @@ public class AuthControllerTest {
       }
       String jsonContent = objectMapper.writeValueAsString(requestMap);
 
-      doPostRequestWithRawJson(REGISTER_ENDPOINT, jsonContent)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, jsonContent)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.password", notNullValue()));
@@ -136,7 +128,8 @@ public class AuthControllerTest {
 
     @Test
     void givenMalformedJson_whenRegister_thenReturnBadRequest() throws Exception {
-      doPostRequestWithRawJson(REGISTER_ENDPOINT, MALFORMED_JSON)
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, MALFORMED_JSON)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(MALFORMED_JSON_MESSAGE)));
     }
@@ -148,7 +141,8 @@ public class AuthControllerTest {
     void givenValidCredentials_whenLogin_thenReturnOkWithToken() throws Exception {
       when(authService.login(any(AuthRequest.class))).thenReturn(successLoginResponse);
 
-      doPostRequest(LOGIN_ENDPOINT, validRequest)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, validRequest)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
@@ -162,7 +156,8 @@ public class AuthControllerTest {
       when(authService.login(any(AuthRequest.class)))
           .thenThrow(new BadCredentialsException(INVALID_CREDENTIALS_ERROR));
 
-      doPostRequest(LOGIN_ENDPOINT, validRequest)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, validRequest)
           .andExpect(status().isUnauthorized())
           .andExpect(jsonPath("$.message", is(INVALID_CREDENTIALS_MESSAGE)));
     }
@@ -178,7 +173,8 @@ public class AuthControllerTest {
       }
       String jsonContent = objectMapper.writeValueAsString(requestMap);
 
-      doPostRequestWithRawJson(LOGIN_ENDPOINT, jsonContent)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, jsonContent)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.password", notNullValue()));
@@ -189,7 +185,8 @@ public class AuthControllerTest {
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
       AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
 
-      doPostRequest(LOGIN_ENDPOINT, invalidRequest)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, invalidRequest)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", is(INVALID_EMAIL_MESSAGE)));
@@ -197,7 +194,8 @@ public class AuthControllerTest {
 
     @Test
     void givenMissingRequestBody_whenLogin_thenReturnBadRequest() throws Exception {
-      doPostRequestWithRawJson(LOGIN_ENDPOINT, EMPTY_JSON)
+      mockMvcTestUtils
+          .performPostRequest(LOGIN_ENDPOINT, EMPTY_JSON)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", notNullValue()))

@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestcontainersConfig.class)
+@Import({TestcontainersConfig.class})
 @AutoConfigureMockMvc
 public abstract class BaseIntegrationTest {
   // Common test utilities can be added here

@@ -2,6 +2,7 @@ package com.habittracker.api.config.annotation;
 
 import com.habittracker.api.config.SecurityTestConfig;
 import com.habittracker.api.security.jwt.filter.JwtFilter;
+import com.habittracker.api.testutils.MockMvcTestUtils;
 import java.lang.annotation.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 @WebMvcTest(
     excludeFilters =
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtFilter.class))
-@Import(SecurityTestConfig.class)
+@Import({SecurityTestConfig.class, MockMvcTestUtils.class})
 @ActiveProfiles("test")
 public @interface WebMvcTestWithoutJwt {
 
