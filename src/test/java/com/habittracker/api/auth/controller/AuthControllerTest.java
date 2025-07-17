@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
+import com.habittracker.api.auth.dto.RefreshTokenRequest;
+import com.habittracker.api.auth.dto.RefreshTokenResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
@@ -41,8 +43,10 @@ public class AuthControllerTest {
   @BeforeEach
   void setUp() {
     validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
-    successRegisterResponse = new AuthResponse(TEST_EMAIL, JWT_TOKEN, REGISTER_SUCCESS_MESSAGE);
-    successLoginResponse = new AuthResponse(TEST_EMAIL, JWT_TOKEN, LOGIN_SUCCESS_MESSAGE);
+    successRegisterResponse =
+        new AuthResponse(TEST_EMAIL, JWT_TOKEN, REFRESH_TOKEN, REGISTER_SUCCESS_MESSAGE);
+    successLoginResponse =
+        new AuthResponse(TEST_EMAIL, JWT_TOKEN, REFRESH_TOKEN, LOGIN_SUCCESS_MESSAGE);
   }
 
   @Nested
@@ -56,6 +60,7 @@ public class AuthControllerTest {
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
+          .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
 
       verify(authService).register(any(AuthRequest.class));
@@ -146,6 +151,7 @@ public class AuthControllerTest {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
+          .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
 
       verify(authService).login(any(AuthRequest.class));
@@ -200,6 +206,26 @@ public class AuthControllerTest {
           .andExpect(jsonPath("$.message", is(VALIDATION_FAILED_MESSAGE)))
           .andExpect(jsonPath("$.errors.email", notNullValue()))
           .andExpect(jsonPath("$.errors.password", notNullValue()));
+    }
+  }
+
+  @Nested
+  class RefreshTokenTests {
+    @Test
+    void givenValidRefreshToken_whenRefresh_thenReturnNewTokens() throws Exception {
+      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(REFRESH_TOKEN);
+      RefreshTokenResponse refreshResponse =
+          new RefreshTokenResponse(NEW_ACCESS_TOKEN, NEW_REFRESH_TOKEN, REFRESH_SUCCESS_MESSAGE);
+      when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(refreshResponse);
+
+      mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.accessToken", is(NEW_ACCESS_TOKEN)))
+          .andExpect(jsonPath("$.refreshToken", is(NEW_REFRESH_TOKEN)))
+          .andExpect(jsonPath("$.message", is(REFRESH_SUCCESS_MESSAGE)));
+
+      verify(authService).refreshToken(any(RefreshTokenRequest.class));
     }
   }
 }
