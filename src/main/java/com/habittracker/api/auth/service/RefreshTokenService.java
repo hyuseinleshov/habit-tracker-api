@@ -8,4 +8,6 @@ public interface RefreshTokenService {
   String getEmailFromRefreshToken(String refreshToken);
 
   void revokeRefreshToken(String refreshToken);
+
+  void revokeAllRefreshTokensForUser(String email);
 }
