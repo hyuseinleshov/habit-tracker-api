@@ -58,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
     log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);
 
+    refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
     String token = jwtService.generateToken(savedUser.getEmail());
     String refreshToken = refreshTokenService.createRefreshToken(savedUser.getEmail());
     return new AuthResponse(savedUser.getEmail(), token, refreshToken, REGISTER_SUCCESS_MESSAGE);
@@ -72,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
 
       if (auth.isAuthenticated()) {
         log.info("User authenticated: {}", request.email());
+        refreshTokenService.revokeAllRefreshTokensForUser(request.email());
         String token = jwtService.generateToken(request.email());
         String refreshToken = refreshTokenService.createRefreshToken(request.email());
         return new AuthResponse(request.email(), token, refreshToken, LOGIN_SUCCESS_MESSAGE);
