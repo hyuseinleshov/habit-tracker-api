@@ -15,9 +15,8 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
-import java.util.Collections;
-
 import jakarta.transaction.Transactional;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

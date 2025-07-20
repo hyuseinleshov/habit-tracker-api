@@ -181,13 +181,15 @@ public class AuthControllerIT {
       String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
 
       RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
-      String refreshResponse = mockMvcTestUtils
-          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
-          .andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-      String newRefreshToken = new ObjectMapper().readTree(refreshResponse).get("refreshToken").asText();
+      String refreshResponse =
+          mockMvcTestUtils
+              .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String newRefreshToken =
+          new ObjectMapper().readTree(refreshResponse).get("refreshToken").asText();
 
       mockMvcTestUtils
           .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
