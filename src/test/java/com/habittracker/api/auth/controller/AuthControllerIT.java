@@ -168,5 +168,30 @@ public class AuthControllerIT {
           .andExpect(jsonPath("$.refreshToken", notNullValue()))
           .andExpect(jsonPath("$.message", is(REFRESH_SUCCESS_MESSAGE)));
     }
+
+    @Test
+    public void givenUsedRefreshToken_whenRefreshAgain_thenUnauthorized() throws Exception {
+      AuthRequest loginRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      String loginResponse =
+          mockMvcTestUtils
+              .performPostRequest(LOGIN_ENDPOINT, loginRequest)
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
+
+      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
+      String refreshResponse = mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+      String newRefreshToken = new ObjectMapper().readTree(refreshResponse).get("refreshToken").asText();
+
+      mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .andExpect(status().isUnauthorized());
+    }
   }
 }
