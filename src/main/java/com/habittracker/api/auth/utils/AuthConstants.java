@@ -27,9 +27,6 @@ public final class AuthConstants {
   public static final String PASSWORD_REQUIRED_MESSAGE = "Password is required";
   public static final String PASSWORD_LENGTH_MESSAGE = "Password must be at least 6 characters";
 
-  // Refresh tokens
-  public static final long REFRESH_TOKEN_EXPIRY_DAYS = 7;
-
   private AuthConstants() {
     throw new UnsupportedOperationException("Utility class, do not instantiate");
   }

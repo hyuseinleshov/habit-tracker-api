@@ -1,15 +1,14 @@
 package com.habittracker.api.auth.service.impl;
 
-import static com.habittracker.api.auth.utils.AuthConstants.*;
-
 import com.habittracker.api.auth.model.RefreshTokenEntity;
 import com.habittracker.api.auth.repository.RefreshTokenRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,13 +17,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   private final RefreshTokenRepository refreshTokenRepository;
 
+  @Value("${refresh-token.expiration-duration}")
+  private Duration refreshTokenExpiration;
+
   @Override
   public String createRefreshToken(String email) {
     String token = UUID.randomUUID().toString();
     RefreshTokenEntity entity = new RefreshTokenEntity();
     entity.setToken(token);
     entity.setEmail(email);
-    entity.setExpiresAt(Instant.now().plus(REFRESH_TOKEN_EXPIRY_DAYS, ChronoUnit.DAYS));
+    entity.setExpiresAt(Instant.now().plus(refreshTokenExpiration));
     refreshTokenRepository.save(entity);
     return token;
   }
