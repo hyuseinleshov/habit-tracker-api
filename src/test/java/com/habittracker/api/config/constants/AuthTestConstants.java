@@ -11,6 +11,9 @@ public final class AuthTestConstants {
   public static final String NONEXISTENT_EMAIL = "nonexistent@example.com";
   public static final String WRONG_PASSWORD = "wrongpassword";
   public static final String JWT_TOKEN = "jwt-token";
+  public static final String REFRESH_TOKEN = "dummy-refresh-token";
+  public static final String NEW_ACCESS_TOKEN = "new-access-token";
+  public static final String NEW_REFRESH_TOKEN = "new-refresh-token";
 
   // JSON Strings
   public static final String EMPTY_JSON = "{}";

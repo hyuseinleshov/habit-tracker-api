@@ -4,6 +4,8 @@ import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
+import com.habittracker.api.auth.dto.RefreshTokenRequest;
+import com.habittracker.api.auth.dto.RefreshTokenResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -11,7 +13,9 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
+import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
+import jakarta.transaction.Transactional;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
   private final UserRepository userRepository;
@@ -33,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authManager;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
+  private final RefreshTokenService refreshTokenService;
 
   @Override
   public AuthResponse register(AuthRequest request) {
@@ -54,9 +60,10 @@ public class AuthServiceImpl implements AuthService {
     log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);
 
+    refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
     String token = jwtService.generateToken(savedUser.getEmail());
-
-    return new AuthResponse(savedUser.getEmail(), token, REGISTER_SUCCESS_MESSAGE);
+    String refreshToken = refreshTokenService.createRefreshToken(savedUser.getEmail());
+    return new AuthResponse(savedUser.getEmail(), token, refreshToken, REGISTER_SUCCESS_MESSAGE);
   }
 
   @Override
@@ -68,9 +75,10 @@ public class AuthServiceImpl implements AuthService {
 
       if (auth.isAuthenticated()) {
         log.info("User authenticated: {}", request.email());
+        refreshTokenService.revokeAllRefreshTokensForUser(request.email());
         String token = jwtService.generateToken(request.email());
-
-        return new AuthResponse(request.email(), token, LOGIN_SUCCESS_MESSAGE);
+        String refreshToken = refreshTokenService.createRefreshToken(request.email());
+        return new AuthResponse(request.email(), token, refreshToken, LOGIN_SUCCESS_MESSAGE);
       }
 
       log.error("Authentication failed for user with email: {}", request.email());
@@ -79,5 +87,20 @@ public class AuthServiceImpl implements AuthService {
       log.error("Authentication error: {}", e.getMessage());
       throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
     }
+  }
+
+  @Override
+  public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+    String refreshToken = request.refreshToken();
+    if (!refreshTokenService.isValid(refreshToken)) {
+      throw new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE);
+    }
+
+    String email = refreshTokenService.getEmailFromRefreshToken(refreshToken);
+    String newAccessToken = jwtService.generateToken(email);
+
+    refreshTokenService.revokeRefreshToken(refreshToken);
+    String newRefreshToken = refreshTokenService.createRefreshToken(email);
+    return new RefreshTokenResponse(newAccessToken, newRefreshToken, REFRESH_SUCCESS_MESSAGE);
   }
 }

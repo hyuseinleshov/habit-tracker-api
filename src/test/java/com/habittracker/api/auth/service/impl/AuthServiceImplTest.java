@@ -15,6 +15,7 @@ import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
+import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ class AuthServiceImplTest {
   @Mock private AuthenticationManager authManager;
   @Mock private JwtService jwtService;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private RefreshTokenService refreshTokenService;
   @InjectMocks private AuthServiceImpl authService;
 
   private AuthRequest validRequest;
@@ -58,6 +60,7 @@ class AuthServiceImplTest {
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
       assertThat(response.message()).isEqualTo(REGISTER_SUCCESS_MESSAGE);
       verify(userRepository).save(any(UserEntity.class));
     }
@@ -102,6 +105,7 @@ class AuthServiceImplTest {
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
       assertThat(response.message()).isEqualTo(LOGIN_SUCCESS_MESSAGE);
     }
 
@@ -147,6 +151,7 @@ class AuthServiceImplTest {
     UserEntity savedUser = createUser(TEST_EMAIL, ENCODED_PASSWORD, role);
     when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);
     when(jwtService.generateToken(TEST_EMAIL)).thenReturn(JWT_TOKEN);
+    when(refreshTokenService.createRefreshToken(TEST_EMAIL)).thenReturn(REFRESH_TOKEN);
   }
 
   private void setupForSuccessfulAuthentication() {
@@ -154,5 +159,6 @@ class AuthServiceImplTest {
     when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
     when(auth.isAuthenticated()).thenReturn(true);
     when(jwtService.generateToken(TEST_EMAIL)).thenReturn(JWT_TOKEN);
+    when(refreshTokenService.createRefreshToken(TEST_EMAIL)).thenReturn(REFRESH_TOKEN);
   }
 }

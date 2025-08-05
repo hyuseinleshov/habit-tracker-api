@@ -5,7 +5,9 @@ import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.AuthRequest;
+import com.habittracker.api.auth.dto.RefreshTokenRequest;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.testutils.AuthTestUtils;
 import com.habittracker.api.testutils.MockMvcTestUtils;
@@ -41,6 +43,7 @@ public class AuthControllerIT {
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(NEW_USER_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
+          .andExpect(jsonPath("$.refreshToken", notNullValue()))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
     }
 
@@ -103,6 +106,7 @@ public class AuthControllerIT {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
+          .andExpect(jsonPath("$.refreshToken", notNullValue()))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
     }
 
@@ -140,6 +144,56 @@ public class AuthControllerIT {
               jsonPath(
                   "$.errors.password",
                   anyOf(is(PASSWORD_REQUIRED_MESSAGE), is(PASSWORD_LENGTH_MESSAGE))));
+    }
+  }
+
+  @Nested
+  class RefreshTokenTests {
+    @Test
+    public void givenValidRefreshToken_whenRefresh_thenSuccess() throws Exception {
+      AuthRequest loginRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      String loginResponse =
+          mockMvcTestUtils
+              .performPostRequest(LOGIN_ENDPOINT, loginRequest)
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
+
+      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
+      mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.accessToken", notNullValue()))
+          .andExpect(jsonPath("$.refreshToken", notNullValue()))
+          .andExpect(jsonPath("$.message", is(REFRESH_SUCCESS_MESSAGE)));
+    }
+
+    @Test
+    public void givenUsedRefreshToken_whenRefreshAgain_thenUnauthorized() throws Exception {
+      AuthRequest loginRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      String loginResponse =
+          mockMvcTestUtils
+              .performPostRequest(LOGIN_ENDPOINT, loginRequest)
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
+
+      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
+      String refreshResponse =
+          mockMvcTestUtils
+              .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      String newRefreshToken =
+          new ObjectMapper().readTree(refreshResponse).get("refreshToken").asText();
+
+      mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .andExpect(status().isUnauthorized());
     }
   }
 }

@@ -2,6 +2,8 @@ package com.habittracker.api.auth.controller;
 
 import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
+import com.habittracker.api.auth.dto.RefreshTokenRequest;
+import com.habittracker.api.auth.dto.RefreshTokenResponse;
 import com.habittracker.api.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,14 @@ public class AuthController {
   public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
     AuthResponse response = userService.login(request);
     log.info("User with email - {}, logged in successfully", request.email());
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<RefreshTokenResponse> refresh(
+      @Valid @RequestBody RefreshTokenRequest request) {
+    RefreshTokenResponse response = userService.refreshToken(request);
+    log.info("Refresh token used successfully");
     return ResponseEntity.ok(response);
   }
 }

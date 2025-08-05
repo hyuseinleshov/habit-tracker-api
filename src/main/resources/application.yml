@@ -15,3 +15,5 @@ jwt:
  expiration-duration: ${JWT_EXPIRATION_DURATION:PT10M}
  not-before-leeway-duration: ${JWT_NOT_BEFORE_LEEWAY_DURATION:PT15S}
  clock-skew-seconds: ${JWT_CLOCK_SKEW_SECONDS:25}
+refresh-token:
+ expiration-duration: ${REFRESH_TOKEN_EXPIRATION_DURATION:P7D}
