@@ -49,14 +49,14 @@ class UserDetailsServiceImplTest {
     assertThat(userDetails.getPassword()).isEqualTo(ENCODED_PASSWORD);
     assertThat(userDetails.getAuthorities()).hasSize(1);
     assertThat(userDetails.getAuthorities().iterator().next().getAuthority())
-            .isEqualTo(ROLE_USER_AUTHORITY);
+        .isEqualTo(ROLE_USER_AUTHORITY);
 
     verify(userRepository).findByEmail(TEST_EMAIL);
   }
 
   @Test
   void
-  givenUserWithMultipleRoles_whenLoadUserByUsername_thenReturnUserDetailsImplWithCorrectAuthorities() {
+      givenUserWithMultipleRoles_whenLoadUserByUsername_thenReturnUserDetailsImplWithCorrectAuthorities() {
     RoleEntity adminRole = new RoleEntity();
     adminRole.setType(RoleType.ADMIN);
     testUser.setRoles(Set.of(userRole, adminRole));
@@ -68,7 +68,7 @@ class UserDetailsServiceImplTest {
     UserDetailsImpl userDetails = (UserDetailsImpl) result;
     assertThat(userDetails.getAuthorities()).hasSize(2);
     assertThat(userDetails.getAuthorities().stream().map(Object::toString))
-            .containsExactlyInAnyOrder(ROLE_USER_AUTHORITY, ROLE_ADMIN_AUTHORITY);
+        .containsExactlyInAnyOrder(ROLE_USER_AUTHORITY, ROLE_ADMIN_AUTHORITY);
 
     verify(userRepository).findByEmail(TEST_EMAIL);
   }
@@ -78,39 +78,38 @@ class UserDetailsServiceImplTest {
     when(userRepository.findByEmail(NONEXISTENT_EMAIL)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userDetailsService.loadUserByUsername(NONEXISTENT_EMAIL))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessage(generateUserNotFoundMessage(NONEXISTENT_EMAIL));
+        .isInstanceOf(UsernameNotFoundException.class)
+        .hasMessage(generateUserNotFoundMessage(NONEXISTENT_EMAIL));
 
     verify(userRepository).findByEmail(NONEXISTENT_EMAIL);
   }
 
   @Test
   void
-  givenEmptyEmail_whenLoadUserByUsername_thenThrowUsernameNotFoundExceptionWithCorrectMessage() {
+      givenEmptyEmail_whenLoadUserByUsername_thenThrowUsernameNotFoundExceptionWithCorrectMessage() {
     when(userRepository.findByEmail(EMPTY_EMAIL)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userDetailsService.loadUserByUsername(EMPTY_EMAIL))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessage(generateUserNotFoundMessage(EMPTY_EMAIL));
+        .isInstanceOf(UsernameNotFoundException.class)
+        .hasMessage(generateUserNotFoundMessage(EMPTY_EMAIL));
 
     verify(userRepository).findByEmail(EMPTY_EMAIL);
   }
 
   @Test
   void
-  givenNullEmail_whenLoadUserByUsername_thenThrowUsernameNotFoundExceptionWithCorrectMessage() {
+      givenNullEmail_whenLoadUserByUsername_thenThrowUsernameNotFoundExceptionWithCorrectMessage() {
     when(userRepository.findByEmail(NULL_EMAIL)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> userDetailsService.loadUserByUsername(NULL_EMAIL))
-            .isInstanceOf(UsernameNotFoundException.class)
-            .hasMessage(generateUserNotFoundMessage(NULL_EMAIL));
+        .isInstanceOf(UsernameNotFoundException.class)
+        .hasMessage(generateUserNotFoundMessage(NULL_EMAIL));
 
     verify(userRepository).findByEmail(NULL_EMAIL);
   }
 
   @Test
-  void
-  givenUserWithNoRoles_whenLoadUserByUsername_thenReturnUserDetailsImplWithEmptyAuthorities() {
+  void givenUserWithNoRoles_whenLoadUserByUsername_thenReturnUserDetailsImplWithEmptyAuthorities() {
     testUser.setRoles(Set.of());
     when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
 
@@ -125,7 +124,7 @@ class UserDetailsServiceImplTest {
 
   @Test
   void
-  givenExistingUser_whenLoadUserByUsername_thenReturnUserDetailsImplWithCorrectDefaultMethods() {
+      givenExistingUser_whenLoadUserByUsername_thenReturnUserDetailsImplWithCorrectDefaultMethods() {
     when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
 
     UserDetails result = userDetailsService.loadUserByUsername(TEST_EMAIL);
