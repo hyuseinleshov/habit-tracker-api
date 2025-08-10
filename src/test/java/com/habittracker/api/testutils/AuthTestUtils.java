@@ -53,4 +53,8 @@ public class AuthTestUtils {
     role.setType(RoleType.USER);
     return role;
   }
+
+  public static String generateUserNotFoundMessage(String email) {
+    return String.format("User with email %s not found", email);
+  }
 }

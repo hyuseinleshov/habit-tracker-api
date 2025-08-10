@@ -15,6 +15,14 @@ public final class AuthTestConstants {
   public static final String NEW_ACCESS_TOKEN = "new-access-token";
   public static final String NEW_REFRESH_TOKEN = "new-refresh-token";
 
+  // Role authorities
+  public static final String ROLE_USER_AUTHORITY = "ROLE_USER";
+  public static final String ROLE_ADMIN_AUTHORITY = "ROLE_ADMIN";
+
+  // Test values
+  public static final String EMPTY_EMAIL = "";
+  public static final String NULL_EMAIL = null;
+
   // JSON Strings
   public static final String EMPTY_JSON = "{}";
   public static final String MALFORMED_JSON = "{\"email\": \"test@example.com\", \"password\":}";
