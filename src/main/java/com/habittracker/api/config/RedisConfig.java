@@ -27,7 +27,7 @@ public class RedisConfig {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    
+
     // Use JSON serializer for values with configured ObjectMapper
     template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
     template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
