@@ -1,5 +1,8 @@
 package com.habittracker.api.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -20,9 +23,14 @@ public class RedisConfig {
     template.setKeySerializer(new StringRedisSerializer());
     template.setHashKeySerializer(new StringRedisSerializer());
 
-    // Use JSON serializer for values
-    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+    // Configure ObjectMapper for proper Java 8 date/time handling
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    
+    // Use JSON serializer for values with configured ObjectMapper
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
 
     template.afterPropertiesSet();
     return template;
