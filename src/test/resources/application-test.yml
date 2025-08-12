@@ -2,6 +2,11 @@ spring:
  jpa:
   hibernate:
    ddl-auto: create-drop
+ data:
+  redis:
+   host: localhost
+   port: 6379
+   timeout: 1000ms
 
 logging:
  level:
