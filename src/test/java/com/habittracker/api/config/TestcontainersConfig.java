@@ -9,26 +9,17 @@ import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestcontainersConfig {
-  private static final PostgreSQLContainer<?> postgres =
-      new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"));
 
-  private static final GenericContainer<?> redis =
-      new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
-
-  static {
-    postgres.start();
-    redis.start();
+  @Bean
+  @ServiceConnection("postgres")
+  public PostgreSQLContainer<?> postgreSQLContainer() {
+    return new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"));
   }
 
   @Bean
-  @ServiceConnection
-  public PostgreSQLContainer<?> postgresContainer() {
-    return postgres;
-  }
-
-  @Bean
-  @ServiceConnection
+  @ServiceConnection("redis")
+  @SuppressWarnings("resource")
   public GenericContainer<?> redisContainer() {
-    return redis;
+    return new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
   }
 }
