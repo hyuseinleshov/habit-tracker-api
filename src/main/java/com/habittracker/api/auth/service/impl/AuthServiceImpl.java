@@ -10,6 +10,7 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
+import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
+  private final UserProfileService userProfileService;
 
   @Override
   public AuthResponse register(RegisterRequest request) {
@@ -55,8 +57,11 @@ public class AuthServiceImpl implements AuthService {
     RoleEntity role = roleRepository.getByType(RoleType.USER);
     user.setRoles(Collections.singleton(role));
 
+
+
     log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);
+    userProfileService.createProfile(user, request.timezone());
 
     refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
     String token = jwtService.generateToken(savedUser.getEmail());

@@ -19,6 +19,8 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import java.util.Optional;
+
+import com.habittracker.api.userprofile.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,7 @@ class AuthServiceImplTest {
   @Mock private JwtService jwtService;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private RefreshTokenService refreshTokenService;
+  @Mock private UserProfileService userProfileService;
   @InjectMocks private AuthServiceImpl authService;
 
   private RegisterRequest validRegisterRequest;
@@ -92,6 +95,7 @@ class AuthServiceImplTest {
 
       verify(userRepository).save(userCaptor.capture());
       UserEntity capturedUser = userCaptor.getValue();
+      verify(userProfileService).createProfile(capturedUser, TEST_TIMEZONE);
       assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
       assertThat(capturedUser.getPassword()).isEqualTo(ENCODED_PASSWORD);
       assertThat(capturedUser.getPassword()).isNotEqualTo(TEST_PASSWORD);
