@@ -76,7 +76,7 @@ public class JwtServiceImplTest {
   public void isValid_shouldReturnTrue_whenTokenIsValid() {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
-    String validToken = JwtTestUtils.generateValidToken();
+    String validToken = JwtTestUtils.generateValidToken(TEST_SUBJECT, TEST_ISSUER, TEST_SECRET_KEY);
     assertTrue(totest.isValid(validToken));
   }
 
@@ -92,7 +92,7 @@ public class JwtServiceImplTest {
   public void extractSubject_shouldReturnSubject_whenTokenIsValid() {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
-    String token = JwtTestUtils.generateValidToken();
+    String token = JwtTestUtils.generateValidToken(TEST_SUBJECT, TEST_ISSUER, TEST_SECRET_KEY);
     Optional<String> subjectOptional = totest.extractSubject(token);
     assertTrue(subjectOptional.isPresent());
     String subject = subjectOptional.get();
