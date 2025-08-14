@@ -42,7 +42,7 @@ public class AuthControllerTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
     successRegisterResponse =
         new AuthResponse(TEST_EMAIL, JWT_TOKEN, REFRESH_TOKEN, REGISTER_SUCCESS_MESSAGE);
     successLoginResponse =
@@ -80,7 +80,7 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -91,7 +91,7 @@ public class AuthControllerTest {
 
     @Test
     void givenBlankEmail_whenRegister_thenReturnBadRequest() throws Exception {
-      AuthRequest invalidRequest = new AuthRequest("", TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest("", TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -104,7 +104,7 @@ public class AuthControllerTest {
     @ValueSource(strings = {"12345", "short", "tiny"})
     void givenShortPassword_whenRegister_thenReturnBadRequest(String shortPassword)
         throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(TEST_EMAIL, shortPassword);
+      AuthRequest invalidRequest = new AuthRequest(TEST_EMAIL, shortPassword, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -189,7 +189,7 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid", "missing-at-sign.com", "user@", "@domain.com"})
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, invalidRequest)

@@ -47,7 +47,7 @@ class AuthServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
   }
 
   @Nested
@@ -132,7 +132,7 @@ class AuthServiceImplTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid"})
     void givenInvalidEmail_whenLoggingIn_thenThrowsException(String invalidEmail) {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       when(authManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 
