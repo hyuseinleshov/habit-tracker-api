@@ -26,6 +26,10 @@ public final class AuthConstants {
   public static final String INVALID_EMAIL_MESSAGE = "Email must be valid";
   public static final String PASSWORD_REQUIRED_MESSAGE = "Password is required";
   public static final String PASSWORD_LENGTH_MESSAGE = "Password must be at least 6 characters";
+  public static final String INVALID_FIRST_NAME_MESSAGE =
+      "First name must be at most 50 characters";
+  public static final String INVALID_LAST_NAME_MESSAGE = "Last name must be at most 50 characters";
+  public static final String INVALID_AGE_MESSAGE = "Age must be between 0 and 150";
 
   private AuthConstants() {
     throw new UnsupportedOperationException("Utility class, do not instantiate");

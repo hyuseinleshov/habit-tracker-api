@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserProfileController {
 
-    private final UserProfileService userProfileService;
+  private final UserProfileService userProfileService;
 
-    @GetMapping
-    public ResponseEntity<UserProfileDTO> get(@AuthenticationPrincipal UserDetailsImpl principal){
-        return ResponseEntity.ok(userProfileService.getUserProfileById(principal.getId()));
-    }
+  @GetMapping
+  public ResponseEntity<UserProfileDTO> get(@AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(userProfileService.getUserProfileById(principal.getId()));
+  }
 }

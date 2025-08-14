@@ -1,5 +1,7 @@
 package com.habittracker.api.auth.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
+
 import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
@@ -12,6 +14,7 @@ import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.transaction.Transactional;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,10 +24,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-
-import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -56,8 +55,6 @@ public class AuthServiceImpl implements AuthService {
 
     RoleEntity role = roleRepository.getByType(RoleType.USER);
     user.setRoles(Collections.singleton(role));
-
-
 
     log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);

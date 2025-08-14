@@ -77,7 +77,8 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
-      RegisterRequest invalidRequest = new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -101,7 +102,8 @@ public class AuthControllerTest {
     @ValueSource(strings = {"12345", "short", "tiny"})
     void givenShortPassword_whenRegister_thenReturnBadRequest(String shortPassword)
         throws Exception {
-      RegisterRequest invalidRequest = new RegisterRequest(TEST_EMAIL, shortPassword, TEST_TIMEZONE);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(TEST_EMAIL, shortPassword, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -186,7 +188,8 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid", "missing-at-sign.com", "user@", "@domain.com"})
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
-      RegisterRequest invalidRequest = new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, invalidRequest)

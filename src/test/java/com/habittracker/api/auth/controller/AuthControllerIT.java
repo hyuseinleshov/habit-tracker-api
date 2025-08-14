@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.dto.RefreshTokenRequest;
+import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.testutils.AuthTestUtils;
 import com.habittracker.api.testutils.MockMvcTestUtils;
@@ -122,7 +122,8 @@ public class AuthControllerIT {
 
     @Test
     public void givenNonexistentUser_whenLogin_thenUnauthorized() throws Exception {
-      RegisterRequest request = new RegisterRequest(NONEXISTENT_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request =
+          new RegisterRequest(NONEXISTENT_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)

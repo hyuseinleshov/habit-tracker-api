@@ -3,6 +3,8 @@ package com.habittracker.api.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -14,50 +16,45 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-
 @Configuration
 public class RedisConfig {
 
+  @Bean
+  public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    RedisCacheConfiguration cacheConfig =
+        RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.of(1, ChronoUnit.HOURS))
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(
+                    new GenericJackson2JsonRedisSerializer()))
+            .disableCachingNullValues();
+    return RedisCacheManager.builder(connectionFactory).cacheDefaults(cacheConfig).build();
+  }
 
-    @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.of(1, ChronoUnit.HOURS))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
-                        new GenericJackson2JsonRedisSerializer()
-                ))
-                .disableCachingNullValues();
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(cacheConfig)
-                .build();
-    }
+  @Bean
+  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(connectionFactory);
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+    // Use String serializer for keys
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setHashKeySerializer(new StringRedisSerializer());
 
-        // Use String serializer for keys
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setHashKeySerializer(new StringRedisSerializer());
+    // Configure ObjectMapper for proper Java 8 date/time handling
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        // Configure ObjectMapper for proper Java 8 date/time handling
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    // Use JSON serializer for values with configured ObjectMapper
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
 
-        // Use JSON serializer for values with configured ObjectMapper
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+    template.afterPropertiesSet();
+    return template;
+  }
 
-        template.afterPropertiesSet();
-        return template;
-    }
-
-    @Bean
-    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
-        return new StringRedisTemplate(connectionFactory);
-    }
+  @Bean
+  public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+    return new StringRedisTemplate(connectionFactory);
+  }
 }

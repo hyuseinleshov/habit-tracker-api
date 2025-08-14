@@ -7,9 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.dto.LoginRequest;
 import com.habittracker.api.auth.dto.RegisterRequest;
-import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -18,9 +18,8 @@ import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
-import java.util.Optional;
-
 import com.habittracker.api.userprofile.service.UserProfileService;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
