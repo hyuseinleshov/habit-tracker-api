@@ -7,7 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-import com.habittracker.api.auth.dto.AuthRequest;
+import com.habittracker.api.auth.dto.LoginRequest;
+import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
@@ -43,11 +44,13 @@ class AuthServiceImplTest {
   @Mock private RefreshTokenService refreshTokenService;
   @InjectMocks private AuthServiceImpl authService;
 
-  private AuthRequest validRequest;
+  private RegisterRequest validRegisterRequest;
+  private LoginRequest validLoginRequest;
 
   @BeforeEach
   void setUp() {
-    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    validRegisterRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    validLoginRequest = new LoginRequest(TEST_EMAIL, TEST_PASSWORD);
   }
 
   @Nested
@@ -56,7 +59,7 @@ class AuthServiceImplTest {
     void givenValidCredentials_whenRegisteringNewUser_thenSuccessful() {
       setupForSuccessfulRegistration();
 
-      AuthResponse response = authService.register(validRequest);
+      AuthResponse response = authService.register(validRegisterRequest);
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
@@ -69,7 +72,7 @@ class AuthServiceImplTest {
     void givenExistingEmail_whenRegisteringUser_thenThrowsException() {
       when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(new UserEntity()));
 
-      assertThatThrownBy(() -> authService.register(validRequest))
+      assertThatThrownBy(() -> authService.register(validRegisterRequest))
           .isInstanceOf(EmailAlreadyExistsException.class)
           .hasMessage(EMAIL_EXISTS_MESSAGE);
 
@@ -85,7 +88,7 @@ class AuthServiceImplTest {
 
       ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
 
-      authService.register(validRequest);
+      authService.register(validRegisterRequest);
 
       verify(userRepository).save(userCaptor.capture());
       UserEntity capturedUser = userCaptor.getValue();
@@ -101,7 +104,7 @@ class AuthServiceImplTest {
     void givenValidCredentials_whenLoggingIn_thenSuccessful() {
       setupForSuccessfulAuthentication();
 
-      AuthResponse response = authService.login(validRequest);
+      AuthResponse response = authService.login(validLoginRequest);
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
       assertThat(response.token()).isEqualTo(JWT_TOKEN);
@@ -114,7 +117,7 @@ class AuthServiceImplTest {
       when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
           .thenThrow(new BadCredentialsException(INVALID_CREDENTIALS_ERROR));
 
-      assertThatThrownBy(() -> authService.login(validRequest))
+      assertThatThrownBy(() -> authService.login(validLoginRequest))
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage(INVALID_CREDENTIALS_ERROR);
     }
@@ -125,14 +128,14 @@ class AuthServiceImplTest {
       when(authManager.authenticate(any())).thenReturn(auth);
       when(auth.isAuthenticated()).thenReturn(false);
 
-      assertThatThrownBy(() -> authService.login(validRequest))
+      assertThatThrownBy(() -> authService.login(validLoginRequest))
           .isInstanceOf(BadCredentialsException.class);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid"})
     void givenInvalidEmail_whenLoggingIn_thenThrowsException(String invalidEmail) {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+      LoginRequest invalidRequest = new LoginRequest(invalidEmail, TEST_PASSWORD);
 
       when(authManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 

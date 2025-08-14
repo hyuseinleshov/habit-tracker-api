@@ -1,11 +1,6 @@
 package com.habittracker.api.auth.service.impl;
 
-import static com.habittracker.api.auth.utils.AuthConstants.*;
-
-import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.auth.dto.AuthResponse;
-import com.habittracker.api.auth.dto.RefreshTokenRequest;
-import com.habittracker.api.auth.dto.RefreshTokenResponse;
+import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -16,7 +11,6 @@ import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import jakarta.transaction.Transactional;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +20,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+
+import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
   private final RefreshTokenService refreshTokenService;
 
   @Override
-  public AuthResponse register(AuthRequest request) {
+  public AuthResponse register(RegisterRequest request) {
     userRepository
         .findByEmail(request.email())
         .ifPresent(
@@ -67,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public AuthResponse login(AuthRequest request) {
+  public AuthResponse login(LoginRequest request) {
     try {
       Authentication auth =
           authManager.authenticate(
