@@ -1,29 +1,36 @@
 package com.habittracker.api.userprofile.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.service.AuthService;
-import com.habittracker.api.auth.testutils.MockMvcTestUtils;
+import com.habittracker.api.auth.testutils.TestDatabaseCleaner;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
-import com.habittracker.api.security.jwt.config.JwtProperties;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
+import com.habittracker.api.userprofile.dto.UserProfileDTO;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.crypto.SecretKey;
+import java.util.stream.Stream;
 
 import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
-import static com.habittracker.api.config.constants.JwtTestConstant.AUTHORIZATION_HEADER;
-import static com.habittracker.api.config.constants.JwtTestConstant.BEARER_PREFIX;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BaseIntegrationTest
+@TestExecutionListeners(value = TestDatabaseCleaner.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public class UserProfileControllerIT {
+
+
 
     @Autowired
     private SecretKey secretKey;
@@ -36,6 +43,8 @@ public class UserProfileControllerIT {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired private ObjectMapper objectMapper;
 
     @Test
     public void test_Get_UserProfile_Return_Unauthorized_When_NotHave_Jwt() throws Exception {
@@ -52,5 +61,50 @@ public class UserProfileControllerIT {
                 .andExpect(jsonPath("$.timezone").value(TEST_TIMEZONE));
     }
 
+    @Test
+    public void test_Update_UserProfile_Return_Unauthorized_When_NotHave_Jwt() throws Exception {
+        mockMvc.perform(put("/api/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUserProfileDTOs")
+    public void test_Update_UserProfile_Return_Bad_InvalidBody(UserProfileDTO profileDTO) throws Exception {
+        authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));
+        String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+        mockMvc.perform(addJwt(jwt, put("/api/me").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(profileDTO))))
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<UserProfileDTO> invalidUserProfileDTOs() {
+        return Stream.of(
+                new UserProfileDTO("Shenol", "test", 2, "Wrong"),
+                new UserProfileDTO("Shenol", "test", -61, TEST_TIMEZONE),
+                new UserProfileDTO("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy", "Shengov", 12, TEST_TIMEZONE),
+                new UserProfileDTO("Shenol", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy", 24, TEST_TIMEZONE),
+                new UserProfileDTO("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
+                        -20, "Test")
+        );
+    }
+
+    @Test
+    public void test_Update_UserProfile_Return_ExpectedResult_WithValidUserProfile() throws Exception {
+        final String UPDATED_TIMEZONE = "Asia/Tokyo";
+        final String UPDATED_FIRST_NAME = "John";
+        final String UPDATED_LAST_NAME = "Doe";
+        final Integer UPDATED_AGE = 22;
+        UserProfileDTO userProfileDTO = new UserProfileDTO(UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
+        authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));
+        String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+        mockMvc.perform(addJwt(jwt, put("/api/me").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(userProfileDTO))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(UPDATED_FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(UPDATED_LAST_NAME))
+                .andExpect(jsonPath("$.age").value(UPDATED_AGE))
+                .andExpect(jsonPath("$.timezone").value(UPDATED_TIMEZONE));
+    }
 
 }
