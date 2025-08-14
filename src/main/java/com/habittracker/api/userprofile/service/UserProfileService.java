@@ -9,4 +9,6 @@ public interface UserProfileService {
   void createProfile(UserEntity user, String timezone);
 
   UserProfileDTO getUserProfileById(UUID id);
+
+  UserProfileDTO updateUserProfile(UUID id, UserProfileDTO userProfileDTO);
 }
