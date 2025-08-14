@@ -1,4 +1,4 @@
-package com.habittracker.api.testutils;
+package com.habittracker.api.auth.testutils;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.security.jwt.config.JwtProperties;
-import com.habittracker.api.security.jwt.utils.JwtTestUtils;
+import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.time.Duration;
@@ -65,7 +65,7 @@ public class JwtServiceImplTest {
   }
 
   @ParameterizedTest
-  @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+  @MethodSource("com.habittracker.api.security.jwt.testutils.JwtTestUtils#getInvalidTokens")
   public void isValid_shouldReturnExpectedResult_forGivenTokens(String token) {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
@@ -81,7 +81,7 @@ public class JwtServiceImplTest {
   }
 
   @ParameterizedTest
-  @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+  @MethodSource("com.habittracker.api.security.jwt.testutils.JwtTestUtils#getInvalidTokens")
   public void extractSubject_shouldReturnEmpty_forGivenTokens(String token) {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);

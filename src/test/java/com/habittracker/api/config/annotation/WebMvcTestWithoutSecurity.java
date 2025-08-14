@@ -2,7 +2,7 @@ package com.habittracker.api.config.annotation;
 
 import com.habittracker.api.config.SecurityTestConfig;
 import com.habittracker.api.security.jwt.filter.JwtFilter;
-import com.habittracker.api.testutils.MockMvcTestUtils;
+import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import java.lang.annotation.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;

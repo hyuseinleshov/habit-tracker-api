@@ -13,7 +13,7 @@ import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
-import com.habittracker.api.testutils.MockMvcTestUtils;
+import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

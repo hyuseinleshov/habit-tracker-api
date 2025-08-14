@@ -1,4 +1,4 @@
-package com.habittracker.api.testutils;
+package com.habittracker.api.auth.testutils;
 
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;

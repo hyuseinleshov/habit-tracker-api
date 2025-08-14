@@ -1,18 +1,22 @@
-package com.habittracker.api.security.jwt.utils;
-
-import static com.habittracker.api.config.constants.JwtTestConstant.*;
+package com.habittracker.api.security.jwt.testutils;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.stream.Stream;
 
+import static com.habittracker.api.config.constants.JwtTestConstant.*;
+
 public final class JwtTestUtils {
 
   private JwtTestUtils() {}
 
-  private static String generateTestToken(String issuer, Instant expiration, Instant notBefore) {
+  private static String generateTestToken(String issuer, Instant expiration, Instant notBefore, SecretKey key) {
     return Jwts.builder()
         .header()
         .type("JWT")
@@ -21,7 +25,7 @@ public final class JwtTestUtils {
         .issuer(issuer)
         .expiration(Date.from(expiration))
         .notBefore(Date.from(notBefore))
-        .signWith(TEST_SECRET_KEY)
+        .signWith(key)
         .compact();
   }
 
@@ -31,13 +35,17 @@ public final class JwtTestUtils {
     return Stream.of(
         "mailFormedJwt",
         tokenWithInvalidSignature(),
-        generateTestToken(DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now),
+        generateTestToken(DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now, TEST_SECRET_KEY),
         generateTestToken(
-            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.plus(5, ChronoUnit.MINUTES)),
+            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.plus(5, ChronoUnit.MINUTES), TEST_SECRET_KEY),
         generateTestToken(
-            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS)),
+            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS), TEST_SECRET_KEY),
         "",
         null);
+  }
+
+  public static SecretKey createKey(String secret) {
+    return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
   }
 
   private static String tokenWithInvalidSignature() {
@@ -47,6 +55,6 @@ public final class JwtTestUtils {
   public static String generateValidToken() {
     Instant now = Instant.now();
     return generateTestToken(
-        TEST_ISSUER, now.plus(5, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS));
+        TEST_ISSUER, now.plus(5, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS), TEST_SECRET_KEY);
   }
 }
