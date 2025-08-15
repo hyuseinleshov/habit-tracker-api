@@ -22,7 +22,10 @@ public class UserProfileController {
   }
 
   @PutMapping
-  public ResponseEntity<UserProfileDTO> update(@RequestBody @Valid UserProfileDTO userProfileDTO, @AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(userProfileService.updateUserProfile(principal.getId(), userProfileDTO));
+  public ResponseEntity<UserProfileDTO> update(
+      @RequestBody @Valid UserProfileDTO userProfileDTO,
+      @AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(
+        userProfileService.updateUserProfile(principal.getId(), userProfileDTO));
   }
 }

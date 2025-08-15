@@ -1,23 +1,20 @@
 package com.habittracker.api.security.jwt.testutils;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import static com.habittracker.api.config.constants.JwtTestConstant.*;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import io.jsonwebtoken.Jwts;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.stream.Stream;
-
-import static com.habittracker.api.config.constants.JwtTestConstant.*;
+import javax.crypto.SecretKey;
 
 public final class JwtTestUtils {
 
   private JwtTestUtils() {}
 
-  private static String generateTestToken(String subject, String issuer, Instant expiration, Instant notBefore, SecretKey key) {
+  private static String generateTestToken(
+      String subject, String issuer, Instant expiration, Instant notBefore, SecretKey key) {
     return Jwts.builder()
         .header()
         .type("JWT")
@@ -36,11 +33,20 @@ public final class JwtTestUtils {
     return Stream.of(
         "mailFormedJwt",
         tokenWithInvalidSignature(),
-        generateTestToken(TEST_SUBJECT,DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now, TEST_SECRET_KEY),
         generateTestToken(
-            TEST_SUBJECT,DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.plus(5, ChronoUnit.MINUTES), TEST_SECRET_KEY),
+            TEST_SUBJECT, DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now, TEST_SECRET_KEY),
         generateTestToken(
-            TEST_SUBJECT, DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS), TEST_SECRET_KEY),
+            TEST_SUBJECT,
+            DUMMY_ISSUER,
+            now.plus(20, ChronoUnit.MINUTES),
+            now.plus(5, ChronoUnit.MINUTES),
+            TEST_SECRET_KEY),
+        generateTestToken(
+            TEST_SUBJECT,
+            DUMMY_ISSUER,
+            now.plus(20, ChronoUnit.MINUTES),
+            now.minus(5, ChronoUnit.SECONDS),
+            TEST_SECRET_KEY),
         "",
         null);
   }

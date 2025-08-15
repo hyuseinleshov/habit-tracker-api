@@ -31,7 +31,8 @@ public class MockMvcTestUtils {
         post(endpoint).contentType(MediaType.APPLICATION_JSON).content(jsonContent));
   }
 
-  public static MockHttpServletRequestBuilder addJwt(String jwt, MockHttpServletRequestBuilder builder) {
+  public static MockHttpServletRequestBuilder addJwt(
+      String jwt, MockHttpServletRequestBuilder builder) {
     return builder.header(AUTHORIZATION_HEADER, BEARER_PREFIX + jwt);
   }
 }

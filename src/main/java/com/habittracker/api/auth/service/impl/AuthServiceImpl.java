@@ -14,6 +14,7 @@ import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,8 @@ public class AuthServiceImpl implements AuthService {
   private final UserProfileService userProfileService;
 
   @Override
-  public AuthResponse register(RegisterRequest request) {
+  public AuthResponse register(@Valid RegisterRequest request) {
+
     userRepository
         .findByEmail(request.email())
         .ifPresent(

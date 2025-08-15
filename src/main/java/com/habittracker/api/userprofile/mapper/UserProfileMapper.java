@@ -1,6 +1,5 @@
 package com.habittracker.api.userprofile.mapper;
 
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.userprofile.dto.UserProfileDTO;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import org.mapstruct.Mapper;

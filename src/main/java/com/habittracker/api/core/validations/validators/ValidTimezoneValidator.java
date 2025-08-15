@@ -4,8 +4,6 @@ import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.core.validations.annotations.ValidTimezone;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.time.ZoneId;
-import java.util.Set;
 
 public class ValidTimezoneValidator implements ConstraintValidator<ValidTimezone, String> {
 

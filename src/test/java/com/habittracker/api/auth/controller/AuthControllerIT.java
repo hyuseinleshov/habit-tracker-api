@@ -8,9 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.RefreshTokenRequest;
 import com.habittracker.api.auth.dto.RegisterRequest;
-import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
+import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

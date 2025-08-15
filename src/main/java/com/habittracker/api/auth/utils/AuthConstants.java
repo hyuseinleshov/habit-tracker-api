@@ -27,7 +27,6 @@ public final class AuthConstants {
   public static final String PASSWORD_REQUIRED_MESSAGE = "Password is required";
   public static final String PASSWORD_LENGTH_MESSAGE = "Password must be at least 6 characters";
 
-
   private AuthConstants() {
     throw new UnsupportedOperationException("Utility class, do not instantiate");
   }
