@@ -30,6 +30,7 @@ public final class AuthConstants {
       "First name must be at most 50 characters";
   public static final String INVALID_LAST_NAME_MESSAGE = "Last name must be at most 50 characters";
   public static final String INVALID_AGE_MESSAGE = "Age must be between 0 and 150";
+  public static final String USER_CANT_BE_NULL_MESSAGE = "User can't be null";
 
   private AuthConstants() {
     throw new UnsupportedOperationException("Utility class, do not instantiate");

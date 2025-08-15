@@ -19,7 +19,7 @@ public class TestDatabaseCleaner implements TestExecutionListener {
         jdbcTemplate.execute("SET session_replication_role = 'replica';");
 
         for (String tableName : tableNames) {
-            jdbcTemplate.execute("TRUNCATE TABLE " + tableName + " RESTART IDENTITY CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE " + tableName + " CASCADE");
         }
 
         jdbcTemplate.execute("SET session_replication_role = 'origin';");
@@ -27,7 +27,7 @@ public class TestDatabaseCleaner implements TestExecutionListener {
 
     @Override
     public void beforeTestClass(@NonNull TestContext testContext) {
-        jdbcTemplate(testContext).execute("INSERT INTO roles (id, created_at, type) VALUES (gen_random_uuid(), now(), 'USER'), (gen_random_uuid(),now(), 'ADMIN') ON CONFLICT (type) DO NOTHING");
+        jdbcTemplate(testContext).execute("INSERT INTO roles (id, created_at, type) VALUES (gen_random_uuid(), now(), 'USER'), (gen_random_uuid(),now(), 'ADMIN') ON CONFLICT DO NOTHING");
         tableNames =  jdbcTemplate(testContext).queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name != 'roles'", String.class);
 
     }
