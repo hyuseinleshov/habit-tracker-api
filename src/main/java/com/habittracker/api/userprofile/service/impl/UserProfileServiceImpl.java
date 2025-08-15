@@ -1,6 +1,7 @@
 package com.habittracker.api.userprofile.service.impl;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.userprofile.dto.UserProfileDTO;
 import com.habittracker.api.userprofile.mapper.UserProfileMapper;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
+
 @Service
 @RequiredArgsConstructor
 public class UserProfileServiceImpl implements UserProfileService {
@@ -25,7 +28,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     @Transactional
     public void createProfile(UserEntity user, String timezone) {
-        UserProfileEntity userProfile = new UserProfileEntity();
+       if(user == null) throw new IllegalArgumentException(USER_CANT_BE_NULL_MESSAGE);
+       if(!TimezoneUtils.isValidTimezone(timezone)) throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+       UserProfileEntity userProfile = new UserProfileEntity();
         userProfile.setUser(user);
         userProfile.setTimezone(timezone);
         userProfileRepository.save(userProfile);
@@ -35,14 +40,19 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Cacheable(value = "userProfiles", key = "#id")
     @Transactional(readOnly = true)
     public UserProfileDTO getUserProfileById(UUID id) {
-        return userProfileMapper.toUserProfileDTO(userProfileRepository.getReferenceById(id));
+        return userProfileMapper.toUserProfileDTO(byId(id));
+    }
+
+    private UserProfileEntity byId(UUID id) {
+        return userProfileRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(USER_PROFILE_NOT_FOUND_MESSAGE));
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "userProfiles", key = "#id")
     public UserProfileDTO updateUserProfile(UUID id, UserProfileDTO userProfileDTO) {
-        UserProfileEntity profile = userProfileRepository.getReferenceById(id);
+        UserProfileEntity profile = byId(id);
         BeanUtils.copyProperties(userProfileDTO, profile);
         UserProfileEntity updated = userProfileRepository.save(profile);
         return userProfileMapper.toUserProfileDTO(updated);

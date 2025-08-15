@@ -1,6 +1,7 @@
 package com.habittracker.api.userprofile.dto;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
+import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.habittracker.api.core.validations.annotations.ValidTimezone;
