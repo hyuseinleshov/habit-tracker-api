@@ -24,4 +24,15 @@ public class UserProfileEntity {
   private String firstName;
   private String lastName;
   private Integer age;
+
+  public UserProfileEntity(UserEntity user, String timezone, String firstName, String lastName, Integer age) {
+    this.user = user;
+    this.timezone = timezone;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.age = age;
+  }
+
+  public UserProfileEntity() {
+  }
 }
