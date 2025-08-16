@@ -1,6 +1,7 @@
 package com.habittracker.api.auth.model;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +18,10 @@ public class UserDetailsImpl implements UserDetails {
     return user.getRoles().stream()
         .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getType()))
         .collect(Collectors.toSet());
+  }
+
+  public UUID getId() {
+    return user.getId();
   }
 
   @Override

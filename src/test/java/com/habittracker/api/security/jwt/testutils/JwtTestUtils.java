@@ -1,4 +1,4 @@
-package com.habittracker.api.security.jwt.utils;
+package com.habittracker.api.security.jwt.testutils;
 
 import static com.habittracker.api.config.constants.JwtTestConstant.*;
 
@@ -7,21 +7,23 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.stream.Stream;
+import javax.crypto.SecretKey;
 
 public final class JwtTestUtils {
 
   private JwtTestUtils() {}
 
-  private static String generateTestToken(String issuer, Instant expiration, Instant notBefore) {
+  private static String generateTestToken(
+      String subject, String issuer, Instant expiration, Instant notBefore, SecretKey key) {
     return Jwts.builder()
         .header()
         .type("JWT")
         .and()
-        .subject(TEST_SUBJECT)
+        .subject(subject)
         .issuer(issuer)
         .expiration(Date.from(expiration))
         .notBefore(Date.from(notBefore))
-        .signWith(TEST_SECRET_KEY)
+        .signWith(key)
         .compact();
   }
 
@@ -31,11 +33,20 @@ public final class JwtTestUtils {
     return Stream.of(
         "mailFormedJwt",
         tokenWithInvalidSignature(),
-        generateTestToken(DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now),
         generateTestToken(
-            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.plus(5, ChronoUnit.MINUTES)),
+            TEST_SUBJECT, DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now, TEST_SECRET_KEY),
         generateTestToken(
-            DUMMY_ISSUER, now.plus(20, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS)),
+            TEST_SUBJECT,
+            DUMMY_ISSUER,
+            now.plus(20, ChronoUnit.MINUTES),
+            now.plus(5, ChronoUnit.MINUTES),
+            TEST_SECRET_KEY),
+        generateTestToken(
+            TEST_SUBJECT,
+            DUMMY_ISSUER,
+            now.plus(20, ChronoUnit.MINUTES),
+            now.minus(5, ChronoUnit.SECONDS),
+            TEST_SECRET_KEY),
         "",
         null);
   }
@@ -44,9 +55,9 @@ public final class JwtTestUtils {
     return Jwts.builder().signWith(Jwts.SIG.HS256.key().build()).compact();
   }
 
-  public static String generateValidToken() {
+  public static String generateValidToken(String subject, String issuer, SecretKey key) {
     Instant now = Instant.now();
     return generateTestToken(
-        TEST_ISSUER, now.plus(5, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS));
+        subject, issuer, now.plus(5, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS), key);
   }
 }

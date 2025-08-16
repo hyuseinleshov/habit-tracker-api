@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.security.jwt.config.JwtProperties;
-import com.habittracker.api.security.jwt.utils.JwtTestUtils;
+import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.time.Duration;
@@ -65,7 +65,7 @@ public class JwtServiceImplTest {
   }
 
   @ParameterizedTest
-  @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+  @MethodSource("com.habittracker.api.security.jwt.testutils.JwtTestUtils#getInvalidTokens")
   public void isValid_shouldReturnExpectedResult_forGivenTokens(String token) {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
@@ -76,12 +76,12 @@ public class JwtServiceImplTest {
   public void isValid_shouldReturnTrue_whenTokenIsValid() {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
-    String validToken = JwtTestUtils.generateValidToken();
+    String validToken = JwtTestUtils.generateValidToken(TEST_SUBJECT, TEST_ISSUER, TEST_SECRET_KEY);
     assertTrue(totest.isValid(validToken));
   }
 
   @ParameterizedTest
-  @MethodSource("com.habittracker.api.security.jwt.utils.JwtTestUtils#getInvalidTokens")
+  @MethodSource("com.habittracker.api.security.jwt.testutils.JwtTestUtils#getInvalidTokens")
   public void extractSubject_shouldReturnEmpty_forGivenTokens(String token) {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
@@ -92,7 +92,7 @@ public class JwtServiceImplTest {
   public void extractSubject_shouldReturnSubject_whenTokenIsValid() {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
-    String token = JwtTestUtils.generateValidToken();
+    String token = JwtTestUtils.generateValidToken(TEST_SUBJECT, TEST_ISSUER, TEST_SECRET_KEY);
     Optional<String> subjectOptional = totest.extractSubject(token);
     assertTrue(subjectOptional.isPresent());
     String subject = subjectOptional.get();

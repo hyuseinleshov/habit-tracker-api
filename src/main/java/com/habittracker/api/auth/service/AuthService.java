@@ -1,14 +1,11 @@
 package com.habittracker.api.auth.service;
 
-import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.auth.dto.AuthResponse;
-import com.habittracker.api.auth.dto.RefreshTokenRequest;
-import com.habittracker.api.auth.dto.RefreshTokenResponse;
+import com.habittracker.api.auth.dto.*;
 
 public interface AuthService {
-  AuthResponse register(AuthRequest request);
+  AuthResponse register(RegisterRequest request);
 
-  AuthResponse login(AuthRequest request);
+  AuthResponse login(LoginRequest request);
 
   RefreshTokenResponse refreshToken(RefreshTokenRequest request);
 }

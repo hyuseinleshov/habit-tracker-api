@@ -6,11 +6,11 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habittracker.api.auth.dto.AuthRequest;
 import com.habittracker.api.auth.dto.RefreshTokenRequest;
+import com.habittracker.api.auth.dto.RegisterRequest;
+import com.habittracker.api.auth.testutils.AuthTestUtils;
+import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
-import com.habittracker.api.testutils.AuthTestUtils;
-import com.habittracker.api.testutils.MockMvcTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class AuthControllerIT {
   class RegisterTests {
     @Test
     public void givenValidDetails_whenRegister_thenSuccess() throws Exception {
-      AuthRequest request = new AuthRequest(NEW_USER_EMAIL, TEST_PASSWORD);
+      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -49,7 +49,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenExistingEmail_whenRegister_thenError() throws Exception {
-      AuthRequest request = new AuthRequest(EXISTING_EMAIL, TEST_PASSWORD);
+      RegisterRequest request = new RegisterRequest(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -61,7 +61,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     public void givenInvalidEmail_whenRegister_thenValidationError(String invalidEmail)
         throws Exception {
-      AuthRequest request = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      RegisterRequest request = new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -72,7 +72,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenBlankEmail_whenRegister_thenValidationError() throws Exception {
-      AuthRequest request = new AuthRequest("", TEST_PASSWORD);
+      RegisterRequest request = new RegisterRequest("", TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -85,7 +85,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"12345", "short", "tiny"})
     public void givenShortPassword_whenRegister_thenValidationError(String shortPassword)
         throws Exception {
-      AuthRequest request = new AuthRequest(NEW_USER_EMAIL, shortPassword);
+      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, shortPassword, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -99,7 +99,7 @@ public class AuthControllerIT {
   class LoginTests {
     @Test
     public void givenValidCredentials_whenLogin_thenSuccess() throws Exception {
-      AuthRequest request = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -112,7 +112,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenInvalidPassword_whenLogin_thenUnauthorized() throws Exception {
-      AuthRequest request = new AuthRequest(TEST_EMAIL, WRONG_PASSWORD);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, WRONG_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -122,7 +122,8 @@ public class AuthControllerIT {
 
     @Test
     public void givenNonexistentUser_whenLogin_thenUnauthorized() throws Exception {
-      AuthRequest request = new AuthRequest(NONEXISTENT_EMAIL, TEST_PASSWORD);
+      RegisterRequest request =
+          new RegisterRequest(NONEXISTENT_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -134,7 +135,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"", " "})
     public void givenBlankPassword_whenLogin_thenValidationError(String blankPassword)
         throws Exception {
-      AuthRequest request = new AuthRequest(TEST_EMAIL, blankPassword);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, blankPassword, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -151,7 +152,7 @@ public class AuthControllerIT {
   class RefreshTokenTests {
     @Test
     public void givenValidRefreshToken_whenRefresh_thenSuccess() throws Exception {
-      AuthRequest loginRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
       String loginResponse =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)
@@ -171,7 +172,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenUsedRefreshToken_whenRefreshAgain_thenUnauthorized() throws Exception {
-      AuthRequest loginRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
       String loginResponse =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)

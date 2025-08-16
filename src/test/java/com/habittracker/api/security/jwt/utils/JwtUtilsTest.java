@@ -1,5 +1,7 @@
 package com.habittracker.api.security.jwt.utils;
 
+import static com.habittracker.api.config.constants.JwtTestConstant.AUTHORIZATION_HEADER;
+import static com.habittracker.api.config.constants.JwtTestConstant.BEARER_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -15,9 +17,7 @@ class JwtUtilsTest {
 
   @Mock private HttpServletRequest request;
 
-  private static final String BEARER_PREFIX = "Bearer ";
   private static final String DUMMY_JWT_TOKEN = "Test jwt token";
-  private static final String AUTHORIZATION_HEADER = "Authorization";
 
   @Test
   void shouldReturnEmptyWhenAuthorizationHeaderIsMissing() {

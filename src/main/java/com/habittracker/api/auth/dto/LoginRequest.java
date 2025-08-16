@@ -7,6 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
-public record AuthRequest(
+public record LoginRequest(
     @NotBlank(message = EMAIL_REQUIRED_MESSAGE) @Email(message = INVALID_EMAIL_MESSAGE) String email,
     @NotNull(message = PASSWORD_REQUIRED_MESSAGE) @Length(min = 6, message = PASSWORD_LENGTH_MESSAGE) String password) {}
