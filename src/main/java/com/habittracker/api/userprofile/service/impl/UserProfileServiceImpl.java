@@ -9,9 +9,8 @@ import com.habittracker.api.userprofile.mapper.UserProfileMapper;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import com.habittracker.api.userprofile.service.UserProfileService;
-import java.util.UUID;
-
 import jakarta.validation.Validator;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -56,7 +55,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   @Transactional
   @CacheEvict(value = "userProfiles", key = "#id")
   public UserProfileDTO updateUserProfile(UUID id, UserProfileDTO userProfileDTO) {
-    if(!validator.validate(userProfileDTO).isEmpty()) {
+    if (!validator.validate(userProfileDTO).isEmpty()) {
       throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
     }
     UserProfileEntity profile = byId(id);

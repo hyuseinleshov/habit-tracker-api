@@ -1,5 +1,12 @@
 package com.habittracker.api.userprofile.controller;
 
+import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
+import static com.habittracker.api.config.constants.AuthTestConstants.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.service.AuthService;
@@ -7,6 +14,7 @@ import com.habittracker.api.auth.testutils.RoleTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import com.habittracker.api.userprofile.dto.UserProfileDTO;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,15 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.crypto.SecretKey;
-
-import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
-import static com.habittracker.api.config.constants.AuthTestConstants.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BaseIntegrationTest
 @Transactional
@@ -71,7 +70,8 @@ public class UserProfileControllerIT {
   }
 
   @ParameterizedTest
-  @MethodSource("com.habittracker.api.userprofile.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
+  @MethodSource(
+      "com.habittracker.api.userprofile.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
   public void test_Update_UserProfile_Return_Bad_InvalidBody(UserProfileDTO profileDTO)
       throws Exception {
     authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));
@@ -85,8 +85,6 @@ public class UserProfileControllerIT {
                     .content(objectMapper.writeValueAsString(profileDTO))))
         .andExpect(status().isBadRequest());
   }
-
-
 
   @Test
   public void test_Update_UserProfile_Return_ExpectedResult_WithValidUserProfile()

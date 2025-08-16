@@ -25,7 +25,8 @@ public class UserProfileEntity {
   private String lastName;
   private Integer age;
 
-  public UserProfileEntity(UserEntity user, String timezone, String firstName, String lastName, Integer age) {
+  public UserProfileEntity(
+      UserEntity user, String timezone, String firstName, String lastName, Integer age) {
     this.user = user;
     this.timezone = timezone;
     this.firstName = firstName;
@@ -33,6 +34,5 @@ public class UserProfileEntity {
     this.age = age;
   }
 
-  public UserProfileEntity() {
-  }
+  public UserProfileEntity() {}
 }
