@@ -1,5 +1,6 @@
 package com.habittracker.api.core.validations.annotations;
 
+import static com.habittracker.api.userprofile.constants.UserProfileConstants.INVALID_TIMEZONE_MESSAGE;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -16,7 +17,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = ValidTimezoneValidator.class)
 public @interface ValidTimezone {
 
-  String message() default "Invalid timezone";
+  String message() default INVALID_TIMEZONE_MESSAGE;
 
   Class<?>[] groups() default {};
 
