@@ -1,6 +1,7 @@
 package com.habittracker.api.auth.model;
 
 import com.habittracker.api.core.entity.BaseEntity;
+import com.habittracker.api.userprofile.model.UserProfileEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,4 +26,7 @@ public class UserEntity extends BaseEntity {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<RoleEntity> roles = new HashSet<>();
+
+  @OneToOne(mappedBy = "user")
+  private UserProfileEntity userProfile;
 }

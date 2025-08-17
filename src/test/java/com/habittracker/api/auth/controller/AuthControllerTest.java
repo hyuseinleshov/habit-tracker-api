@@ -9,14 +9,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.auth.dto.AuthResponse;
-import com.habittracker.api.auth.dto.RefreshTokenRequest;
-import com.habittracker.api.auth.dto.RefreshTokenResponse;
+import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.service.AuthService;
+import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
-import com.habittracker.api.testutils.MockMvcTestUtils;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,13 +33,13 @@ public class AuthControllerTest {
   @Autowired private ObjectMapper objectMapper;
   @MockitoBean private AuthService authService;
 
-  private AuthRequest validRequest;
+  private RegisterRequest validRequest;
   private AuthResponse successRegisterResponse;
   private AuthResponse successLoginResponse;
 
   @BeforeEach
   void setUp() {
-    validRequest = new AuthRequest(TEST_EMAIL, TEST_PASSWORD);
+    validRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
     successRegisterResponse =
         new AuthResponse(TEST_EMAIL, JWT_TOKEN, REFRESH_TOKEN, REGISTER_SUCCESS_MESSAGE);
     successLoginResponse =
@@ -53,7 +50,7 @@ public class AuthControllerTest {
   class RegisterTests {
     @Test
     void givenValidRequest_whenRegister_thenReturnCreatedWithToken() throws Exception {
-      when(authService.register(any(AuthRequest.class))).thenReturn(successRegisterResponse);
+      when(authService.register(any(RegisterRequest.class))).thenReturn(successRegisterResponse);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, validRequest)
@@ -63,12 +60,12 @@ public class AuthControllerTest {
           .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
 
-      verify(authService).register(any(AuthRequest.class));
+      verify(authService).register(any(RegisterRequest.class));
     }
 
     @Test
     void givenExistingEmail_whenRegister_thenReturnConflict() throws Exception {
-      when(authService.register(any(AuthRequest.class)))
+      when(authService.register(any(RegisterRequest.class)))
           .thenThrow(new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE));
 
       mockMvcTestUtils
@@ -80,7 +77,8 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -91,7 +89,7 @@ public class AuthControllerTest {
 
     @Test
     void givenBlankEmail_whenRegister_thenReturnBadRequest() throws Exception {
-      AuthRequest invalidRequest = new AuthRequest("", TEST_PASSWORD);
+      RegisterRequest invalidRequest = new RegisterRequest("", TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -104,7 +102,8 @@ public class AuthControllerTest {
     @ValueSource(strings = {"12345", "short", "tiny"})
     void givenShortPassword_whenRegister_thenReturnBadRequest(String shortPassword)
         throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(TEST_EMAIL, shortPassword);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(TEST_EMAIL, shortPassword, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -144,7 +143,7 @@ public class AuthControllerTest {
   class LoginTests {
     @Test
     void givenValidCredentials_whenLogin_thenReturnOkWithToken() throws Exception {
-      when(authService.login(any(AuthRequest.class))).thenReturn(successLoginResponse);
+      when(authService.login(any(LoginRequest.class))).thenReturn(successLoginResponse);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, validRequest)
@@ -154,12 +153,12 @@ public class AuthControllerTest {
           .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
 
-      verify(authService).login(any(AuthRequest.class));
+      verify(authService).login(any(LoginRequest.class));
     }
 
     @Test
     void givenInvalidCredentials_whenLogin_thenReturnUnauthorized() throws Exception {
-      when(authService.login(any(AuthRequest.class)))
+      when(authService.login(any(LoginRequest.class)))
           .thenThrow(new BadCredentialsException(INVALID_CREDENTIALS_ERROR));
 
       mockMvcTestUtils
@@ -189,7 +188,8 @@ public class AuthControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"invalid", "missing-at-sign.com", "user@", "@domain.com"})
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
-      AuthRequest invalidRequest = new AuthRequest(invalidEmail, TEST_PASSWORD);
+      RegisterRequest invalidRequest =
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, invalidRequest)

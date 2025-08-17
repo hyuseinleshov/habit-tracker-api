@@ -8,4 +8,6 @@ public class JwtTestConstant {
   public static final SecretKey TEST_SECRET_KEY = Jwts.SIG.HS256.key().build();
   public static final String TEST_ISSUER = "test-issuer";
   public static final String TEST_SUBJECT = "test-subject";
+  public static final String BEARER_PREFIX = "Bearer ";
+  public static final String AUTHORIZATION_HEADER = "Authorization";
 }

@@ -1,5 +1,7 @@
-package com.habittracker.api.testutils;
+package com.habittracker.api.auth.testutils;
 
+import static com.habittracker.api.config.constants.JwtTestConstant.AUTHORIZATION_HEADER;
+import static com.habittracker.api.config.constants.JwtTestConstant.BEARER_PREFIX;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @Component
 public class MockMvcTestUtils {
@@ -26,5 +29,10 @@ public class MockMvcTestUtils {
   public ResultActions performPostRequest(String endpoint, String jsonContent) throws Exception {
     return mockMvc.perform(
         post(endpoint).contentType(MediaType.APPLICATION_JSON).content(jsonContent));
+  }
+
+  public static MockHttpServletRequestBuilder addJwt(
+      String jwt, MockHttpServletRequestBuilder builder) {
+    return builder.header(AUTHORIZATION_HEADER, BEARER_PREFIX + jwt);
   }
 }

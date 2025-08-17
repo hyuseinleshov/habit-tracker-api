@@ -2,10 +2,7 @@ package com.habittracker.api.auth.service.impl;
 
 import static com.habittracker.api.auth.utils.AuthConstants.*;
 
-import com.habittracker.api.auth.dto.AuthRequest;
-import com.habittracker.api.auth.dto.AuthResponse;
-import com.habittracker.api.auth.dto.RefreshTokenRequest;
-import com.habittracker.api.auth.dto.RefreshTokenResponse;
+import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -15,7 +12,9 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
+import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +38,11 @@ public class AuthServiceImpl implements AuthService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
+  private final UserProfileService userProfileService;
 
   @Override
-  public AuthResponse register(AuthRequest request) {
+  public AuthResponse register(@Valid RegisterRequest request) {
+
     userRepository
         .findByEmail(request.email())
         .ifPresent(
@@ -59,6 +60,7 @@ public class AuthServiceImpl implements AuthService {
 
     log.info("Registering new user: {}", request.email());
     UserEntity savedUser = userRepository.save(user);
+    userProfileService.createProfile(user, request.timezone());
 
     refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
     String token = jwtService.generateToken(savedUser.getEmail());
@@ -67,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public AuthResponse login(AuthRequest request) {
+  public AuthResponse login(LoginRequest request) {
     try {
       Authentication auth =
           authManager.authenticate(
