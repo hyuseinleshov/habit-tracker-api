@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.userprofile.dto.UserProfileDTO;
+import com.habittracker.api.userprofile.exception.UserProfileNotFoundException;
 import com.habittracker.api.userprofile.mapper.UserProfileMapper;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
@@ -96,7 +97,7 @@ class UserProfileServiceImplTest {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> toTest.getUserProfileById(TEST_ID))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(UserProfileNotFoundException.class)
         .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
   }
 
@@ -129,7 +130,7 @@ class UserProfileServiceImplTest {
   void test_UpdateProfile_Should_Throw_With_Invalid_Id() {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> toTest.updateUserProfile(TEST_ID, TEST_USER_PROFILE_DTO))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(UserProfileNotFoundException.class)
         .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
   }
 

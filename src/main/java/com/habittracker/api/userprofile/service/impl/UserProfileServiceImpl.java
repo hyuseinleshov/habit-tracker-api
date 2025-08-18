@@ -5,6 +5,7 @@ import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.userprofile.dto.UserProfileDTO;
+import com.habittracker.api.userprofile.exception.UserProfileNotFoundException;
 import com.habittracker.api.userprofile.mapper.UserProfileMapper;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
@@ -48,7 +49,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   private UserProfileEntity byId(UUID id) {
     return userProfileRepository
         .findById(id)
-        .orElseThrow(() -> new IllegalArgumentException(USER_PROFILE_NOT_FOUND_MESSAGE));
+        .orElseThrow(UserProfileNotFoundException::new);
   }
 
   @Override
