@@ -5,9 +5,15 @@ import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
+
+import java.time.Instant;
 import java.util.Set;
+
+import com.habittracker.api.userprofile.model.UserProfileEntity;
+import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class AuthTestUtils {
@@ -15,14 +21,16 @@ public class AuthTestUtils {
   private final PasswordEncoder passwordEncoder;
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
+  private final UserProfileRepository userProfileRepository;
 
   public AuthTestUtils(
-      PasswordEncoder passwordEncoder,
-      RoleRepository roleRepository,
-      UserRepository userRepository) {
+          PasswordEncoder passwordEncoder,
+          RoleRepository roleRepository,
+          UserRepository userRepository, UserProfileRepository userProfileRepository) {
     this.passwordEncoder = passwordEncoder;
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
+      this.userProfileRepository = userProfileRepository;
   }
 
   public RoleEntity getUserRoleFromRepository() {
@@ -34,10 +42,20 @@ public class AuthTestUtils {
     return roleRepository.getByType(RoleType.USER);
   }
 
-  public void createAndSaveUser(String email, String password) {
+  public UserEntity createAndSaveUser(String email, String password, String timezone) {
     RoleEntity role = getUserRoleFromRepository();
     UserEntity user = createUser(email, passwordEncoder.encode(password), role);
-    userRepository.save(user);
+    UserProfileEntity userProfileEntity = new UserProfileEntity();
+    userProfileEntity.setTimezone(timezone);
+    userProfileEntity.setUser(user);
+    user.setUserProfile(userProfileEntity);
+    userProfileRepository.save(userProfileEntity);
+    return user;
+  }
+
+  @Transactional
+  public void softDelete(UserEntity userEntity) {
+    userEntity.setDeletedAt(Instant.now());
   }
 
   public static UserEntity createUser(String email, String password, RoleEntity role) {

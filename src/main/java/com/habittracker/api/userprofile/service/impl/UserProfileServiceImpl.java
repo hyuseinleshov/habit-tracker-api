@@ -31,14 +31,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 
   @Override
   @Transactional
-  public void createProfile(UserEntity user, String timezone) {
+  public UserProfileEntity createProfile(UserEntity user, String timezone) {
     if (user == null) throw new IllegalArgumentException(USER_CANT_BE_NULL_MESSAGE);
     if (!TimezoneUtils.isValidTimezone(timezone))
       throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
     UserProfileEntity userProfile = new UserProfileEntity();
     userProfile.setUser(user);
     userProfile.setTimezone(timezone);
-    userProfileRepository.save(userProfile);
+    return userProfile;
   }
 
   @Override
