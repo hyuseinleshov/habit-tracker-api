@@ -3,8 +3,7 @@ package com.habittracker.api.userprofile.service.impl;
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUser;
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUserRole;
 import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +16,8 @@ import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -156,5 +157,29 @@ class UserProfileServiceImplTest {
     assertThat(updatedProfile.getLastName()).isEqualTo(UPDATED_LAST_NAME);
     assertThat(updatedProfile.getAge()).isEqualTo(UPDATED_AGE);
     assertThat(updatedProfile.getTimezone()).isEqualTo(UPDATED_TIMEZONE);
+  }
+
+  @Test
+  void test_DeleteUser_Should_Throw_When_Id_Is_Invalid() {
+    when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> toTest.delete(TEST_ID))
+            .isInstanceOf(UserProfileNotFoundException.class)
+            .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
+  }
+
+  @Test
+  void test_Delete_Should_Delete_UserProfile_WithValid_Id() {
+    when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.of(TEST_PROFILE));
+
+    Instant before = Instant.now();
+    toTest.delete(TEST_ID);
+    Instant after = Instant.now();
+
+    assertThat(TEST_PROFILE.getUser().isDeleted()).isTrue();
+    assertThat(TEST_PROFILE.getUser().getDeletedAt()).isInstanceOf(Instant.class)
+                    .isBetween(before.minusSeconds(1), after.plusSeconds(1));
+
+    verify(userProfileRepository).findById(TEST_ID);
   }
 }

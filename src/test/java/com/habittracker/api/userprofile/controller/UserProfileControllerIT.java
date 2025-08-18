@@ -2,8 +2,7 @@ package com.habittracker.api.userprofile.controller;
 
 import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,5 +108,19 @@ public class UserProfileControllerIT {
         .andExpect(jsonPath("$.lastName").value(UPDATED_LAST_NAME))
         .andExpect(jsonPath("$.age").value(UPDATED_AGE))
         .andExpect(jsonPath("$.timezone").value(UPDATED_TIMEZONE));
+  }
+
+  @Test
+  public void test_Delete_UserProfile_Return_Unauthorized_When_NotHave_Jwt() throws Exception {
+    mockMvc.perform(delete("/api/me")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  public void test_Delete_UserProfile_DeleteUser_WithValid_JWT() throws Exception {
+    authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));
+    String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+    mockMvc
+            .perform(addJwt(jwt, delete("/api/me")))
+            .andExpect(status().isNoContent());
   }
 }
