@@ -14,7 +14,8 @@ public final class AuthConstants {
 
   // Exception and error messages
   public static final String EMAIL_EXISTS_MESSAGE = "Email already exists";
-  public static final String EMAIL_DELETED_MESSAGE = "This email was previously used by a deleted account. You can register with it again after %s";
+  public static final String EMAIL_DELETED_MESSAGE =
+      "This email was previously used by a deleted account. You can register with it again after %s";
   public static final String INVALID_CREDENTIALS_ERROR = "Invalid email or password";
   public static final String INVALID_CREDENTIALS_MESSAGE = "Invalid username or password";
   public static final String VALIDATION_FAILED_MESSAGE =

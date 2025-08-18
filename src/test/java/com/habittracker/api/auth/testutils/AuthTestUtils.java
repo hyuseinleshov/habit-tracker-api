@@ -5,12 +5,10 @@ import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
-
-import java.time.Instant;
-import java.util.Set;
-
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
+import java.time.Instant;
+import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +22,14 @@ public class AuthTestUtils {
   private final UserProfileRepository userProfileRepository;
 
   public AuthTestUtils(
-          PasswordEncoder passwordEncoder,
-          RoleRepository roleRepository,
-          UserRepository userRepository, UserProfileRepository userProfileRepository) {
+      PasswordEncoder passwordEncoder,
+      RoleRepository roleRepository,
+      UserRepository userRepository,
+      UserProfileRepository userProfileRepository) {
     this.passwordEncoder = passwordEncoder;
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
-      this.userProfileRepository = userProfileRepository;
+    this.userProfileRepository = userProfileRepository;
   }
 
   public RoleEntity getUserRoleFromRepository() {

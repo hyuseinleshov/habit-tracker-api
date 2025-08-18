@@ -19,7 +19,6 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.userprofile.service.UserProfileService;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

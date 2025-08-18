@@ -25,8 +25,7 @@ public class UserProfileController {
   public ResponseEntity<UserProfileDTO> update(
       @RequestBody @Valid UserProfileDTO userProfileDTO,
       @AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(
-        userProfileService.update(principal.getId(), userProfileDTO));
+    return ResponseEntity.ok(userProfileService.update(principal.getId(), userProfileDTO));
   }
 
   @DeleteMapping

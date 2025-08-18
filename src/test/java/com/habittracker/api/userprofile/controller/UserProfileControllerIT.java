@@ -119,8 +119,6 @@ public class UserProfileControllerIT {
   public void test_Delete_UserProfile_DeleteUser_WithValid_JWT() throws Exception {
     authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));
     String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
-    mockMvc
-            .perform(addJwt(jwt, delete("/api/me")))
-            .andExpect(status().isNoContent());
+    mockMvc.perform(addJwt(jwt, delete("/api/me"))).andExpect(status().isNoContent());
   }
 }

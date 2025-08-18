@@ -1,6 +1,5 @@
 package com.habittracker.api.auth.model;
 
-import com.habittracker.api.core.entity.BaseEntity;
 import com.habittracker.api.core.entity.DeletableEntity;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.userprofile.model.UserProfileEntity;

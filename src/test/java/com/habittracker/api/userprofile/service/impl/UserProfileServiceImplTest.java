@@ -16,7 +16,6 @@ import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -164,8 +163,8 @@ class UserProfileServiceImplTest {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> toTest.delete(TEST_ID))
-            .isInstanceOf(UserProfileNotFoundException.class)
-            .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
+        .isInstanceOf(UserProfileNotFoundException.class)
+        .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
   }
 
   @Test
@@ -177,8 +176,9 @@ class UserProfileServiceImplTest {
     Instant after = Instant.now();
 
     assertThat(TEST_PROFILE.getUser().isDeleted()).isTrue();
-    assertThat(TEST_PROFILE.getUser().getDeletedAt()).isInstanceOf(Instant.class)
-                    .isBetween(before.minusSeconds(1), after.plusSeconds(1));
+    assertThat(TEST_PROFILE.getUser().getDeletedAt())
+        .isInstanceOf(Instant.class)
+        .isBetween(before.minusSeconds(1), after.plusSeconds(1));
 
     verify(userProfileRepository).findById(TEST_ID);
   }

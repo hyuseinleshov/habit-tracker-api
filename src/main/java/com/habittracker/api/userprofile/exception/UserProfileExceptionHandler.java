@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UserProfileExceptionHandler {
 
-    @ExceptionHandler(UserProfileNotFoundException.class)
-    public ResponseEntity<ApiError> handleUserProfileNotFoundException(UserProfileNotFoundException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status)
-                .body(ApiError.from(ex.getMessage(), status, request));
-    }
+  @ExceptionHandler(UserProfileNotFoundException.class)
+  public ResponseEntity<ApiError> handleUserProfileNotFoundException(
+      UserProfileNotFoundException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
 }

@@ -11,7 +11,6 @@ import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.validation.Validator;
-
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +48,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   }
 
   private UserProfileEntity byId(UUID id) {
-    return userProfileRepository
-        .findById(id)
-        .orElseThrow(UserProfileNotFoundException::new);
+    return userProfileRepository.findById(id).orElseThrow(UserProfileNotFoundException::new);
   }
 
   @Override
