@@ -84,10 +84,7 @@ class UserProfileServiceImplTest {
 
   @Test
   void test_CreateProfile_Should_Return_ExpectedResult_WithValid_Arguments() {
-    toTest.createProfile(TEST_USER, TEST_TIMEZONE);
-    ArgumentCaptor<UserProfileEntity> captor = ArgumentCaptor.forClass(UserProfileEntity.class);
-    verify(userProfileRepository).save(captor.capture());
-    UserProfileEntity savedProfile = captor.getValue();
+    UserProfileEntity savedProfile = toTest.createProfile(TEST_USER, TEST_TIMEZONE);
     assertThat(savedProfile.getTimezone()).isEqualTo(TEST_TIMEZONE);
     assertThat(TEST_USER).isEqualTo(savedProfile.getUser());
   }
