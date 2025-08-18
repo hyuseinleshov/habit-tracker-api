@@ -2,6 +2,7 @@ package com.habittracker.api.habit.model;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.entity.BaseEntity;
+import com.habittracker.api.core.entity.DeletableEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Table(name = "habits")
 @Getter
 @Setter
-public class HabitEntity extends BaseEntity {
+public class HabitEntity extends DeletableEntity {
 
   @ManyToOne
   @JoinColumn(nullable = false)

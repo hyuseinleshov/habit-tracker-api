@@ -1,6 +1,7 @@
 package com.habittracker.api.auth.model;
 
 import com.habittracker.api.core.entity.BaseEntity;
+import com.habittracker.api.core.entity.DeletableEntity;
 import com.habittracker.api.userprofile.model.UserProfileEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @Table(name = "users")
 @Getter
 @Setter
-public class UserEntity extends BaseEntity {
+public class UserEntity extends DeletableEntity {
 
   @Column(unique = true, nullable = false)
   private String email;
