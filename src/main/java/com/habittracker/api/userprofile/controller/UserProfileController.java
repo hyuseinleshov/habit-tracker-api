@@ -18,7 +18,7 @@ public class UserProfileController {
 
   @GetMapping
   public ResponseEntity<UserProfileDTO> get(@AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(userProfileService.getUserProfileById(principal.getId()));
+    return ResponseEntity.ok(userProfileService.getById(principal.getId()));
   }
 
   @PutMapping
@@ -26,6 +26,12 @@ public class UserProfileController {
       @RequestBody @Valid UserProfileDTO userProfileDTO,
       @AuthenticationPrincipal UserDetailsImpl principal) {
     return ResponseEntity.ok(
-        userProfileService.updateUserProfile(principal.getId(), userProfileDTO));
+        userProfileService.update(principal.getId(), userProfileDTO));
+  }
+
+  @DeleteMapping
+  public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetailsImpl principal) {
+    userProfileService.delete(principal.getId());
+    return ResponseEntity.noContent().build();
   }
 }

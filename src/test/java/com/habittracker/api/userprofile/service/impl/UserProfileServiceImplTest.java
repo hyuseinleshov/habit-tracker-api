@@ -96,7 +96,7 @@ class UserProfileServiceImplTest {
   void test_GetUserProfileById_Should_Throw_When_Id_Is_Invalid() {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> toTest.getUserProfileById(TEST_ID))
+    assertThatThrownBy(() -> toTest.getById(TEST_ID))
         .isInstanceOf(UserProfileNotFoundException.class)
         .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
   }
@@ -106,7 +106,7 @@ class UserProfileServiceImplTest {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.of(TEST_PROFILE));
     when(profileMapper.toUserProfileDTO(TEST_PROFILE)).thenReturn(TEST_USER_PROFILE_DTO);
 
-    UserProfileDTO profile = toTest.getUserProfileById(TEST_ID);
+    UserProfileDTO profile = toTest.getById(TEST_ID);
 
     verify(userProfileRepository).findById(TEST_ID);
     verify(profileMapper).toUserProfileDTO(TEST_PROFILE);
@@ -121,7 +121,7 @@ class UserProfileServiceImplTest {
   @MethodSource(
       "com.habittracker.api.userprofile.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
   void test_UpdateProfile_Should_Throw_WithInvalid_ProfileData(UserProfileDTO profile) {
-    assertThatThrownBy(() -> toTest.updateUserProfile(TEST_ID, profile))
+    assertThatThrownBy(() -> toTest.update(TEST_ID, profile))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
   }
@@ -129,7 +129,7 @@ class UserProfileServiceImplTest {
   @Test
   void test_UpdateProfile_Should_Throw_With_Invalid_Id() {
     when(userProfileRepository.findById(TEST_ID)).thenReturn(Optional.empty());
-    assertThatThrownBy(() -> toTest.updateUserProfile(TEST_ID, TEST_USER_PROFILE_DTO))
+    assertThatThrownBy(() -> toTest.update(TEST_ID, TEST_USER_PROFILE_DTO))
         .isInstanceOf(UserProfileNotFoundException.class)
         .hasMessage(USER_PROFILE_NOT_FOUND_MESSAGE);
   }
@@ -145,7 +145,7 @@ class UserProfileServiceImplTest {
     UserProfileDTO updatedProfileDTO =
         new UserProfileDTO(UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
 
-    toTest.updateUserProfile(TEST_ID, updatedProfileDTO);
+    toTest.update(TEST_ID, updatedProfileDTO);
 
     ArgumentCaptor<UserProfileEntity> captor = ArgumentCaptor.forClass(UserProfileEntity.class);
 

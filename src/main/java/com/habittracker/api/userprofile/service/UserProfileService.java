@@ -8,7 +8,9 @@ public interface UserProfileService {
 
   void createProfile(UserEntity user, String timezone);
 
-  UserProfileDTO getUserProfileById(UUID id);
+  UserProfileDTO getById(UUID id);
 
-  UserProfileDTO updateUserProfile(UUID id, UserProfileDTO userProfileDTO);
+  UserProfileDTO update(UUID id, UserProfileDTO userProfileDTO);
+
+  void delete(UUID uuid);
 }

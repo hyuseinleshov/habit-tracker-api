@@ -11,6 +11,8 @@ import com.habittracker.api.userprofile.model.UserProfileEntity;
 import com.habittracker.api.userprofile.repository.UserProfileRepository;
 import com.habittracker.api.userprofile.service.UserProfileService;
 import jakarta.validation.Validator;
+
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -42,7 +44,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   @Override
   @Cacheable(value = "userProfiles", key = "#id")
   @Transactional(readOnly = true)
-  public UserProfileDTO getUserProfileById(UUID id) {
+  public UserProfileDTO getById(UUID id) {
     return userProfileMapper.toUserProfileDTO(byId(id));
   }
 
@@ -55,7 +57,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   @Override
   @Transactional
   @CacheEvict(value = "userProfiles", key = "#id")
-  public UserProfileDTO updateUserProfile(UUID id, UserProfileDTO userProfileDTO) {
+  public UserProfileDTO update(UUID id, UserProfileDTO userProfileDTO) {
     if (!validator.validate(userProfileDTO).isEmpty()) {
       throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
     }
@@ -63,5 +65,14 @@ public class UserProfileServiceImpl implements UserProfileService {
     BeanUtils.copyProperties(userProfileDTO, profile);
     UserProfileEntity updated = userProfileRepository.save(profile);
     return userProfileMapper.toUserProfileDTO(updated);
+  }
+
+  @Override
+  @Transactional
+  public void delete(UUID id) {
+    UserEntity toDelete = byId(id).getUser();
+    Instant now = Instant.now();
+    toDelete.setDeletedAt(now);
+    toDelete.getHabits().forEach(h -> h.setDeletedAt(now));
   }
 }
