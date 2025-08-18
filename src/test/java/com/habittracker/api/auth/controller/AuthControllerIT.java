@@ -53,8 +53,8 @@ public class AuthControllerIT {
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
-          .andExpect(status().isConflict())
-          .andExpect(jsonPath("$.message", is(EMAIL_EXISTS_MESSAGE)));
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errors.email", is(EMAIL_EXISTS_MESSAGE)));
     }
 
     @ParameterizedTest

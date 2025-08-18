@@ -3,7 +3,6 @@ package com.habittracker.api.auth.service.impl;
 import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 import com.habittracker.api.auth.dto.*;
-import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
@@ -42,14 +41,6 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponse register(@Valid RegisterRequest request) {
-
-    userRepository
-        .findByEmail(request.email())
-        .ifPresent(
-            user -> {
-              log.error("Email {} already exists", request.email());
-              throw new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE);
-            });
 
     UserEntity user = new UserEntity();
     user.setEmail(request.email());
