@@ -1,4 +1,4 @@
-package com.habittracker.api.userprofile.constants;
+package com.habittracker.api.user.constants;
 
 public final class UserProfileConstants {
 
@@ -10,6 +10,6 @@ public final class UserProfileConstants {
   public static final String INVALID_AGE_MESSAGE = "Age must be between 0 and 150";
   public static final String INVALID_TIMEZONE_MESSAGE = "Invalid timezone";
   public static final String USER_CANT_BE_NULL_MESSAGE = "User can't be null";
-  public static final String USER_PROFILE_NOT_FOUND_MESSAGE = "User profile is not found";
+  public static final String USER_NOT_FOUND_MESSAGE = "User profile is not found";
   public static final String USER_PROFILE_DATA_NOT_VALID_MESSAGE = "Invalid user profile data";
 }

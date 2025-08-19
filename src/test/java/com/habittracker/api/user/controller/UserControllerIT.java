@@ -1,4 +1,4 @@
-package com.habittracker.api.userprofile.controller;
+package com.habittracker.api.user.controller;
 
 import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
@@ -12,7 +12,7 @@ import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.testutils.RoleTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
-import com.habittracker.api.userprofile.dto.UserProfileDTO;
+import com.habittracker.api.user.dto.UserProfileDTO;
 import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @BaseIntegrationTest
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class UserProfileControllerIT {
+public class UserControllerIT {
 
   @Autowired private SecretKey secretKey;
 
@@ -69,8 +69,7 @@ public class UserProfileControllerIT {
   }
 
   @ParameterizedTest
-  @MethodSource(
-      "com.habittracker.api.userprofile.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
+  @MethodSource("com.habittracker.api.user.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
   public void test_Update_UserProfile_Return_Bad_InvalidBody(UserProfileDTO profileDTO)
       throws Exception {
     authService.register(new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE));

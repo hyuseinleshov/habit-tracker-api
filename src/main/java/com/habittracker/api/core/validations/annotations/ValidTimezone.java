@@ -1,6 +1,6 @@
 package com.habittracker.api.core.validations.annotations;
 
-import static com.habittracker.api.userprofile.constants.UserProfileConstants.INVALID_TIMEZONE_MESSAGE;
+import static com.habittracker.api.user.constants.UserProfileConstants.INVALID_TIMEZONE_MESSAGE;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

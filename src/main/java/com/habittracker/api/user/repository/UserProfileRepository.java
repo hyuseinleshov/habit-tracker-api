@@ -1,6 +1,6 @@
-package com.habittracker.api.userprofile.repository;
+package com.habittracker.api.user.repository;
 
-import com.habittracker.api.userprofile.model.UserProfileEntity;
+import com.habittracker.api.user.model.UserProfileEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 

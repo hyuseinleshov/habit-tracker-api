@@ -1,17 +1,16 @@
-package com.habittracker.api.userprofile.service.impl;
+package com.habittracker.api.user.service.impl;
 
-import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
+import static com.habittracker.api.user.constants.UserProfileConstants.*;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.utils.TimezoneUtils;
-import com.habittracker.api.userprofile.dto.UserProfileDTO;
-import com.habittracker.api.userprofile.exception.UserProfileNotFoundException;
-import com.habittracker.api.userprofile.mapper.UserProfileMapper;
-import com.habittracker.api.userprofile.model.UserProfileEntity;
-import com.habittracker.api.userprofile.repository.UserProfileRepository;
-import com.habittracker.api.userprofile.service.UserProfileService;
+import com.habittracker.api.user.dto.UserProfileDTO;
+import com.habittracker.api.user.exception.UserNotFoundException;
+import com.habittracker.api.user.mapper.UserProfileMapper;
+import com.habittracker.api.user.model.UserProfileEntity;
+import com.habittracker.api.user.repository.UserProfileRepository;
+import com.habittracker.api.user.service.UserProfileService;
 import jakarta.validation.Validator;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -48,7 +47,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   }
 
   private UserProfileEntity byId(UUID id) {
-    return userProfileRepository.findById(id).orElseThrow(UserProfileNotFoundException::new);
+    return userProfileRepository.findById(id).orElseThrow(UserNotFoundException::new);
   }
 
   @Override
@@ -62,14 +61,5 @@ public class UserProfileServiceImpl implements UserProfileService {
     BeanUtils.copyProperties(userProfileDTO, profile);
     UserProfileEntity updated = userProfileRepository.save(profile);
     return userProfileMapper.toUserProfileDTO(updated);
-  }
-
-  @Override
-  @Transactional
-  public void delete(UUID id) {
-    UserEntity toDelete = byId(id).getUser();
-    Instant now = Instant.now();
-    toDelete.setDeletedAt(now);
-    toDelete.getHabits().forEach(h -> h.setDeletedAt(now));
   }
 }

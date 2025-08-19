@@ -1,6 +1,6 @@
-package com.habittracker.api.userprofile.dto;
+package com.habittracker.api.user.dto;
 
-import static com.habittracker.api.userprofile.constants.UserProfileConstants.*;
+import static com.habittracker.api.user.constants.UserProfileConstants.*;
 
 import com.habittracker.api.core.validations.annotations.ValidTimezone;
 import jakarta.validation.constraints.Max;

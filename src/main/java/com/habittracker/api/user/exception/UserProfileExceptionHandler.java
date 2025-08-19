@@ -1,4 +1,4 @@
-package com.habittracker.api.userprofile.exception;
+package com.habittracker.api.user.exception;
 
 import com.habittracker.api.core.exception.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UserProfileExceptionHandler {
 
-  @ExceptionHandler(UserProfileNotFoundException.class)
+  @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ApiError> handleUserProfileNotFoundException(
-      UserProfileNotFoundException ex, HttpServletRequest request) {
+      UserNotFoundException ex, HttpServletRequest request) {
     HttpStatus status = HttpStatus.NOT_FOUND;
     return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
   }

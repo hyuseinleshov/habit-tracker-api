@@ -1,8 +1,8 @@
-package com.habittracker.api.userprofile.testutils;
+package com.habittracker.api.user.testutils;
 
 import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
 
-import com.habittracker.api.userprofile.dto.UserProfileDTO;
+import com.habittracker.api.user.dto.UserProfileDTO;
 import java.util.stream.Stream;
 
 public final class UserProfileTestUtils {

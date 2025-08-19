@@ -1,8 +1,9 @@
-package com.habittracker.api.userprofile.controller;
+package com.habittracker.api.user.controller;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
-import com.habittracker.api.userprofile.dto.UserProfileDTO;
-import com.habittracker.api.userprofile.service.UserProfileService;
+import com.habittracker.api.user.dto.UserProfileDTO;
+import com.habittracker.api.user.service.UserProfileService;
+import com.habittracker.api.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/me")
 @RequiredArgsConstructor
-public class UserProfileController {
+public class UserController {
 
   private final UserProfileService userProfileService;
+  private final UserService userService;
 
   @GetMapping
   public ResponseEntity<UserProfileDTO> get(@AuthenticationPrincipal UserDetailsImpl principal) {
@@ -30,7 +32,7 @@ public class UserProfileController {
 
   @DeleteMapping
   public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetailsImpl principal) {
-    userProfileService.delete(principal.getId());
+    userService.delete(principal.getId());
     return ResponseEntity.noContent().build();
   }
 }

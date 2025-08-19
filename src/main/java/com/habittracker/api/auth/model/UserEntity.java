@@ -2,7 +2,7 @@ package com.habittracker.api.auth.model;
 
 import com.habittracker.api.core.entity.DeletableEntity;
 import com.habittracker.api.habit.model.HabitEntity;
-import com.habittracker.api.userprofile.model.UserProfileEntity;
+import com.habittracker.api.user.model.UserProfileEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;

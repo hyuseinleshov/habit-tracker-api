@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     log.debug("Authenticating user with email: {}", email);
     return userRepository
-        .findByEmailAndDeletedIsFalse(email)
+        .findByEmailAndDeletedAtIsNull(email)
         .map(UserDetailsImpl::new)
         .orElseThrow(
             () -> {

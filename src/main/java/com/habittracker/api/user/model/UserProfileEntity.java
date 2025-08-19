@@ -1,4 +1,4 @@
-package com.habittracker.api.userprofile.model;
+package com.habittracker.api.user.model;
 
 import com.habittracker.api.auth.model.UserEntity;
 import jakarta.persistence.*;
