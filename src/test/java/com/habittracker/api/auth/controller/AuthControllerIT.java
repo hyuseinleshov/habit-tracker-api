@@ -66,7 +66,7 @@ public class AuthControllerIT {
     @Test
     public void givenDeletedEmail_whenRegister_thenError() throws Exception {
       RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-      authTestUtils.softDelete(testUser);
+      authTestUtils.softDelete(testUser, Instant.now());
       String deleteDate =
           Instant.now()
               .atZone(ZoneId.of(TEST_TIMEZONE))

@@ -53,8 +53,8 @@ public class AuthTestUtils {
   }
 
   @Transactional
-  public void softDelete(UserEntity userEntity) {
-    userEntity.setDeletedAt(Instant.now());
+  public void softDelete(UserEntity userEntity, Instant deletedAt) {
+    userEntity.setDeletedAt(deletedAt);
   }
 
   public static UserEntity createUser(String email, String password, RoleEntity role) {
