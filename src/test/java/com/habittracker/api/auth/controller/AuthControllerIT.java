@@ -14,6 +14,7 @@ import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import java.time.Instant;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -31,6 +33,9 @@ public class AuthControllerIT {
   @Autowired private AuthTestUtils authTestUtils;
   @Autowired private MockMvcTestUtils mockMvcTestUtils;
   private UserEntity testUser;
+
+  @Value("${user.cleanup.retention-period}")
+  private Period userRetention;
 
   @BeforeEach
   public void setUp() {
@@ -70,7 +75,7 @@ public class AuthControllerIT {
       String deleteDate =
           Instant.now()
               .atZone(ZoneId.of(TEST_TIMEZONE))
-              .plusMonths(1)
+              .plus(userRetention)
               .format(DateTimeFormatter.ISO_LOCAL_DATE);
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
