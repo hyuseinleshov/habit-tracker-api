@@ -28,6 +28,9 @@ public class UserCleanupScheduler {
   public void cleanupUsers() {
     Instant deleteBefore = Instant.now().minus(userRetention);
     long deletedCount = userRepository.deleteAllByDeletedAtBefore(deleteBefore);
-    log.info("Cleaned up {} user(s) that were deleted more than {} days ago.", deletedCount, userRetention.getDays());
+    log.info(
+        "Cleaned up {} user(s) that were deleted more than {} days ago.",
+        deletedCount,
+        userRetention.getDays());
   }
 }
