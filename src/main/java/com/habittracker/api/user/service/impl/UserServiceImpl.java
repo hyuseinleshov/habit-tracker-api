@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void delete(UUID id) {
     UserEntity toDelete = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    log.debug("Soft delete user with email {}", toDelete.getEmail());
     Instant now = Instant.now();
     toDelete.setDeletedAt(now);
     toDelete.getHabits().forEach(h -> h.setDeletedAt(now));
