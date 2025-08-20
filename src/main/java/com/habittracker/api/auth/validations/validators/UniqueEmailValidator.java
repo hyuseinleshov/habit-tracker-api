@@ -7,16 +7,24 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.validations.annotations.UniqueEmail;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, String> {
 
   private final UserRepository userRepository;
+  private final Period userRetention;
+
+  public UniqueEmailValidator(
+      UserRepository userRepository,
+      @Value("${user.cleanup.retention-period}") Period userRetention) {
+    this.userRepository = userRepository;
+    this.userRetention = userRetention;
+  }
 
   @Override
   public boolean isValid(String email, ConstraintValidatorContext context) {
@@ -31,7 +39,7 @@ public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, St
                 String deleteDate =
                     u.getDeletedAt()
                         .atZone(ZoneId.of(u.getUserProfile().getTimezone()))
-                        .plusMonths(1)
+                        .plus(userRetention)
                         .format(DateTimeFormatter.ISO_LOCAL_DATE);
                 String message = String.format(EMAIL_DELETED_MESSAGE, deleteDate);
                 setMessage(message, context);
