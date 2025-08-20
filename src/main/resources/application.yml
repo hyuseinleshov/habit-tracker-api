@@ -20,6 +20,12 @@ spring:
      max-idle: 8
      min-idle: 0
 
+user:
+ cleanup:
+  retention-period: ${USER_RETENTION_PERIOD:P14D}
+  schedule:
+   cron: ${USER_CLEANUP_SCHEDULE_CRON:0 0 0 * * *}
+
 jwt:
  issuer: ${JWT_ISSUER:jwt-issuer}
  expiration-duration: ${JWT_EXPIRATION_DURATION:PT10M}

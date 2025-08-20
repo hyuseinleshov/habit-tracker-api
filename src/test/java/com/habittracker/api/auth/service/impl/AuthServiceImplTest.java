@@ -11,7 +11,6 @@ import static org.mockito.Mockito.*;
 import com.habittracker.api.auth.dto.AuthResponse;
 import com.habittracker.api.auth.dto.LoginRequest;
 import com.habittracker.api.auth.dto.RegisterRequest;
-import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
@@ -19,8 +18,7 @@ import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
-import com.habittracker.api.userprofile.service.UserProfileService;
-import java.util.Optional;
+import com.habittracker.api.user.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -72,19 +70,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void givenExistingEmail_whenRegisteringUser_thenThrowsException() {
-      when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(new UserEntity()));
-
-      assertThatThrownBy(() -> authService.register(validRegisterRequest))
-          .isInstanceOf(EmailAlreadyExistsException.class)
-          .hasMessage(EMAIL_EXISTS_MESSAGE);
-
-      verify(userRepository, never()).save(any());
-    }
-
-    @Test
     void givenValidCredentials_whenRegisteringUser_thenSavesUserWithCorrectProperties() {
-      when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
       when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
       when(roleRepository.getByType(RoleType.USER)).thenReturn(createUserRole());
       when(userRepository.save(any())).thenReturn(new UserEntity());
@@ -149,7 +135,6 @@ class AuthServiceImplTest {
   }
 
   private void setupForSuccessfulRegistration() {
-    when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
     when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
 
     RoleEntity role = createUserRole();

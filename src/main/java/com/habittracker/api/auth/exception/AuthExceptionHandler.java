@@ -19,11 +19,4 @@ public class AuthExceptionHandler {
     return ResponseEntity.status(status)
         .body(ApiError.from(INVALID_CREDENTIALS_MESSAGE, status, request));
   }
-
-  @ExceptionHandler(EmailAlreadyExistsException.class)
-  public ResponseEntity<ApiError> handleEmailAlreadyExistsException(
-      EmailAlreadyExistsException ex, HttpServletRequest request) {
-    HttpStatus status = HttpStatus.CONFLICT;
-    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-  }
 }

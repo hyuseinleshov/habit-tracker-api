@@ -3,7 +3,6 @@ package com.habittracker.api.auth.service.impl;
 import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 import com.habittracker.api.auth.dto.*;
-import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
@@ -12,7 +11,8 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
-import com.habittracker.api.userprofile.service.UserProfileService;
+import com.habittracker.api.user.model.UserProfileEntity;
+import com.habittracker.api.user.service.UserProfileService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.Collections;
@@ -43,14 +43,6 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public AuthResponse register(@Valid RegisterRequest request) {
 
-    userRepository
-        .findByEmail(request.email())
-        .ifPresent(
-            user -> {
-              log.error("Email {} already exists", request.email());
-              throw new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE);
-            });
-
     UserEntity user = new UserEntity();
     user.setEmail(request.email());
     user.setPassword(passwordEncoder.encode(request.password()));
@@ -59,8 +51,9 @@ public class AuthServiceImpl implements AuthService {
     user.setRoles(Collections.singleton(role));
 
     log.info("Registering new user: {}", request.email());
+    UserProfileEntity profile = userProfileService.createProfile(user, request.timezone());
+    user.setUserProfile(profile);
     UserEntity savedUser = userRepository.save(user);
-    userProfileService.createProfile(user, request.timezone());
 
     refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
     String token = jwtService.generateToken(savedUser.getEmail());
