@@ -208,8 +208,9 @@ The Habit Tracker API follows RESTful principles and uses JSON for request/respo
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/me` | Get the current user's profile |
-| PUT | `/api/me` | Update the current user's profile |
+| GET    | `/api/me` | Get the current user's profile |
+| PUT    | `/api/me` | Update the current user's profile |
+| DELETE | `/api/me` | Soft delete current user |
 
 > **Note**: The API evolves with the application. For complete and up-to-date API documentation:
 >
