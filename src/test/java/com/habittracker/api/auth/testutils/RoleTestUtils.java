@@ -15,6 +15,7 @@ public class RoleTestUtils {
   }
 
   public void setUpRoles() {
+    if (roleRepository.count() != 0) return;
     RoleEntity userRole = new RoleEntity();
     userRole.setType(RoleType.USER);
 

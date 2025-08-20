@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.*;
-import com.habittracker.api.auth.exception.EmailAlreadyExistsException;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
@@ -32,6 +32,7 @@ public class AuthControllerTest {
   @Autowired private MockMvcTestUtils mockMvcTestUtils;
   @Autowired private ObjectMapper objectMapper;
   @MockitoBean private AuthService authService;
+  @MockitoBean private UserRepository userRepository;
 
   private RegisterRequest validRequest;
   private AuthResponse successRegisterResponse;
@@ -61,17 +62,6 @@ public class AuthControllerTest {
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
 
       verify(authService).register(any(RegisterRequest.class));
-    }
-
-    @Test
-    void givenExistingEmail_whenRegister_thenReturnConflict() throws Exception {
-      when(authService.register(any(RegisterRequest.class)))
-          .thenThrow(new EmailAlreadyExistsException(EMAIL_EXISTS_MESSAGE));
-
-      mockMvcTestUtils
-          .performPostRequest(REGISTER_ENDPOINT, validRequest)
-          .andExpect(status().isConflict())
-          .andExpect(jsonPath("$.message", is(EMAIL_EXISTS_MESSAGE)));
     }
 
     @ParameterizedTest

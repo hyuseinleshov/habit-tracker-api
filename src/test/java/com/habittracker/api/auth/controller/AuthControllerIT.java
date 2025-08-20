@@ -3,20 +3,27 @@ package com.habittracker.api.auth.controller;
 import static com.habittracker.api.auth.utils.AuthConstants.*;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.dto.RefreshTokenRequest;
 import com.habittracker.api.auth.dto.RegisterRequest;
+import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
+import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -25,11 +32,15 @@ public class AuthControllerIT {
 
   @Autowired private AuthTestUtils authTestUtils;
   @Autowired private MockMvcTestUtils mockMvcTestUtils;
+  private UserEntity testUser;
+
+  @Value("${user.cleanup.retention-period}")
+  private Period userRetention;
 
   @BeforeEach
   public void setUp() {
-    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD);
-    authTestUtils.createAndSaveUser(EXISTING_EMAIL, TEST_PASSWORD);
+    testUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    authTestUtils.createAndSaveUser(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
   }
 
   @Nested
@@ -53,8 +64,24 @@ public class AuthControllerIT {
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
-          .andExpect(status().isConflict())
-          .andExpect(jsonPath("$.message", is(EMAIL_EXISTS_MESSAGE)));
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errors.email", is(EMAIL_EXISTS_MESSAGE)));
+    }
+
+    @Test
+    public void givenDeletedEmail_whenRegister_thenError() throws Exception {
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      authTestUtils.softDelete(testUser, Instant.now());
+      String deleteDate =
+          Instant.now()
+              .atZone(ZoneId.of(TEST_TIMEZONE))
+              .plus(userRetention)
+              .format(DateTimeFormatter.ISO_LOCAL_DATE);
+      mockMvcTestUtils
+          .performPostRequest(REGISTER_ENDPOINT, request)
+          .andExpect(status().isBadRequest())
+          .andExpect(
+              jsonPath("$.errors.email", is(String.format(EMAIL_DELETED_MESSAGE, deleteDate))));
     }
 
     @ParameterizedTest

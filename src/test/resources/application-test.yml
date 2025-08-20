@@ -12,6 +12,9 @@ logging:
  level:
   root: DEBUG
 
+user:
+ retention-period: P14D
+
 jwt:
  secret: 9NuCXLE3rpz8/lPYeIag9xs7wyRHKat8exvUmlm01S8=
  issuer: test-issuer
