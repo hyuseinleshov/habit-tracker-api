@@ -227,7 +227,7 @@ The project follows a clean architecture approach with domain-driven design prin
 
 - **auth**: Authentication and authorization functionality
 - **security**: Security configuration and JWT implementation
-- **userprofile**: User profile management
+- **user**: User profile management
 - **habit**: Core habit tracking functionality
 - **checkin**: Check-in recording and tracking
 - **core**: Shared utilities and base components
