@@ -9,6 +9,8 @@ import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.service.UserProfileService;
 import java.util.Arrays;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
   private final UserProfileService userProfileService;
 
   @Override
+  @Transactional
   public void run(String... args) {
     log.info("Initializing data for dev profile");
     initRoles();
