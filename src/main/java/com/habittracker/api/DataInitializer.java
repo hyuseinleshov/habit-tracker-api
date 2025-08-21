@@ -1,19 +1,18 @@
 package com.habittracker.api;
 
+import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
+import com.habittracker.api.auth.service.AuthService;
+import com.habittracker.api.user.dto.UserProfileDTO;
+import com.habittracker.api.user.service.UserProfileService;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,7 +23,8 @@ public class DataInitializer implements CommandLineRunner {
 
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
+  private final AuthService authService;
+  private final UserProfileService userProfileService;
 
   @Override
   public void run(String... args) {
@@ -53,27 +53,48 @@ public class DataInitializer implements CommandLineRunner {
       log.info("Initializing users");
 
       // Create regular user
-      RoleEntity userRole = roleRepository.getByType(RoleType.USER);
+      RegisterRequest userRequest = new RegisterRequest(
+        "user@example.com",
+        "user123",
+        "UTC"
+      );
+      authService.register(userRequest);
+      log.info("Created regular user: {}", userRequest.email());
 
-      UserEntity regularUser = new UserEntity();
-      regularUser.setEmail("user@example.com");
-      regularUser.setPassword(passwordEncoder.encode("user123"));
-      regularUser.setRoles(Collections.singleton(userRole));
-      userRepository.save(regularUser);
-      log.info("Created regular user: {}", regularUser.getEmail());
+      // Set profile info for regular user
+      userRepository.findByEmail(userRequest.email()).ifPresent(user -> {
+        if (user.getUserProfile() != null) {
+          UserProfileDTO userProfileDTO = new UserProfileDTO(
+            "Regular",
+            "User",
+            25,
+            "UTC"
+          );
+          userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+        }
+      });
 
       // Create admin user
-      RoleEntity adminRole = roleRepository.getByType(RoleType.ADMIN);
+      RegisterRequest adminRequest = new RegisterRequest(
+        "admin@example.com",
+        "admin123",
+        "UTC"
+      );
+      authService.register(adminRequest);
+      log.info("Created admin user: {}", adminRequest.email());
 
-      UserEntity adminUser = new UserEntity();
-      adminUser.setEmail("admin@example.com");
-      adminUser.setPassword(passwordEncoder.encode("admin123"));
-      Set<RoleEntity> adminRoles = new HashSet<>();
-      adminRoles.add(userRole);
-      adminRoles.add(adminRole);
-      adminUser.setRoles(adminRoles);
-      userRepository.save(adminUser);
-      log.info("Created admin user: {}", adminUser.getEmail());
+      // Set profile info for admin user
+      userRepository.findByEmail(adminRequest.email()).ifPresent(user -> {
+        if (user.getUserProfile() != null) {
+          UserProfileDTO userProfileDTO = new UserProfileDTO(
+            "Admin",
+            "User",
+            30,
+            "UTC"
+          );
+          userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+        }
+      });
     }
   }
 }
