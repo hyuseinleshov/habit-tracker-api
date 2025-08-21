@@ -53,48 +53,36 @@ public class DataInitializer implements CommandLineRunner {
       log.info("Initializing users");
 
       // Create regular user
-      RegisterRequest userRequest = new RegisterRequest(
-        "user@example.com",
-        "user123",
-        "UTC"
-      );
+      RegisterRequest userRequest = new RegisterRequest("user@example.com", "user123", "UTC");
       authService.register(userRequest);
       log.info("Created regular user: {}", userRequest.email());
 
       // Set profile info for regular user
-      userRepository.findByEmail(userRequest.email()).ifPresent(user -> {
-        if (user.getUserProfile() != null) {
-          UserProfileDTO userProfileDTO = new UserProfileDTO(
-            "Regular",
-            "User",
-            25,
-            "UTC"
-          );
-          userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
-        }
-      });
+      userRepository
+          .findByEmail(userRequest.email())
+          .ifPresent(
+              user -> {
+                if (user.getUserProfile() != null) {
+                  UserProfileDTO userProfileDTO = new UserProfileDTO("Regular", "User", 25, "UTC");
+                  userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+                }
+              });
 
       // Create admin user
-      RegisterRequest adminRequest = new RegisterRequest(
-        "admin@example.com",
-        "admin123",
-        "UTC"
-      );
+      RegisterRequest adminRequest = new RegisterRequest("admin@example.com", "admin123", "UTC");
       authService.register(adminRequest);
       log.info("Created admin user: {}", adminRequest.email());
 
       // Set profile info for admin user
-      userRepository.findByEmail(adminRequest.email()).ifPresent(user -> {
-        if (user.getUserProfile() != null) {
-          UserProfileDTO userProfileDTO = new UserProfileDTO(
-            "Admin",
-            "User",
-            30,
-            "UTC"
-          );
-          userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
-        }
-      });
+      userRepository
+          .findByEmail(adminRequest.email())
+          .ifPresent(
+              user -> {
+                if (user.getUserProfile() != null) {
+                  UserProfileDTO userProfileDTO = new UserProfileDTO("Admin", "User", 30, "UTC");
+                  userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+                }
+              });
     }
   }
 }
