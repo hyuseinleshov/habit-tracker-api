@@ -8,9 +8,8 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.service.UserProfileService;
-import java.util.Arrays;
-
 import jakarta.transaction.Transactional;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
