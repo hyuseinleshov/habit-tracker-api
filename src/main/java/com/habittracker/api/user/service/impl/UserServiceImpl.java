@@ -1,17 +1,17 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.user.constants.UserProfileConstants.EMAIL_CANT_BE_NULL_MESSAGE;
+import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.user.service.UserService;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-
-import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public void updateEmail(UserEntity user, String email) {
     checkForNullUser(user);
+    if (email == null) throw new IllegalArgumentException(EMAIL_CANT_BE_NULL_MESSAGE);
     refreshTokenService.revokeAllRefreshTokensForUser(user.getEmail());
     user.setEmail(email);
     userRepository.save(user);

@@ -8,7 +8,6 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.repository.UserProfileRepository;
 import java.time.Instant;
-import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,11 +1,18 @@
 package com.habittracker.api.user.controller;
 
+import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
+import static com.habittracker.api.config.constants.AuthTestConstants.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.RoleTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -16,14 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.crypto.SecretKey;
-
-import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
-import static com.habittracker.api.config.constants.AuthTestConstants.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BaseIntegrationTest
 @Transactional
@@ -60,7 +59,8 @@ public class UserControllerIT {
     mockMvc
         .perform(addJwt(jwt, get("/api/me")))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.timezone").value(TEST_TIMEZONE));
+        .andExpect(jsonPath("$.timezone").value(TEST_TIMEZONE))
+        .andExpect(jsonPath("$.email").value(TEST_EMAIL));
   }
 
   @Test
