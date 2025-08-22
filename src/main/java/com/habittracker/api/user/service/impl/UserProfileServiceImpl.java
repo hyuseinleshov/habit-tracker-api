@@ -1,17 +1,13 @@
 package com.habittracker.api.user.service.impl;
 
-import static com.habittracker.api.user.constants.UserProfileConstants.*;
-
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
-import com.habittracker.api.user.exception.UserNotFoundException;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
-import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserProfileService;
+import com.habittracker.api.user.service.UserService;
 import jakarta.validation.Validator;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,11 +15,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.habittracker.api.user.constants.UserProfileConstants.*;
+
 @Service
 @RequiredArgsConstructor
 public class UserProfileServiceImpl implements UserProfileService {
 
-  private final UserProfileRepository userProfileRepository;
+  private final UserService userService;
   private final UserProfileMapper userProfileMapper;
   private final Validator validator;
 
@@ -40,26 +38,24 @@ public class UserProfileServiceImpl implements UserProfileService {
   }
 
   @Override
-  @Cacheable(value = "userProfiles", key = "#id")
+  @Cacheable(value = "userProfiles", key = "#userProfile.id")
   @Transactional(readOnly = true)
-  public UserProfileDTO getById(UUID id) {
-    return userProfileMapper.toUserProfileDTO(byId(id));
+  public UserProfileDTO toProfileDTO(UserProfileEntity userProfile) {
+    return userProfileMapper.toUserProfileDTO(userProfile);
   }
 
-  private UserProfileEntity byId(UUID id) {
-    return userProfileRepository.findById(id).orElseThrow(UserNotFoundException::new);
-  }
 
   @Override
   @Transactional
-  @CacheEvict(value = "userProfiles", key = "#id")
-  public UserProfileDTO update(UUID id, UserProfileDTO userProfileDTO) {
+  @CacheEvict(value = "userProfiles", key = "#profile.id")
+  public UserProfileDTO update(UserProfileEntity profile, UserProfileDTO userProfileDTO) {
     if (!validator.validate(userProfileDTO).isEmpty()) {
       throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
     }
-    UserProfileEntity profile = byId(id);
+    if(userProfileDTO.email() != null) {
+      userService.updateEmail(profile.getUser(), userProfileDTO.email());
+    }
     BeanUtils.copyProperties(userProfileDTO, profile);
-    UserProfileEntity updated = userProfileRepository.save(profile);
-    return userProfileMapper.toUserProfileDTO(updated);
+    return userProfileMapper.toUserProfileDTO(profile);
   }
 }

@@ -1,13 +1,16 @@
 package com.habittracker.api.auth.model;
 
+import com.habittracker.api.user.model.UserProfileEntity;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+@Getter
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
@@ -22,6 +25,10 @@ public class UserDetailsImpl implements UserDetails {
 
   public UUID getId() {
     return user.getId();
+  }
+
+  public UserProfileEntity getProfile() {
+    return user.getUserProfile();
   }
 
   @Override

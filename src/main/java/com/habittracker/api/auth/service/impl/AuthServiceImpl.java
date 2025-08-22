@@ -1,7 +1,5 @@
 package com.habittracker.api.auth.service.impl;
 
-import static com.habittracker.api.auth.utils.AuthConstants.*;
-
 import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -15,7 +13,6 @@ import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.service.UserProfileService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     user.setPassword(passwordEncoder.encode(request.password()));
 
     RoleEntity role = roleRepository.getByType(RoleType.USER);
-    user.setRoles(Collections.singleton(role));
+    user.getRoles().add(role);
 
     log.info("Registering new user: {}", request.email());
     UserProfileEntity profile = userProfileService.createProfile(user, request.timezone());

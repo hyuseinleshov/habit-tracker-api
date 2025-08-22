@@ -11,13 +11,22 @@ public final class UserProfileTestUtils {
 
   private static Stream<UserProfileDTO> invalidUserProfileDTOs() {
     return Stream.of(
-        new UserProfileDTO("Shenol", "test", 2, "Wrong"),
-        new UserProfileDTO("Shenol", "test", -61, TEST_TIMEZONE),
+        new UserProfileDTO("ethe", "Shenol", "test", 2, "Wrong"),
+        new UserProfileDTO("messi", "Shenol", "test", -61, TEST_TIMEZONE),
         new UserProfileDTO(
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy", "Shengov", 12, TEST_TIMEZONE),
+            "test@gmail.com",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
+            "Shengov",
+            12,
+            TEST_TIMEZONE),
         new UserProfileDTO(
-            "Shenol", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy", 24, TEST_TIMEZONE),
+            "example@gmail.com",
+            "Shenol",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
+            24,
+            TEST_TIMEZONE),
         new UserProfileDTO(
+            "eeee",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
             -20,

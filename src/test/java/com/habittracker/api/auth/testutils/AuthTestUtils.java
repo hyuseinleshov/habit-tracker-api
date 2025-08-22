@@ -48,8 +48,7 @@ public class AuthTestUtils {
     userProfileEntity.setTimezone(timezone);
     userProfileEntity.setUser(user);
     user.setUserProfile(userProfileEntity);
-    userProfileRepository.save(userProfileEntity);
-    return user;
+    return userRepository.save(user);
   }
 
   @Transactional
@@ -61,7 +60,7 @@ public class AuthTestUtils {
     UserEntity user = new UserEntity();
     user.setEmail(email);
     user.setPassword(password);
-    user.setRoles(Set.of(role));
+    user.getRoles().add(role);
     return user;
   }
 

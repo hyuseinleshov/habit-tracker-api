@@ -1,8 +1,10 @@
 package com.habittracker.api.user.service;
 
-import java.util.UUID;
+import com.habittracker.api.auth.model.UserEntity;
 
 public interface UserService {
 
-  void delete(UUID id);
+  void updateEmail(UserEntity user, String email);
+
+  void delete(UserEntity user);
 }
