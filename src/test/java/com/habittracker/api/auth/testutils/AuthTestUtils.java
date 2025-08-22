@@ -6,9 +6,7 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.user.model.UserProfileEntity;
-import com.habittracker.api.user.repository.UserProfileRepository;
 import java.time.Instant;
-import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,17 +17,14 @@ public class AuthTestUtils {
   private final PasswordEncoder passwordEncoder;
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
-  private final UserProfileRepository userProfileRepository;
 
   public AuthTestUtils(
       PasswordEncoder passwordEncoder,
       RoleRepository roleRepository,
-      UserRepository userRepository,
-      UserProfileRepository userProfileRepository) {
+      UserRepository userRepository) {
     this.passwordEncoder = passwordEncoder;
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
-    this.userProfileRepository = userProfileRepository;
   }
 
   public RoleEntity getUserRoleFromRepository() {

@@ -1,5 +1,7 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.user.constants.UserProfileConstants.*;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
@@ -14,8 +16,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.habittracker.api.user.constants.UserProfileConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +44,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     return userProfileMapper.toUserProfileDTO(userProfile);
   }
 
-
   @Override
   @Transactional
   @CacheEvict(value = "userProfiles", key = "#profile.id")
@@ -52,7 +51,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     if (!validator.validate(userProfileDTO).isEmpty()) {
       throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
     }
-    if(userProfileDTO.email() != null) {
+    if (userProfileDTO.email() != null) {
       userService.updateEmail(profile.getUser(), userProfileDTO.email());
     }
     BeanUtils.copyProperties(userProfileDTO, profile);

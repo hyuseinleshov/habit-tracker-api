@@ -1,5 +1,7 @@
 package com.habittracker.api.auth.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthConstants.*;
+
 import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
@@ -22,8 +24,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import static com.habittracker.api.auth.utils.AuthConstants.*;
 
 @Service
 @RequiredArgsConstructor

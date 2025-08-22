@@ -1,13 +1,21 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.auth.testutils.AuthTestUtils.createUser;
+import static com.habittracker.api.auth.testutils.AuthTestUtils.createUserRole;
+import static com.habittracker.api.user.constants.UserProfileConstants.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
-import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,16 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.HashSet;
-
-import static com.habittracker.api.auth.testutils.AuthTestUtils.createUser;
-import static com.habittracker.api.auth.testutils.AuthTestUtils.createUserRole;
-import static com.habittracker.api.user.constants.UserProfileConstants.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserProfileServiceImplTest {
@@ -42,7 +40,6 @@ class UserProfileServiceImplTest {
   private static final UserProfileEntity TEST_PROFILE =
       new UserProfileEntity(TEST_USER, TEST_TIMEZONE, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE);
 
-  @Mock private UserProfileRepository userProfileRepository;
   @Mock private UserProfileMapper profileMapper;
   @Mock private UserService userService;
   @Mock private Validator validator;
