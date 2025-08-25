@@ -65,8 +65,9 @@ public class DataInitializer implements CommandLineRunner {
           .ifPresent(
               user -> {
                 if (user.getUserProfile() != null) {
-                  UserProfileDTO userProfileDTO = new UserProfileDTO("Regular", "User", 25, "UTC");
-                  userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+                  UserProfileDTO userProfileDTO =
+                      new UserProfileDTO(null, "Regular", "User", 25, "UTC");
+                  userProfileService.update(user.getUserProfile(), userProfileDTO);
                 }
               });
 
@@ -81,8 +82,9 @@ public class DataInitializer implements CommandLineRunner {
           .ifPresent(
               user -> {
                 if (user.getUserProfile() != null) {
-                  UserProfileDTO userProfileDTO = new UserProfileDTO("Admin", "User", 30, "UTC");
-                  userProfileService.update(user.getUserProfile().getId(), userProfileDTO);
+                  UserProfileDTO userProfileDTO =
+                      new UserProfileDTO(null, "Admin", "User", 30, "UTC");
+                  userProfileService.update(user.getUserProfile(), userProfileDTO);
                 }
               });
     }

@@ -20,19 +20,19 @@ public class UserController {
 
   @GetMapping
   public ResponseEntity<UserProfileDTO> get(@AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(userProfileService.getById(principal.getId()));
+    return ResponseEntity.ok(userProfileService.toProfileDTO(principal.getProfile()));
   }
 
   @PutMapping
   public ResponseEntity<UserProfileDTO> update(
       @RequestBody @Valid UserProfileDTO userProfileDTO,
       @AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(userProfileService.update(principal.getId(), userProfileDTO));
+    return ResponseEntity.ok(userProfileService.update(principal.getProfile(), userProfileDTO));
   }
 
   @DeleteMapping
   public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetailsImpl principal) {
-    userService.delete(principal.getId());
+    userService.delete(principal.getUser());
     return ResponseEntity.noContent().build();
   }
 }
