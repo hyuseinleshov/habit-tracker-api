@@ -1,25 +1,11 @@
----
-name: "Task ✍️"
-about: Internal development task (feature, bugfix, test, etc.)
-labels: task
----
-
 ## Task Description
-Briefly describe what needs to be done.
+Brief description of what needs to be implemented.
 
-### Type
-- [ ] Feature
-- [ ] Bugfix
-- [ ] Refactor
-- [ ] Test
-- [ ] Documentation
-- [ ] CI/CD
+## Acceptance Criteria
+- [ ] Main functionality works as expected
+- [ ] Proper error handling implemented
+- [ ] Tests added
+- [ ] Documentation updated (if needed)
 
-### Checklist
-- [ ] Code implemented
-- [ ] Tests (if needed)
-- [ ] Committed and pushed
-- [ ] PR opened and reviewed
-
-### Additional Notes
-Add any extra info, links, or related issues.
+## Technical Notes
+Any specific technical considerations or constraints.

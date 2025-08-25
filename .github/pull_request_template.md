@@ -8,13 +8,19 @@ Brief explanation of what this PR does and why.
 ## Issue
 Closes #<issue_number>  
 or  
-Related to #<issue_number> (if it doesn't fully close it)
+Related to #<issue_number>
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing completed
+- [ ] All tests pass
 
 ## Checklist
-- [ ] Tests added/updated
-- [ ] Documentation updated
 - [ ] Code builds successfully
+- [ ] Documentation updated (if needed)
+- [ ] No breaking changes (or documented)
 - [ ] Code review requested
 
 ## Notes for Reviewers
-Any extra context for the reviewer (e.g. why a decision was made, edge cases to test, etc.)
+Any extra context for the reviewer (testing approach, design decisions, areas of focus, etc.)
