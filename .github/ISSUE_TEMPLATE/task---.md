@@ -1,3 +1,10 @@
+---
+name: "Task ✍️"
+about: Internal development task (feature, bugfix, test, etc.)
+labels: task
+
+---
+
 ## Task Description
 Brief description of what needs to be implemented.
 
