@@ -4,6 +4,7 @@ import static com.habittracker.api.auth.utils.AuthConstants.MALFORMED_JSON_MESSA
 import static com.habittracker.api.auth.utils.AuthConstants.VALIDATION_FAILED_MESSAGE;
 import static com.habittracker.api.core.exception.ExceptionConstants.*;
 
+import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,6 +76,13 @@ public class GlobalExceptionHandler {
     HttpStatus status = HttpStatus.NOT_FOUND;
     return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
   }
+
+    @ExceptionHandler(HabitNameAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
+            HabitNameAlreadyExistsException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+    }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleIllegalArgumentException(HttpServletRequest request) {
