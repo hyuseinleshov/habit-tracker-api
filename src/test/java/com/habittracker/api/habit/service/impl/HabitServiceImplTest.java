@@ -1,5 +1,6 @@
 package com.habittracker.api.habit.service.impl;
 
+import static com.habittracker.api.habit.constants.HabitTestConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,9 +28,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HabitServiceImplTest {
 
-  @Mock private HabitRepository habitRepository;
-  @Mock private HabitMapper habitMapper;
-  @InjectMocks private HabitServiceImpl habitService;
+  @Mock
+  private HabitRepository habitRepository;
+  @Mock
+  private HabitMapper habitMapper;
+  @InjectMocks
+  private HabitServiceImpl habitService;
 
   private UserEntity testUser;
   private CreateHabitRequest validRequest;
@@ -41,22 +45,21 @@ class HabitServiceImplTest {
     testUser = new UserEntity();
     testUser.setId(UUID.randomUUID());
 
-    validRequest = new CreateHabitRequest("Read daily", "Read for 30 minutes every day");
+    validRequest = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_LONG);
 
     testHabitEntity = new HabitEntity();
     testHabitEntity.setId(UUID.randomUUID());
-    testHabitEntity.setName("Read daily");
-    testHabitEntity.setDescription("Read for 30 minutes every day");
+    testHabitEntity.setName(HABIT_NAME_READ_DAILY);
+    testHabitEntity.setDescription(HABIT_DESCRIPTION_LONG);
     testHabitEntity.setUser(testUser);
-    testHabitEntity.setArchived(false);
+    testHabitEntity.setArchived(EXPECTED_ARCHIVED);
 
-    testHabitResponse =
-        new HabitResponse(
-            testHabitEntity.getId(),
-            testHabitEntity.getName(),
-            testHabitEntity.getDescription(),
-            Frequency.DAILY,
-            false);
+    testHabitResponse = new HabitResponse(
+        testHabitEntity.getId(),
+        testHabitEntity.getName(),
+        testHabitEntity.getDescription(),
+        Frequency.DAILY,
+        EXPECTED_ARCHIVED);
   }
 
   @Nested
@@ -77,17 +80,17 @@ class HabitServiceImplTest {
       verify(habitRepository).save(habitCaptor.capture());
 
       HabitEntity savedHabit = habitCaptor.getValue();
-      assertThat(savedHabit.getName()).isEqualTo("Read daily");
-      assertThat(savedHabit.getDescription()).isEqualTo("Read for 30 minutes every day");
+      assertThat(savedHabit.getName()).isEqualTo(HABIT_NAME_READ_DAILY);
+      assertThat(savedHabit.getDescription()).isEqualTo(HABIT_DESCRIPTION_LONG);
       assertThat(savedHabit.getUser()).isEqualTo(testUser);
       assertThat(savedHabit.isArchived()).isFalse();
     }
 
     @Test
     void shouldTrimWhitespace_WhenCreatingHabit() {
-      CreateHabitRequest requestWithWhitespace =
-          new CreateHabitRequest("  Read daily  ", "  Description  ");
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, "  Read daily  "))
+      CreateHabitRequest requestWithWhitespace = new CreateHabitRequest(HABIT_NAME_WHITESPACE,
+          HABIT_DESCRIPTION_WHITESPACE);
+      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_WHITESPACE))
           .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
@@ -98,14 +101,14 @@ class HabitServiceImplTest {
       verify(habitRepository).save(habitCaptor.capture());
 
       HabitEntity savedHabit = habitCaptor.getValue();
-      assertThat(savedHabit.getName()).isEqualTo("Read daily");
-      assertThat(savedHabit.getDescription()).isEqualTo("Description");
+      assertThat(savedHabit.getName()).isEqualTo(HABIT_NAME_READ_DAILY);
+      assertThat(savedHabit.getDescription()).isEqualTo(HABIT_DESCRIPTION_GENERIC);
     }
 
     @Test
     void shouldHandleNullDescription_WhenCreatingHabit() {
-      CreateHabitRequest requestWithNullDescription = new CreateHabitRequest("Read daily", null);
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, "Read daily")).thenReturn(false);
+      CreateHabitRequest requestWithNullDescription = new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
+      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_READ_DAILY)).thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -132,9 +135,10 @@ class HabitServiceImplTest {
 
     @Test
     void shouldCheckNameIgnoreCase_WhenValidatingUniqueness() {
-      CreateHabitRequest requestWithDifferentCase =
-          new CreateHabitRequest("READ DAILY", "Description");
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, "READ DAILY")).thenReturn(true);
+      CreateHabitRequest requestWithDifferentCase = new CreateHabitRequest(HABIT_NAME_DIFFERENT_CASE,
+          HABIT_DESCRIPTION_GENERIC);
+      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_DIFFERENT_CASE))
+          .thenReturn(true);
 
       assertThatThrownBy(() -> habitService.createHabit(testUser, requestWithDifferentCase))
           .isInstanceOf(HabitNameAlreadyExistsException.class);

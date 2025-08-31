@@ -1,6 +1,7 @@
 package com.habittracker.api.habit.controller;
 
 import static com.habittracker.api.habit.constants.HabitConstants.*;
+import static com.habittracker.api.habit.constants.HabitTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -35,7 +36,7 @@ public class HabitControllerIT {
 
   @BeforeEach
   public void setUp() {
-    testUser = authTestUtils.createAndSaveUser("test@example.com", "password123", "UTC");
+    testUser = authTestUtils.createAndSaveUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
     authToken = "Bearer " + jwtService.generateToken(testUser.getEmail());
   }
 
@@ -44,38 +45,38 @@ public class HabitControllerIT {
 
     @Test
     public void shouldCreateHabit_WhenValidRequest() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest("Read daily", "Read for 30 minutes");
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.name").value("Read daily"))
-          .andExpect(jsonPath("$.description").value("Read for 30 minutes"))
-          .andExpect(jsonPath("$.frequency").value("DAILY"))
-          .andExpect(jsonPath("$.archived").value(false))
+          .andExpect(jsonPath("$.name").value(HABIT_NAME_READ_DAILY))
+          .andExpect(jsonPath("$.description").value(HABIT_DESCRIPTION_READ_30_MIN))
+          .andExpect(jsonPath("$.frequency").value(EXPECTED_FREQUENCY))
+          .andExpect(jsonPath("$.archived").value(EXPECTED_ARCHIVED))
           .andExpect(jsonPath("$.id").exists());
     }
 
     @Test
     public void shouldCreateHabitWithNullDescription_WhenDescriptionNotProvided() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest("Exercise", null);
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_EXERCISE, null);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.name").value("Exercise"))
+          .andExpect(jsonPath("$.name").value(HABIT_NAME_EXERCISE))
           .andExpect(jsonPath("$.description").isEmpty())
-          .andExpect(jsonPath("$.frequency").value("DAILY"))
-          .andExpect(jsonPath("$.archived").value(false));
+          .andExpect(jsonPath("$.frequency").value(EXPECTED_FREQUENCY))
+          .andExpect(jsonPath("$.archived").value(EXPECTED_ARCHIVED));
     }
 
     @Test
     public void shouldReturnConflict_WhenHabitNameAlreadyExists() throws Exception {
-      habitTestUtils.createAndSaveHabit(testUser, "Read daily");
-      CreateHabitRequest request = new CreateHabitRequest("Read daily", "Another description");
+      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY);
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_ANOTHER);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isConflict())
           .andExpect(jsonPath("$.message").value(NAME_ALREADY_EXISTS_MESSAGE));
     }
@@ -83,56 +84,55 @@ public class HabitControllerIT {
     @Test
     public void shouldReturnConflictIgnoreCase_WhenHabitNameExistsWithDifferentCase()
         throws Exception {
-      habitTestUtils.createAndSaveHabit(testUser, "read daily");
-      CreateHabitRequest request = new CreateHabitRequest("READ DAILY", "Description");
+      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY.toLowerCase());
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY.toUpperCase(),
+          HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isConflict())
           .andExpect(jsonPath("$.message").value(NAME_ALREADY_EXISTS_MESSAGE));
     }
 
     @Test
     public void shouldReturnBadRequest_WhenNameIsBlank() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest("", "Description");
+      CreateHabitRequest request = new CreateHabitRequest(BLANK_NAME, HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isBadRequest())
           .andExpect(
               jsonPath("$.message")
-                  .value("Validation failed for one or more fields in your request."))
+                  .value(VALIDATION_FAILED_MESSAGE))
           .andExpect(jsonPath("$.errors.name").value(NAME_REQUIRED_MESSAGE));
     }
 
     @Test
     public void shouldReturnBadRequest_WhenNameTooLong() throws Exception {
-      String longName = "a".repeat(101);
-      CreateHabitRequest request = new CreateHabitRequest(longName, "Description");
+      CreateHabitRequest request = new CreateHabitRequest(LONG_NAME_101_CHARS, HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errors.name").value(NAME_LENGTH_MESSAGE));
     }
 
     @Test
     public void shouldReturnBadRequest_WhenDescriptionTooLong() throws Exception {
-      String longDescription = "a".repeat(2001);
-      CreateHabitRequest request = new CreateHabitRequest("Valid name", longDescription);
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_VALID, LONG_DESCRIPTION_2001_CHARS);
 
       mockMvcTestUtils
-          .performAuthenticatedPostRequest("/api/habits", request, authToken)
+          .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.errors.description").value(DESCRIPTION_LENGTH_MESSAGE));
     }
 
     @Test
     public void shouldReturnUnauthorized_WhenNoAuthToken() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest("Read daily", "Description");
+      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
-          .performUnauthenticatedPostRequest("/api/habits", request)
+          .performUnauthenticatedPostRequest(HABITS_ENDPOINT, request)
           .andExpect(status().isUnauthorized());
     }
   }
@@ -142,43 +142,44 @@ public class HabitControllerIT {
 
     @Test
     public void shouldReturnUserHabits_WhenHabitsExist() throws Exception {
-      habitTestUtils.createAndSaveHabit(testUser, "Read daily", "Read for 30 minutes");
-      habitTestUtils.createAndSaveHabit(testUser, "Exercise", "Workout for 45 minutes");
+      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
+      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_EXERCISE, HABIT_DESCRIPTION_WORKOUT_45_MIN);
 
       mockMvcTestUtils
-          .performAuthenticatedGetRequest("/api/habits", authToken)
+          .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(2)))
-          .andExpect(jsonPath("$[*].name", containsInAnyOrder("Read daily", "Exercise")))
-          .andExpect(jsonPath("$[*].frequency", everyItem(is("DAILY"))))
-          .andExpect(jsonPath("$[*].archived", everyItem(is(false))));
+          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_2)))
+          .andExpect(jsonPath("$[*].name", containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
+          .andExpect(jsonPath("$[*].frequency", everyItem(is(EXPECTED_FREQUENCY))))
+          .andExpect(jsonPath("$[*].archived", everyItem(is(EXPECTED_ARCHIVED))));
     }
 
     @Test
     public void shouldReturnEmptyList_WhenNoHabitsExist() throws Exception {
       mockMvcTestUtils
-          .performAuthenticatedGetRequest("/api/habits", authToken)
+          .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(0)));
+          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_0)));
     }
 
     @Test
     public void shouldOnlyReturnCurrentUserHabits_WhenMultipleUsersHaveHabits() throws Exception {
-      UserEntity otherUser = authTestUtils.createAndSaveUser("other@example.com", "password123", "UTC");
-      habitTestUtils.createAndSaveHabit(testUser, "My habit");
-      habitTestUtils.createAndSaveHabit(otherUser, "Other's habit");
+      UserEntity otherUser = authTestUtils.createAndSaveUser(OTHER_USER_EMAIL, OTHER_USER_PASSWORD,
+          OTHER_USER_TIMEZONE);
+      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_MY_HABIT);
+      habitTestUtils.createAndSaveHabit(otherUser, HABIT_NAME_OTHERS_HABIT);
 
       mockMvcTestUtils
-          .performAuthenticatedGetRequest("/api/habits", authToken)
+          .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(1)))
-          .andExpect(jsonPath("$[0].name").value("My habit"));
+          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_1)))
+          .andExpect(jsonPath("$[0].name").value(HABIT_NAME_MY_HABIT));
     }
 
     @Test
     public void shouldReturnUnauthorized_WhenNoAuthToken() throws Exception {
       mockMvcTestUtils
-          .performUnauthenticatedGetRequest("/api/habits")
+          .performUnauthenticatedGetRequest(HABITS_ENDPOINT)
           .andExpect(status().isUnauthorized());
     }
   }
