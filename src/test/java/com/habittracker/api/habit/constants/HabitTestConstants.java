@@ -43,7 +43,8 @@ public final class HabitTestConstants {
   public static final int EXPECTED_HABIT_COUNT_0 = 0;
 
   // Validation error messages
-  public static final String VALIDATION_FAILED_MESSAGE = "Validation failed for one or more fields in your request.";
+  public static final String VALIDATION_FAILED_MESSAGE =
+      "Validation failed for one or more fields in your request.";
 
   // API endpoints
   public static final String HABITS_ENDPOINT = "/api/habits";

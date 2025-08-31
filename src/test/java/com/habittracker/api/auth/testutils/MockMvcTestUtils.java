@@ -37,7 +37,8 @@ public class MockMvcTestUtils {
     return builder.header(AUTHORIZATION_HEADER, BEARER_PREFIX + jwt);
   }
 
-  public <T> ResultActions performAuthenticatedPostRequest(String endpoint, T body, String authToken) throws Exception {
+  public <T> ResultActions performAuthenticatedPostRequest(
+      String endpoint, T body, String authToken) throws Exception {
     return mockMvc.perform(
         post(endpoint)
             .header("Authorization", authToken)
@@ -45,13 +46,13 @@ public class MockMvcTestUtils {
             .content(objectMapper.writeValueAsString(body)));
   }
 
-  public ResultActions performAuthenticatedGetRequest(String endpoint, String authToken) throws Exception {
-    return mockMvc.perform(
-        get(endpoint)
-            .header("Authorization", authToken));
+  public ResultActions performAuthenticatedGetRequest(String endpoint, String authToken)
+      throws Exception {
+    return mockMvc.perform(get(endpoint).header("Authorization", authToken));
   }
 
-  public <T> ResultActions performUnauthenticatedPostRequest(String endpoint, T body) throws Exception {
+  public <T> ResultActions performUnauthenticatedPostRequest(String endpoint, T body)
+      throws Exception {
     return mockMvc.perform(
         post(endpoint)
             .contentType(MediaType.APPLICATION_JSON)

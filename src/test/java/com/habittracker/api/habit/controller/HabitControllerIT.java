@@ -22,21 +22,18 @@ import org.springframework.transaction.annotation.Transactional;
 @BaseIntegrationTest
 public class HabitControllerIT {
 
-  @Autowired
-  private MockMvcTestUtils mockMvcTestUtils;
-  @Autowired
-  private AuthTestUtils authTestUtils;
-  @Autowired
-  private HabitTestUtils habitTestUtils;
-  @Autowired
-  private JwtService jwtService;
+  @Autowired private MockMvcTestUtils mockMvcTestUtils;
+  @Autowired private AuthTestUtils authTestUtils;
+  @Autowired private HabitTestUtils habitTestUtils;
+  @Autowired private JwtService jwtService;
 
   private UserEntity testUser;
   private String authToken;
 
   @BeforeEach
   public void setUp() {
-    testUser = authTestUtils.createAndSaveUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
+    testUser =
+        authTestUtils.createAndSaveUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
     authToken = "Bearer " + jwtService.generateToken(testUser.getEmail());
   }
 
@@ -45,7 +42,8 @@ public class HabitControllerIT {
 
     @Test
     public void shouldCreateHabit_WhenValidRequest() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
+      CreateHabitRequest request =
+          new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
 
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
@@ -73,7 +71,8 @@ public class HabitControllerIT {
     @Test
     public void shouldReturnConflict_WhenHabitNameAlreadyExists() throws Exception {
       habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY);
-      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_ANOTHER);
+      CreateHabitRequest request =
+          new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_ANOTHER);
 
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
@@ -85,8 +84,8 @@ public class HabitControllerIT {
     public void shouldReturnConflictIgnoreCase_WhenHabitNameExistsWithDifferentCase()
         throws Exception {
       habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY.toLowerCase());
-      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY.toUpperCase(),
-          HABIT_DESCRIPTION_GENERIC);
+      CreateHabitRequest request =
+          new CreateHabitRequest(HABIT_NAME_READ_DAILY.toUpperCase(), HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
@@ -101,15 +100,14 @@ public class HabitControllerIT {
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
           .andExpect(status().isBadRequest())
-          .andExpect(
-              jsonPath("$.message")
-                  .value(VALIDATION_FAILED_MESSAGE))
+          .andExpect(jsonPath("$.message").value(VALIDATION_FAILED_MESSAGE))
           .andExpect(jsonPath("$.errors.name").value(NAME_REQUIRED_MESSAGE));
     }
 
     @Test
     public void shouldReturnBadRequest_WhenNameTooLong() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest(LONG_NAME_101_CHARS, HABIT_DESCRIPTION_GENERIC);
+      CreateHabitRequest request =
+          new CreateHabitRequest(LONG_NAME_101_CHARS, HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
@@ -119,7 +117,8 @@ public class HabitControllerIT {
 
     @Test
     public void shouldReturnBadRequest_WhenDescriptionTooLong() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_VALID, LONG_DESCRIPTION_2001_CHARS);
+      CreateHabitRequest request =
+          new CreateHabitRequest(HABIT_NAME_VALID, LONG_DESCRIPTION_2001_CHARS);
 
       mockMvcTestUtils
           .performAuthenticatedPostRequest(HABITS_ENDPOINT, request, authToken)
@@ -129,7 +128,8 @@ public class HabitControllerIT {
 
     @Test
     public void shouldReturnUnauthorized_WhenNoAuthToken() throws Exception {
-      CreateHabitRequest request = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_GENERIC);
+      CreateHabitRequest request =
+          new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_GENERIC);
 
       mockMvcTestUtils
           .performUnauthenticatedPostRequest(HABITS_ENDPOINT, request)
@@ -142,14 +142,17 @@ public class HabitControllerIT {
 
     @Test
     public void shouldReturnUserHabits_WhenHabitsExist() throws Exception {
-      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
-      habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_EXERCISE, HABIT_DESCRIPTION_WORKOUT_45_MIN);
+      habitTestUtils.createAndSaveHabit(
+          testUser, HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_READ_30_MIN);
+      habitTestUtils.createAndSaveHabit(
+          testUser, HABIT_NAME_EXERCISE, HABIT_DESCRIPTION_WORKOUT_45_MIN);
 
       mockMvcTestUtils
           .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_2)))
-          .andExpect(jsonPath("$[*].name", containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
+          .andExpect(
+              jsonPath("$[*].name", containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
           .andExpect(jsonPath("$[*].frequency", everyItem(is(EXPECTED_FREQUENCY))))
           .andExpect(jsonPath("$[*].archived", everyItem(is(EXPECTED_ARCHIVED))));
     }
@@ -164,8 +167,9 @@ public class HabitControllerIT {
 
     @Test
     public void shouldOnlyReturnCurrentUserHabits_WhenMultipleUsersHaveHabits() throws Exception {
-      UserEntity otherUser = authTestUtils.createAndSaveUser(OTHER_USER_EMAIL, OTHER_USER_PASSWORD,
-          OTHER_USER_TIMEZONE);
+      UserEntity otherUser =
+          authTestUtils.createAndSaveUser(
+              OTHER_USER_EMAIL, OTHER_USER_PASSWORD, OTHER_USER_TIMEZONE);
       habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_MY_HABIT);
       habitTestUtils.createAndSaveHabit(otherUser, HABIT_NAME_OTHERS_HABIT);
 

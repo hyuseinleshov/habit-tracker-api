@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HabitRepository extends JpaRepository<HabitEntity, UUID> {
 
-    boolean existsByUserAndNameIgnoreCase(UserEntity user, String name);
+  boolean existsByUserAndNameIgnoreCase(UserEntity user, String name);
 
-    List<HabitEntity> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(UserEntity user);
+  List<HabitEntity> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(UserEntity user);
 }

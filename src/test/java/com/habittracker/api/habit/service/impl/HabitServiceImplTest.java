@@ -28,12 +28,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HabitServiceImplTest {
 
-  @Mock
-  private HabitRepository habitRepository;
-  @Mock
-  private HabitMapper habitMapper;
-  @InjectMocks
-  private HabitServiceImpl habitService;
+  @Mock private HabitRepository habitRepository;
+  @Mock private HabitMapper habitMapper;
+  @InjectMocks private HabitServiceImpl habitService;
 
   private UserEntity testUser;
   private CreateHabitRequest validRequest;
@@ -54,12 +51,13 @@ class HabitServiceImplTest {
     testHabitEntity.setUser(testUser);
     testHabitEntity.setArchived(EXPECTED_ARCHIVED);
 
-    testHabitResponse = new HabitResponse(
-        testHabitEntity.getId(),
-        testHabitEntity.getName(),
-        testHabitEntity.getDescription(),
-        Frequency.DAILY,
-        EXPECTED_ARCHIVED);
+    testHabitResponse =
+        new HabitResponse(
+            testHabitEntity.getId(),
+            testHabitEntity.getName(),
+            testHabitEntity.getDescription(),
+            Frequency.DAILY,
+            EXPECTED_ARCHIVED);
   }
 
   @Nested
@@ -88,8 +86,8 @@ class HabitServiceImplTest {
 
     @Test
     void shouldTrimWhitespace_WhenCreatingHabit() {
-      CreateHabitRequest requestWithWhitespace = new CreateHabitRequest(HABIT_NAME_WHITESPACE,
-          HABIT_DESCRIPTION_WHITESPACE);
+      CreateHabitRequest requestWithWhitespace =
+          new CreateHabitRequest(HABIT_NAME_WHITESPACE, HABIT_DESCRIPTION_WHITESPACE);
       when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_WHITESPACE))
           .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
@@ -107,8 +105,10 @@ class HabitServiceImplTest {
 
     @Test
     void shouldHandleNullDescription_WhenCreatingHabit() {
-      CreateHabitRequest requestWithNullDescription = new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_READ_DAILY)).thenReturn(false);
+      CreateHabitRequest requestWithNullDescription =
+          new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
+      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_READ_DAILY))
+          .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -135,8 +135,8 @@ class HabitServiceImplTest {
 
     @Test
     void shouldCheckNameIgnoreCase_WhenValidatingUniqueness() {
-      CreateHabitRequest requestWithDifferentCase = new CreateHabitRequest(HABIT_NAME_DIFFERENT_CASE,
-          HABIT_DESCRIPTION_GENERIC);
+      CreateHabitRequest requestWithDifferentCase =
+          new CreateHabitRequest(HABIT_NAME_DIFFERENT_CASE, HABIT_DESCRIPTION_GENERIC);
       when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_DIFFERENT_CASE))
           .thenReturn(true);
 

@@ -77,12 +77,12 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
   }
 
-    @ExceptionHandler(HabitNameAlreadyExistsException.class)
-    public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
-            HabitNameAlreadyExistsException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-    }
+  @ExceptionHandler(HabitNameAlreadyExistsException.class)
+  public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
+      HabitNameAlreadyExistsException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.CONFLICT;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleIllegalArgumentException(HttpServletRequest request) {

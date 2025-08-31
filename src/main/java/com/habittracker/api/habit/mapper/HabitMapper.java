@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface HabitMapper {
 
-    @Mapping(target = "frequency", expression = "java(com.habittracker.api.habit.model.Frequency.DAILY)")
-    HabitResponse toResponse(HabitEntity entity);
+  @Mapping(
+      target = "frequency",
+      expression = "java(com.habittracker.api.habit.model.Frequency.DAILY)")
+  HabitResponse toResponse(HabitEntity entity);
 }
