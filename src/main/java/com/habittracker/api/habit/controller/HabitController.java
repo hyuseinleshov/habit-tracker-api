@@ -44,7 +44,8 @@ public class HabitController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@NotNull @PathVariable UUID id) {
+  public ResponseEntity<Void> delete(@NotNull @PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
+    habitService.delete(id, principal.getUser().getId());
     return ResponseEntity.noContent().build();
   }
 }
