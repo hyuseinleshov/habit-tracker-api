@@ -1,13 +1,7 @@
 package com.habittracker.api.core.exception;
 
-import static com.habittracker.api.auth.utils.AuthConstants.MALFORMED_JSON_MESSAGE;
-import static com.habittracker.api.auth.utils.AuthConstants.VALIDATION_FAILED_MESSAGE;
-import static com.habittracker.api.core.exception.ExceptionConstants.*;
-
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +10,16 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.habittracker.api.auth.utils.AuthConstants.MALFORMED_JSON_MESSAGE;
+import static com.habittracker.api.auth.utils.AuthConstants.VALIDATION_FAILED_MESSAGE;
+import static com.habittracker.api.core.exception.ExceptionConstants.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -89,6 +92,14 @@ public class GlobalExceptionHandler {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     return ResponseEntity.status(status)
         .body(ApiError.from(ILLEGAL_ARGUMENT_MESSAGE, status, request));
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    String message = ex.getRequiredType() == UUID.class ? INVALID_UUID_MESSAGE : ARGUMENT_TYPE_MISMATCH_MESSAGE;
+    return ResponseEntity.status(status)
+            .body(ApiError.from(message, status, request));
   }
 
   @ExceptionHandler(Exception.class)
