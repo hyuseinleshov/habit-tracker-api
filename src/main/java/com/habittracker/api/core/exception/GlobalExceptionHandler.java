@@ -1,8 +1,8 @@
 package com.habittracker.api.core.exception;
 
-import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.JDBCException;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -80,13 +80,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
   }
 
-  @ExceptionHandler(HabitNameAlreadyExistsException.class)
-  public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
-      HabitNameAlreadyExistsException ex, HttpServletRequest request) {
-    HttpStatus status = HttpStatus.CONFLICT;
-    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-  }
-
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleIllegalArgumentException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -103,7 +96,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleGenericException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     return ResponseEntity.status(status)
         .body(ApiError.from(INTERNAL_SERVER_ERROR_MESSAGE, status, request));
