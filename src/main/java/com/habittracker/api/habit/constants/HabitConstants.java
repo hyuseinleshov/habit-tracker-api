@@ -9,6 +9,7 @@ public final class HabitConstants {
   public static final String DESCRIPTION_LENGTH_MESSAGE =
       "Habit description must not exceed 2000 characters";
   public static final String NAME_ALREADY_EXISTS_MESSAGE = "A habit with this name already exists";
+  public static final String HABIT_NOT_FOUND_MESSAGE = "Habit not found";
 
   private HabitConstants() {
     throw new UnsupportedOperationException("Utility class, do not instantiate");
