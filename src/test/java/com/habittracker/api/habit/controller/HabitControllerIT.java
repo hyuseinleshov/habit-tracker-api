@@ -15,14 +15,13 @@ import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import com.habittracker.api.security.jwt.service.JwtService;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Transactional
 @BaseIntegrationTest
@@ -204,38 +203,45 @@ public class HabitControllerIT {
 
     @Test
     public void shouldReturn_NotAuthorized_WithoutAuthorization() throws Exception {
-      mockMvc.perform(delete("/api/habits/{id}", UUID.randomUUID()))
-              .andExpect(status().isUnauthorized());
+      mockMvc
+          .perform(delete("/api/habits/{id}", UUID.randomUUID()))
+          .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void shouldReturn_BadRequest_WithInvalidId() throws Exception {
-        mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", INVALID_UUID)))
-                .andExpect(status().isBadRequest());
+      mockMvc
+          .perform(addJwt(jwtToken, delete("/api/habits/{id}", INVALID_UUID)))
+          .andExpect(status().isBadRequest());
     }
 
     @Test
     public void shouldReturn_NotFound_WhenHabitNotExist() throws Exception {
-      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", UUID.randomUUID())))
-              .andExpect(status().isNotFound())
-              .andExpect(jsonPath("$.message").value(HABIT_NOT_FOUND_MESSAGE));
+      mockMvc
+          .perform(addJwt(jwtToken, delete("/api/habits/{id}", UUID.randomUUID())))
+          .andExpect(status().isNotFound())
+          .andExpect(jsonPath("$.message").value(HABIT_NOT_FOUND_MESSAGE));
     }
 
     @Test
     public void shouldReturn_NotFound_WhenHabitIsAlreadyDeleted() throws Exception {
       HabitEntity newHabit = habitTestUtils.createAndSaveHabit(testUser, "New habit");
       habitTestUtils.delete(newHabit);
-      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
-              .andExpect(status().isNotFound())
-              .andExpect(jsonPath("$.message").value(HABIT_ALREADY_DELETED_MESSAGE));
+      mockMvc
+          .perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
+          .andExpect(status().isNotFound())
+          .andExpect(jsonPath("$.message").value(HABIT_ALREADY_DELETED_MESSAGE));
     }
 
     @Test
     public void shouldReturn_Forbidden_WhenLoggedUserInNotOwner() throws Exception {
-      UserEntity anotherUser = authTestUtils.createAndSaveUser("anotheruser@gmail.com", TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
+      UserEntity anotherUser =
+          authTestUtils.createAndSaveUser(
+              "anotheruser@gmail.com", TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
       HabitEntity newHabit = habitTestUtils.createAndSaveHabit(anotherUser, "New habit");
-      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
-              .andExpect(status().isForbidden());
+      mockMvc
+          .perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
+          .andExpect(status().isForbidden());
     }
   }
 }

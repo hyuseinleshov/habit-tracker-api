@@ -6,15 +6,14 @@ import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.service.HabitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -44,7 +43,8 @@ public class HabitController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@NotNull @PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
+  public ResponseEntity<Void> delete(
+      @NotNull @PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
     habitService.delete(id, principal.getUser().getId());
     return ResponseEntity.noContent().build();
   }

@@ -12,18 +12,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Order(-1)
 public class HabitExceptionHandler {
 
-    @ExceptionHandler(HabitNameAlreadyExistsException.class)
-    public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
-            HabitNameAlreadyExistsException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-    }
+  @ExceptionHandler(HabitNameAlreadyExistsException.class)
+  public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
+      HabitNameAlreadyExistsException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.CONFLICT;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
 
-    @ExceptionHandler(value = {HabitNotFoundException.class, HabitAlreadyDeletedException.class})
-    public ResponseEntity<ApiError> handleHabitMissingExceptions(
-            Exception ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-    }
-
+  @ExceptionHandler(value = {HabitNotFoundException.class, HabitAlreadyDeletedException.class})
+  public ResponseEntity<ApiError> handleHabitMissingExceptions(
+      Exception ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
 }

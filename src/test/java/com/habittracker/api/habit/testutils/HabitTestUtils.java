@@ -3,9 +3,8 @@ package com.habittracker.api.habit.testutils;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
-import org.springframework.stereotype.Component;
-
 import java.time.Instant;
+import org.springframework.stereotype.Component;
 
 @Component
 public class HabitTestUtils {

@@ -1,9 +1,15 @@
 package com.habittracker.api.habit.service.impl;
 
+import static com.habittracker.api.habit.constants.HabitConstants.HABIT_NOT_FOUND_MESSAGE;
+import static com.habittracker.api.habit.constants.HabitTestConstants.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
-import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.mapper.HabitMapper;
@@ -11,6 +17,9 @@ import com.habittracker.api.habit.model.Frequency;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.service.InternalHabitService;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,19 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static com.habittracker.api.habit.constants.HabitConstants.HABIT_ALREADY_DELETED_MESSAGE;
-import static com.habittracker.api.habit.constants.HabitConstants.HABIT_NOT_FOUND_MESSAGE;
-import static com.habittracker.api.habit.constants.HabitTestConstants.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HabitServiceImplTest {
@@ -192,18 +188,17 @@ class HabitServiceImplTest {
     @Test
     void shouldThrowNotFound_WhenHabitNotExist() {
       final UUID TEST_ID = UUID.randomUUID();
-      when(habitRepository.findById(TEST_ID))
-              .thenReturn(Optional.empty());
+      when(habitRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> habitService.delete(TEST_ID, testUser.getId()))
-              .isInstanceOf(HabitNotFoundException.class)
-              .hasMessage(HABIT_NOT_FOUND_MESSAGE);
+          .isInstanceOf(HabitNotFoundException.class)
+          .hasMessage(HABIT_NOT_FOUND_MESSAGE);
     }
 
     @Test
     void shouldDeleteHabit() {
       when(habitRepository.findById(testHabitEntity.getId()))
-              .thenReturn(Optional.of(testHabitEntity));
+          .thenReturn(Optional.of(testHabitEntity));
 
       habitService.delete(testHabitEntity.getId(), testUser.getId());
       verify(internalHabitService).softDelete(testHabitEntity);

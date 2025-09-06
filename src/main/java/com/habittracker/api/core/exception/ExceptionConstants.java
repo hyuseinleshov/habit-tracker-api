@@ -12,7 +12,8 @@ public final class ExceptionConstants {
       "One of the arguments provided was illegal or inappropriate for the method. Please review the input parameters.";
 
   public static final String INVALID_UUID_MESSAGE = "Invalid id provided.";
-  public static final String ARGUMENT_TYPE_MISMATCH_MESSAGE = "The value you entered is not in the correct format.";
+  public static final String ARGUMENT_TYPE_MISMATCH_MESSAGE =
+      "The value you entered is not in the correct format.";
 
   // HTTP 500 - Internal Server Error
   public static final String DATABASE_ERROR_MESSAGE =
