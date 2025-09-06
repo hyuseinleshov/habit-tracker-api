@@ -5,6 +5,7 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class HabitTestUtils {
@@ -32,8 +33,9 @@ public class HabitTestUtils {
     return createAndSaveHabit(user, name, "Default description for " + name);
   }
 
-  public HabitEntity delete(HabitEntity habit) {
-    habit.setDeletedAt(Instant.now());
-    return habitRepository.save(habit);
+  @Transactional
+  public void softDelete(HabitEntity habit, Instant deleteAt) {
+    habit.setDeletedAt(deleteAt);
+    habitRepository.save(habit);
   }
 }

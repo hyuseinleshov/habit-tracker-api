@@ -15,6 +15,8 @@ import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import com.habittracker.api.security.jwt.service.JwtService;
+
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -226,7 +228,7 @@ public class HabitControllerIT {
     @Test
     public void shouldReturn_NotFound_WhenHabitIsAlreadyDeleted() throws Exception {
       HabitEntity newHabit = habitTestUtils.createAndSaveHabit(testUser, "New habit");
-      habitTestUtils.delete(newHabit);
+      habitTestUtils.softDelete(newHabit, Instant.now());
       mockMvc
           .perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
           .andExpect(status().isNotFound())
