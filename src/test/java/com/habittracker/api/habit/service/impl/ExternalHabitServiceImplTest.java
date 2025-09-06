@@ -30,12 +30,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class HabitServiceImplTest {
+class ExternalHabitServiceImplTest {
 
   @Mock private HabitRepository habitRepository;
   @Mock private HabitMapper habitMapper;
   @Mock private InternalHabitService internalHabitService;
-  @InjectMocks private HabitServiceImpl habitService;
+  @InjectMocks private ExternalHabitServiceImpl habitService;
 
   private UserEntity testUser;
   private CreateHabitRequest validRequest;

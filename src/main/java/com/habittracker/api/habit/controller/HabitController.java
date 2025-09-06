@@ -3,7 +3,7 @@ package com.habittracker.api.habit.controller;
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
-import com.habittracker.api.habit.service.HabitService;
+import com.habittracker.api.habit.service.ExternalHabitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class HabitController {
 
-  private final HabitService habitService;
+  private final ExternalHabitService externalHabitService;
 
   @PostMapping
   public ResponseEntity<HabitResponse> createHabit(
@@ -29,7 +29,7 @@ public class HabitController {
       @AuthenticationPrincipal UserDetailsImpl principal) {
 
     log.info("Creating habit '{}' for user {}", request.name(), principal.getUser().getId());
-    HabitResponse response = habitService.createHabit(principal.getUser(), request);
+    HabitResponse response = externalHabitService.createHabit(principal.getUser(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -38,14 +38,14 @@ public class HabitController {
       @AuthenticationPrincipal UserDetailsImpl principal) {
 
     log.debug("Fetching habits for user {}", principal.getUser().getId());
-    List<HabitResponse> habits = habitService.getUserHabits(principal.getUser());
+    List<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser());
     return ResponseEntity.ok(habits);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @NotNull @PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
-    habitService.delete(id, principal.getUser().getId());
+    externalHabitService.delete(id, principal.getUser().getId());
     return ResponseEntity.noContent().build();
   }
 }

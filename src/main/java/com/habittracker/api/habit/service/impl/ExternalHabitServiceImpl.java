@@ -8,7 +8,7 @@ import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
-import com.habittracker.api.habit.service.HabitService;
+import com.habittracker.api.habit.service.ExternalHabitService;
 import com.habittracker.api.habit.service.InternalHabitService;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class HabitServiceImpl implements HabitService {
+public class ExternalHabitServiceImpl implements ExternalHabitService {
 
   private final HabitRepository habitRepository;
   private final InternalHabitService internalHabitService;
