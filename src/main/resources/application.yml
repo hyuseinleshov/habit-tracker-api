@@ -20,6 +20,12 @@ spring:
      max-idle: 8
      min-idle: 0
 
+habit:
+ cleanup:
+  retention-period: ${HABIT_RETENTION_PERIOD:P14D}
+  schedule:
+   cron: ${HABIT_CLEANUP_SCHEDULE_CRON:0 0 0 * * *}
+
 user:
  cleanup:
   retention-period: ${USER_RETENTION_PERIOD:P14D}
