@@ -1,6 +1,7 @@
-package com.habittracker.api.habit.service;
+package com.habittracker.api.habit.service.impl;
 
 import com.habittracker.api.habit.model.HabitEntity;
+import com.habittracker.api.habit.service.InternalHabitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
