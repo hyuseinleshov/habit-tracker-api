@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InternalHabitServiceImpl implements InternalHabitService {
 
   @Override
-  @PreAuthorize("#habit.id.equals(authentication.principal.id)")
+  @PreAuthorize("#habit.id.equals(principal.id)")
   public void softDelete(HabitEntity habit) {
     if (habit == null) {
       throw new IllegalArgumentException(HABIT_NOT_NULL_MESSAGE);
