@@ -54,7 +54,6 @@ public class AuthTestUtils {
 
   public static UserEntity createUser(String email, String password, RoleEntity role) {
     UserEntity user = new UserEntity();
-    user.setId(UUID.randomUUID());
     user.setEmail(email);
     user.setPassword(password);
     user.getRoles().add(role);

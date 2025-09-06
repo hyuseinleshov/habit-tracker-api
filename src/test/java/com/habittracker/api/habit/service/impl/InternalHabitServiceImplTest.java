@@ -12,6 +12,8 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ class InternalHabitServiceImplTest {
   void setUp() {
     UserEntity testUser =
         AuthTestUtils.createUser("test@gmail.com", "pass", AuthTestUtils.createUserRole());
+    testUser.setId(UUID.randomUUID());
     testHabitEntity = HabitTestUtils.createHabit(testUser, "Habit", "desc");
   }
 
