@@ -1,8 +1,10 @@
 package com.habittracker.api.habit.controller;
 
+import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
 import static com.habittracker.api.habit.constants.HabitConstants.*;
 import static com.habittracker.api.habit.constants.HabitTestConstants.*;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.habittracker.api.auth.model.UserEntity;
@@ -10,31 +12,40 @@ import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
+import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import com.habittracker.api.security.jwt.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Transactional
 @BaseIntegrationTest
 public class HabitControllerIT {
 
+  private static final String INVALID_UUID = "invalidId";
+
   @Autowired private MockMvcTestUtils mockMvcTestUtils;
+  @Autowired private MockMvc mockMvc;
   @Autowired private AuthTestUtils authTestUtils;
   @Autowired private HabitTestUtils habitTestUtils;
   @Autowired private JwtService jwtService;
 
   private UserEntity testUser;
   private String authToken;
+  private String jwtToken;
 
   @BeforeEach
   public void setUp() {
     testUser =
         authTestUtils.createAndSaveUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
-    authToken = "Bearer " + jwtService.generateToken(testUser.getEmail());
+    jwtToken = jwtService.generateToken(testUser.getEmail());
+    authToken = "Bearer " + jwtToken;
   }
 
   @Nested
@@ -185,6 +196,46 @@ public class HabitControllerIT {
       mockMvcTestUtils
           .performUnauthenticatedGetRequest(HABITS_ENDPOINT)
           .andExpect(status().isUnauthorized());
+    }
+  }
+
+  @Nested
+  class DeleteHabitTests {
+
+    @Test
+    public void shouldReturn_NotAuthorized_WithoutAuthorization() throws Exception {
+      mockMvc.perform(delete("/api/habits/{id}", UUID.randomUUID()))
+              .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void shouldReturn_BadRequest_WithInvalidId() throws Exception {
+        mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", INVALID_UUID)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldReturn_NotFound_WhenHabitNotExist() throws Exception {
+      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", UUID.randomUUID())))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.message").value(HABIT_NOT_FOUND_MESSAGE));
+    }
+
+    @Test
+    public void shouldReturn_NotFound_WhenHabitIsAlreadyDeleted() throws Exception {
+      HabitEntity newHabit = habitTestUtils.createAndSaveHabit(testUser, "New habit");
+      habitTestUtils.delete(newHabit);
+      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.message").value(HABIT_ALREADY_DELETED_MESSAGE));
+    }
+
+    @Test
+    public void shouldReturn_Forbidden_WhenLoggedUserInNotOwner() throws Exception {
+      UserEntity anotherUser = authTestUtils.createAndSaveUser("anotheruser@gmail.com", TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
+      HabitEntity newHabit = habitTestUtils.createAndSaveHabit(anotherUser, "New habit");
+      mockMvc.perform(addJwt(jwtToken, delete("/api/habits/{id}", newHabit.getId())))
+              .andExpect(status().isForbidden());
     }
   }
 }
