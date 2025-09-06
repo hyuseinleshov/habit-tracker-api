@@ -15,7 +15,6 @@ import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import com.habittracker.api.security.jwt.service.JwtService;
-
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

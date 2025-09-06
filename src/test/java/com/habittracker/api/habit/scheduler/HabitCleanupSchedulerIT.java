@@ -1,25 +1,24 @@
 package com.habittracker.api.habit.scheduler;
 
+import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.time.Instant;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-
-import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 @BaseIntegrationTest
 class HabitCleanupSchedulerIT {
@@ -64,9 +63,9 @@ class HabitCleanupSchedulerIT {
             .map(Map.Entry::getValue)
             .toList();
     assertEquals(beforeCleanup - deletedEmails.size(), habitRepository.count());
-    deletedEmails.forEach(name -> assertFalse(habitRepository.existsByUserAndNameIgnoreCase(testUser, name)));
+    deletedEmails.forEach(
+        name -> assertFalse(habitRepository.existsByUserAndNameIgnoreCase(testUser, name)));
   }
-
 
   private void setUpDeledHabits() {
     DAYS_SINCE_DELETION_TO_NAME_MAP.forEach(

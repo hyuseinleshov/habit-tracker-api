@@ -2,7 +2,6 @@ package com.habittracker.api.habit.repository;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.model.HabitEntity;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -14,5 +13,5 @@ public interface HabitRepository extends JpaRepository<HabitEntity, UUID> {
 
   List<HabitEntity> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(UserEntity user);
 
-    long deleteAllByDeletedAtBefore(Instant deleteBefore);
+  long deleteAllByDeletedAtBefore(Instant deleteBefore);
 }
