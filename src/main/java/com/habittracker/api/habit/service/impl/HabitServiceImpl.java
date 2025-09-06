@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -79,7 +78,5 @@ public class HabitServiceImpl implements HabitService {
       throw new HabitAlreadyDeletedException();
     }
     internalHabitService.softDelete(toDelete);
-    log.debug("Delete habit with id {}", id);
-    toDelete.setDeletedAt(Instant.now());
   }
 }
