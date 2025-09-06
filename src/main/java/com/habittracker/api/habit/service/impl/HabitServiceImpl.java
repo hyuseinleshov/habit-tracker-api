@@ -74,9 +74,6 @@ public class HabitServiceImpl implements HabitService {
   public void delete(UUID id, UUID userId) {
     HabitEntity toDelete = habitRepository.findById(id)
             .orElseThrow(HabitNotFoundException::new);
-    if(toDelete.isDeleted()) {
-      throw new HabitAlreadyDeletedException();
-    }
     internalHabitService.softDelete(toDelete);
   }
 }

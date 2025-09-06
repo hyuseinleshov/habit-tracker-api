@@ -10,6 +10,7 @@ public final class HabitConstants {
       "Habit description must not exceed 2000 characters";
   public static final String NAME_ALREADY_EXISTS_MESSAGE = "A habit with this name already exists";
   public static final String HABIT_NOT_FOUND_MESSAGE = "Habit not found.";
+  public static final String HABIT_NOT_NULL_MESSAGE = "Habit can't be null.";
   public static final String HABIT_ALREADY_DELETED_MESSAGE = "This habit has already been deleted.";
 
   private HabitConstants() {
