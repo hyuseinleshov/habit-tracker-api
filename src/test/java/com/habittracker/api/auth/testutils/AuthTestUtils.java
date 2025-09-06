@@ -7,6 +7,8 @@ import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.user.model.UserProfileEntity;
 import java.time.Instant;
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,7 @@ public class AuthTestUtils {
 
   public static UserEntity createUser(String email, String password, RoleEntity role) {
     UserEntity user = new UserEntity();
+    user.setId(UUID.randomUUID());
     user.setEmail(email);
     user.setPassword(password);
     user.getRoles().add(role);

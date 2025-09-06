@@ -5,6 +5,8 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 @Component
 public class HabitTestUtils {
 
@@ -14,16 +16,25 @@ public class HabitTestUtils {
     this.habitRepository = habitRepository;
   }
 
-  public HabitEntity createAndSaveHabit(UserEntity user, String name, String description) {
+  public static HabitEntity createHabit(UserEntity user, String name, String description) {
     HabitEntity habit = new HabitEntity();
     habit.setUser(user);
     habit.setName(name);
     habit.setDescription(description);
     habit.setArchived(false);
-    return habitRepository.save(habit);
+    return habit;
+  }
+
+  public HabitEntity createAndSaveHabit(UserEntity user, String name, String description) {
+    return habitRepository.save(createHabit(user, name, description));
   }
 
   public HabitEntity createAndSaveHabit(UserEntity user, String name) {
     return createAndSaveHabit(user, name, "Default description for " + name);
+  }
+
+  public HabitEntity delete(HabitEntity habit) {
+    habit.setDeletedAt(Instant.now());
+    return habitRepository.save(habit);
   }
 }

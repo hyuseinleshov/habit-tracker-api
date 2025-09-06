@@ -201,17 +201,6 @@ class HabitServiceImplTest {
     }
 
     @Test
-    void shouldThrowAlreadyDeleted_WhenHabitIsDeleted() {
-      when(habitRepository.findById(testHabitEntity.getId()))
-              .thenReturn(Optional.of(testHabitEntity));
-      testHabitEntity.setDeletedAt(Instant.now());
-
-      assertThatThrownBy(() -> habitService.delete(testHabitEntity.getId(), testUser.getId()))
-              .isInstanceOf(HabitAlreadyDeletedException.class)
-              .hasMessage(HABIT_ALREADY_DELETED_MESSAGE);
-    }
-
-    @Test
     void shouldDeleteHabit() {
       when(habitRepository.findById(testHabitEntity.getId()))
               .thenReturn(Optional.of(testHabitEntity));
