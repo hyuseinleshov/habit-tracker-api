@@ -4,10 +4,10 @@ import static com.habittracker.api.auth.utils.AuthConstants.MALFORMED_JSON_MESSA
 import static com.habittracker.api.auth.utils.AuthConstants.VALIDATION_FAILED_MESSAGE;
 import static com.habittracker.api.core.exception.ExceptionConstants.*;
 
-import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +16,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
@@ -77,13 +78,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
   }
 
-  @ExceptionHandler(HabitNameAlreadyExistsException.class)
-  public ResponseEntity<ApiError> handleHabitNameAlreadyExistsException(
-      HabitNameAlreadyExistsException ex, HttpServletRequest request) {
-    HttpStatus status = HttpStatus.CONFLICT;
-    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-  }
-
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleIllegalArgumentException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -91,8 +85,17 @@ public class GlobalExceptionHandler {
         .body(ApiError.from(ILLEGAL_ARGUMENT_MESSAGE, status, request));
   }
 
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    String message =
+        ex.getRequiredType() == UUID.class ? INVALID_UUID_MESSAGE : ARGUMENT_TYPE_MISMATCH_MESSAGE;
+    return ResponseEntity.status(status).body(ApiError.from(message, status, request));
+  }
+
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
+  public ResponseEntity<ApiError> handleGenericException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     return ResponseEntity.status(status)
         .body(ApiError.from(INTERNAL_SERVER_ERROR_MESSAGE, status, request));

@@ -4,11 +4,14 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
+import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
-import com.habittracker.api.habit.service.HabitService;
+import com.habittracker.api.habit.service.ExternalHabitService;
+import com.habittracker.api.habit.service.InternalHabitService;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class HabitServiceImpl implements HabitService {
+public class ExternalHabitServiceImpl implements ExternalHabitService {
 
   private final HabitRepository habitRepository;
+  private final InternalHabitService internalHabitService;
   private final HabitMapper habitMapper;
 
   @Override
@@ -62,5 +66,11 @@ public class HabitServiceImpl implements HabitService {
     log.debug("Found {} habits for user {}", habits.size(), user.getId());
 
     return habits.stream().map(habitMapper::toResponse).toList();
+  }
+
+  @Override
+  public void delete(UUID id, UUID userId) {
+    HabitEntity toDelete = habitRepository.findById(id).orElseThrow(HabitNotFoundException::new);
+    internalHabitService.softDelete(toDelete);
   }
 }
