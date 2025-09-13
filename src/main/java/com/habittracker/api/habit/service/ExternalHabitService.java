@@ -13,7 +13,7 @@ public interface ExternalHabitService {
 
   HabitResponse createHabit(UserEntity user, CreateHabitRequest request);
 
-  PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable);
+  PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable, boolean isArchived);
 
   void delete(@NotNull UUID id, UUID userId);
 }

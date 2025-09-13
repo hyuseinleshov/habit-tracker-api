@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.habittracker.api.habit.specs.HabitSpecs.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -61,11 +63,11 @@ public class ExternalHabitServiceImpl implements ExternalHabitService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable) {
+  public PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable, boolean isArchived) {
     log.debug("Fetching habits for user {}", user.getId());
 
     Page<HabitEntity> habits =
-        habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(user, pageable);
+        habitRepository.findAll(hasUser(user).and(isDeleted(false).and(isArchived(isArchived))), pageable);
 
     return new PagedModel<>(habits.map(habitMapper::toResponse));
   }

@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 
 import java.util.List;
@@ -157,6 +158,7 @@ class ExternalHabitServiceImplTest {
   }
 
   @Nested
+  @SuppressWarnings("unchecked")
   class GetUserHabitsTests {
 
     @Test
@@ -165,26 +167,26 @@ class ExternalHabitServiceImplTest {
       PagedModel<HabitResponse> expectedResponses =
               new PagedModel<>(new PageImpl<>(List.of(testHabitResponse), defaultPageable, 1));
 
-      when(habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser, defaultPageable))
+      when(habitRepository.findAll(any(Specification.class), defaultPageable))
           .thenReturn(habitEntities);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
-      PagedModel<HabitResponse> result = habitService.getUserHabits(testUser, defaultPageable);
+      PagedModel<HabitResponse> result = habitService.getUserHabits(testUser, defaultPageable, false);
 
       assertThat(result).isEqualTo(expectedResponses);
-      verify(habitRepository).findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser, defaultPageable);
+      verify(habitRepository).findAll(any(Specification.class), defaultPageable);
       verify(habitMapper).toResponse(testHabitEntity);
     }
 
     @Test
     void shouldReturnEmptyList_WhenNoHabitsExist() {
-      when(habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser, defaultPageable))
+      when(habitRepository.findAll(any(Specification.class), defaultPageable))
           .thenReturn(Page.empty());
 
-      PagedModel<HabitResponse> result = habitService.getUserHabits(testUser, defaultPageable);
+      PagedModel<HabitResponse> result = habitService.getUserHabits(testUser, defaultPageable, false);
 
       assertThat(result.getContent()).isEmpty();
-      verify(habitRepository).findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser, defaultPageable);
+      verify(habitRepository).findAll(any(Specification.class), defaultPageable);
       verify(habitMapper, never()).toResponse(any(HabitEntity.class));
     }
   }

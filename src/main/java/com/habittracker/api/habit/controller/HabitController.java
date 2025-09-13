@@ -39,10 +39,11 @@ public class HabitController {
   @GetMapping
   public ResponseEntity<PagedModel<HabitResponse>> getUserHabits(
           @AuthenticationPrincipal UserDetailsImpl principal, @PageableDefault(sort = "createdAt")
-          Pageable pageable) {
+          Pageable pageable,
+          @RequestParam(required = false, defaultValue = "false", name = "archived") boolean isArchived) {
 
     log.debug("Fetching habits for user {}", principal.getUser().getId());
-    PagedModel<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser(), pageable);
+    PagedModel<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser(), pageable, isArchived);
     return ResponseEntity.ok(habits);
   }
 
