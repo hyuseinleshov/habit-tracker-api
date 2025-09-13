@@ -10,12 +10,15 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.service.ExternalHabitService;
 import com.habittracker.api.habit.service.InternalHabitService;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -58,14 +61,13 @@ public class ExternalHabitServiceImpl implements ExternalHabitService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<HabitResponse> getUserHabits(UserEntity user) {
+  public PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable) {
     log.debug("Fetching habits for user {}", user.getId());
 
-    List<HabitEntity> habits =
-        habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(user);
-    log.debug("Found {} habits for user {}", habits.size(), user.getId());
+    Page<HabitEntity> habits =
+        habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(user, pageable);
 
-    return habits.stream().map(habitMapper::toResponse).toList();
+    return new PagedModel<>(habits.map(habitMapper::toResponse));
   }
 
   @Override

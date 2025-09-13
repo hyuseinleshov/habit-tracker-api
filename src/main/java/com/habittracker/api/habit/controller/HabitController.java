@@ -6,14 +6,17 @@ import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.service.ExternalHabitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -34,11 +37,12 @@ public class HabitController {
   }
 
   @GetMapping
-  public ResponseEntity<List<HabitResponse>> getUserHabits(
-      @AuthenticationPrincipal UserDetailsImpl principal) {
+  public ResponseEntity<PagedModel<HabitResponse>> getUserHabits(
+          @AuthenticationPrincipal UserDetailsImpl principal, @PageableDefault(sort = "createdAt")
+          Pageable pageable) {
 
     log.debug("Fetching habits for user {}", principal.getUser().getId());
-    List<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser());
+    PagedModel<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser(), pageable);
     return ResponseEntity.ok(habits);
   }
 
