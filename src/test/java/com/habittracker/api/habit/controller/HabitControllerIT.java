@@ -1,5 +1,13 @@
 package com.habittracker.api.habit.controller;
 
+import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
+import static com.habittracker.api.habit.constants.HabitConstants.*;
+import static com.habittracker.api.habit.constants.HabitTestConstants.*;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
@@ -8,23 +16,14 @@ import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.testutils.HabitTestUtils;
 import com.habittracker.api.security.jwt.service.JwtService;
+import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.UUID;
-
-import static com.habittracker.api.auth.testutils.MockMvcTestUtils.addJwt;
-import static com.habittracker.api.habit.constants.HabitConstants.*;
-import static com.habittracker.api.habit.constants.HabitTestConstants.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
 @BaseIntegrationTest
@@ -165,7 +164,9 @@ public class HabitControllerIT {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.content", hasSize(EXPECTED_HABIT_COUNT_2)))
           .andExpect(
-              jsonPath("$.content[*].name", containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
+              jsonPath(
+                  "$.content[*].name",
+                  containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
           .andExpect(jsonPath("$.content[*].frequency", everyItem(is(EXPECTED_FREQUENCY))))
           .andExpect(jsonPath("$.content[*].archived", everyItem(is(EXPECTED_ARCHIVED))));
     }

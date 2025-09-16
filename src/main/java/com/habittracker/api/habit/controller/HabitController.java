@@ -3,7 +3,7 @@ package com.habittracker.api.habit.controller;
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
-import com.habittracker.api.habit.service.ExternalHabitService;
+import com.habittracker.api.habit.service.HabitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class HabitController {
 
-  private final ExternalHabitService externalHabitService;
+  private final HabitService habitService;
 
   @PostMapping
   public ResponseEntity<HabitResponse> createHabit(
@@ -32,25 +32,31 @@ public class HabitController {
       @AuthenticationPrincipal UserDetailsImpl principal) {
 
     log.info("Creating habit '{}' for user {}", request.name(), principal.getUser().getId());
-    HabitResponse response = externalHabitService.createHabit(principal.getUser(), request);
+    HabitResponse response = habitService.createHabit(principal.getUser(), request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @GetMapping
   public ResponseEntity<PagedModel<HabitResponse>> getUserHabits(
-          @AuthenticationPrincipal UserDetailsImpl principal, @PageableDefault(sort = "createdAt")
-          Pageable pageable,
-          @RequestParam(required = false, defaultValue = "false", name = "archived") boolean isArchived) {
+      @AuthenticationPrincipal UserDetailsImpl principal,
+      @PageableDefault(sort = "createdAt") Pageable pageable,
+      @RequestParam(required = false, defaultValue = "false", name = "archived")
+          boolean isArchived) {
 
     log.debug("Fetching habits for user {}", principal.getUser().getId());
-    PagedModel<HabitResponse> habits = externalHabitService.getUserHabits(principal.getUser(), pageable, isArchived);
+    PagedModel<HabitResponse> habits =
+        habitService.getUserHabits(principal.getUser(), pageable, isArchived);
     return ResponseEntity.ok(habits);
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<HabitResponse> byId(@NotNull @PathVariable UUID id) {
+    return ResponseEntity.ok(habitService.getById(id));
+  }
+
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(
-      @NotNull @PathVariable UUID id, @AuthenticationPrincipal UserDetailsImpl principal) {
-    externalHabitService.delete(id, principal.getUser().getId());
+  public ResponseEntity<Void> delete(@NotNull @PathVariable UUID id) {
+    habitService.delete(id);
     return ResponseEntity.noContent().build();
   }
 }
