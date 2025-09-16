@@ -165,7 +165,7 @@ class HabitServiceImplTest {
       PagedModel<HabitResponse> expectedResponses =
           new PagedModel<>(new PageImpl<>(List.of(testHabitResponse), defaultPageable, 1));
 
-      when(habitRepository.findAll(any(Specification.class), defaultPageable))
+      when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
           .thenReturn(habitEntities);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -173,20 +173,20 @@ class HabitServiceImplTest {
           habitService.getUserHabits(testUser, defaultPageable, false);
 
       assertThat(result).isEqualTo(expectedResponses);
-      verify(habitRepository).findAll(any(Specification.class), defaultPageable);
+      verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
       verify(habitMapper).toResponse(testHabitEntity);
     }
 
     @Test
     void shouldReturnEmptyList_WhenNoHabitsExist() {
-      when(habitRepository.findAll(any(Specification.class), defaultPageable))
+      when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
           .thenReturn(Page.empty());
 
       PagedModel<HabitResponse> result =
           habitService.getUserHabits(testUser, defaultPageable, false);
 
       assertThat(result.getContent()).isEmpty();
-      verify(habitRepository).findAll(any(Specification.class), defaultPageable);
+      verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
       verify(habitMapper, never()).toResponse(any(HabitEntity.class));
     }
   }

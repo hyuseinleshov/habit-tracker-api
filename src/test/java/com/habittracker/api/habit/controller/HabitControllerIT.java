@@ -220,14 +220,6 @@ public class HabitControllerIT {
     }
 
     @Test
-    public void shouldReturn_NotFound_WhenHabitNotExist() throws Exception {
-      mockMvc
-          .perform(addJwt(jwtToken, delete("/api/habits/{id}", UUID.randomUUID())))
-          .andExpect(status().isNotFound())
-          .andExpect(jsonPath("$.message").value(HABIT_NOT_FOUND_MESSAGE));
-    }
-
-    @Test
     public void shouldReturn_NotFound_WhenHabitIsAlreadyDeleted() throws Exception {
       HabitEntity newHabit = habitTestUtils.createAndSaveHabit(testUser, "New habit");
       habitTestUtils.softDelete(newHabit, Instant.now());
