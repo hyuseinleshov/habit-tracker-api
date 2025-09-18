@@ -4,14 +4,17 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 
-public interface ExternalHabitService {
+public interface HabitService {
 
   HabitResponse createHabit(UserEntity user, CreateHabitRequest request);
 
-  List<HabitResponse> getUserHabits(UserEntity user);
+  PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable, boolean isArchived);
 
-  void delete(@NotNull UUID id, UUID userId);
+  void delete(@NotNull UUID id);
+
+  HabitResponse getById(@NotNull UUID id);
 }

@@ -5,7 +5,8 @@ import static com.habittracker.api.habit.constants.HabitConstants.*;
 import static com.habittracker.api.habit.constants.HabitTestConstants.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
@@ -161,11 +162,13 @@ public class HabitControllerIT {
       mockMvcTestUtils
           .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_2)))
+          .andExpect(jsonPath("$.content", hasSize(EXPECTED_HABIT_COUNT_2)))
           .andExpect(
-              jsonPath("$[*].name", containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
-          .andExpect(jsonPath("$[*].frequency", everyItem(is(EXPECTED_FREQUENCY))))
-          .andExpect(jsonPath("$[*].archived", everyItem(is(EXPECTED_ARCHIVED))));
+              jsonPath(
+                  "$.content[*].name",
+                  containsInAnyOrder(HABIT_NAME_READ_DAILY, HABIT_NAME_EXERCISE)))
+          .andExpect(jsonPath("$.content[*].frequency", everyItem(is(EXPECTED_FREQUENCY))))
+          .andExpect(jsonPath("$.content[*].archived", everyItem(is(EXPECTED_ARCHIVED))));
     }
 
     @Test
@@ -173,7 +176,7 @@ public class HabitControllerIT {
       mockMvcTestUtils
           .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_0)));
+          .andExpect(jsonPath("$.content", hasSize(EXPECTED_HABIT_COUNT_0)));
     }
 
     @Test
@@ -187,8 +190,8 @@ public class HabitControllerIT {
       mockMvcTestUtils
           .performAuthenticatedGetRequest(HABITS_ENDPOINT, authToken)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(EXPECTED_HABIT_COUNT_1)))
-          .andExpect(jsonPath("$[0].name").value(HABIT_NAME_MY_HABIT));
+          .andExpect(jsonPath("$.content", hasSize(EXPECTED_HABIT_COUNT_1)))
+          .andExpect(jsonPath("$.content[0].name").value(HABIT_NAME_MY_HABIT));
     }
 
     @Test
@@ -214,14 +217,6 @@ public class HabitControllerIT {
       mockMvc
           .perform(addJwt(jwtToken, delete("/api/habits/{id}", INVALID_UUID)))
           .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void shouldReturn_NotFound_WhenHabitNotExist() throws Exception {
-      mockMvc
-          .perform(addJwt(jwtToken, delete("/api/habits/{id}", UUID.randomUUID())))
-          .andExpect(status().isNotFound())
-          .andExpect(jsonPath("$.message").value(HABIT_NOT_FOUND_MESSAGE));
     }
 
     @Test

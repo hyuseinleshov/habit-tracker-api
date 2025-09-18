@@ -1,19 +1,25 @@
 package com.habittracker.api.habit.service.impl;
 
+import static com.habittracker.api.habit.specs.HabitSpecs.*;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
+import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
-import com.habittracker.api.habit.service.ExternalHabitService;
-import com.habittracker.api.habit.service.InternalHabitService;
-import java.util.List;
+import com.habittracker.api.habit.service.HabitService;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class ExternalHabitServiceImpl implements ExternalHabitService {
+public class HabitServiceImpl implements HabitService {
 
   private final HabitRepository habitRepository;
-  private final InternalHabitService internalHabitService;
   private final HabitMapper habitMapper;
 
   @Override
@@ -58,19 +63,40 @@ public class ExternalHabitServiceImpl implements ExternalHabitService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<HabitResponse> getUserHabits(UserEntity user) {
+  public PagedModel<HabitResponse> getUserHabits(
+      UserEntity user, Pageable pageable, boolean isArchived) {
     log.debug("Fetching habits for user {}", user.getId());
 
-    List<HabitEntity> habits =
-        habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(user);
-    log.debug("Found {} habits for user {}", habits.size(), user.getId());
+    Page<HabitEntity> habits =
+        habitRepository.findAll(
+            hasUser(user).and(isDeleted(false).and(isArchived(isArchived))), pageable);
 
-    return habits.stream().map(habitMapper::toResponse).toList();
+    return new PagedModel<>(habits.map(habitMapper::toResponse));
   }
 
   @Override
-  public void delete(UUID id, UUID userId) {
-    HabitEntity toDelete = habitRepository.findById(id).orElseThrow(HabitNotFoundException::new);
-    internalHabitService.softDelete(toDelete);
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
+  public HabitResponse getById(UUID id) {
+    HabitEntity habit = getNotDeletedOrThrow(id);
+    return habitMapper.toResponse(habit);
+  }
+
+  public boolean isOwnedByUser(UUID id, UUID userId) {
+    return habitRepository.existsByIdAndUserId(id, userId);
+  }
+
+  private HabitEntity getNotDeletedOrThrow(UUID id) {
+    HabitEntity habit = habitRepository.findById(id).orElseThrow(HabitNotFoundException::new);
+    if (habit.isDeleted()) {
+      throw new HabitAlreadyDeletedException();
+    }
+    return habit;
+  }
+
+  @Override
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
+  public void delete(UUID id) {
+    HabitEntity toDelete = getNotDeletedOrThrow(id);
+    toDelete.setDeletedAt(Instant.now());
   }
 }

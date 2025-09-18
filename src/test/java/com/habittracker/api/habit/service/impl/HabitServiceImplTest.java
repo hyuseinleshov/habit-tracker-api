@@ -16,7 +16,6 @@ import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.Frequency;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
-import com.habittracker.api.habit.service.InternalHabitService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,26 +27,31 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PagedModel;
 
 @ExtendWith(MockitoExtension.class)
-class ExternalHabitServiceImplTest {
+class HabitServiceImplTest {
 
   @Mock private HabitRepository habitRepository;
   @Mock private HabitMapper habitMapper;
-  @Mock private InternalHabitService internalHabitService;
-  @InjectMocks private ExternalHabitServiceImpl habitService;
+  @InjectMocks private HabitServiceImpl habitService;
 
   private UserEntity testUser;
   private CreateHabitRequest validRequest;
   private HabitEntity testHabitEntity;
   private HabitResponse testHabitResponse;
+  private Pageable defaultPageable;
 
   @BeforeEach
   void setUp() {
     testUser = new UserEntity();
     testUser.setId(UUID.randomUUID());
-
     validRequest = new CreateHabitRequest(HABIT_NAME_READ_DAILY, HABIT_DESCRIPTION_LONG);
+    defaultPageable = Pageable.ofSize(10).withPage(0);
 
     testHabitEntity = new HabitEntity();
     testHabitEntity.setId(UUID.randomUUID());
@@ -151,33 +155,38 @@ class ExternalHabitServiceImplTest {
   }
 
   @Nested
+  @SuppressWarnings("unchecked")
   class GetUserHabitsTests {
 
     @Test
     void shouldReturnUserHabits_WhenHabitsExist() {
-      List<HabitEntity> habitEntities = List.of(testHabitEntity);
-      List<HabitResponse> expectedResponses = List.of(testHabitResponse);
+      Page<HabitEntity> habitEntities =
+          new PageImpl<>(List.of(testHabitEntity), defaultPageable, 1);
+      PagedModel<HabitResponse> expectedResponses =
+          new PagedModel<>(new PageImpl<>(List.of(testHabitResponse), defaultPageable, 1));
 
-      when(habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser))
+      when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
           .thenReturn(habitEntities);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
-      List<HabitResponse> result = habitService.getUserHabits(testUser);
+      PagedModel<HabitResponse> result =
+          habitService.getUserHabits(testUser, defaultPageable, false);
 
       assertThat(result).isEqualTo(expectedResponses);
-      verify(habitRepository).findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser);
+      verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
       verify(habitMapper).toResponse(testHabitEntity);
     }
 
     @Test
     void shouldReturnEmptyList_WhenNoHabitsExist() {
-      when(habitRepository.findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser))
-          .thenReturn(List.of());
+      when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
+          .thenReturn(Page.empty());
 
-      List<HabitResponse> result = habitService.getUserHabits(testUser);
+      PagedModel<HabitResponse> result =
+          habitService.getUserHabits(testUser, defaultPageable, false);
 
-      assertThat(result).isEmpty();
-      verify(habitRepository).findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(testUser);
+      assertThat(result.getContent()).isEmpty();
+      verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
       verify(habitMapper, never()).toResponse(any(HabitEntity.class));
     }
   }
@@ -190,7 +199,7 @@ class ExternalHabitServiceImplTest {
       final UUID TEST_ID = UUID.randomUUID();
       when(habitRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
-      assertThatThrownBy(() -> habitService.delete(TEST_ID, testUser.getId()))
+      assertThatThrownBy(() -> habitService.delete(TEST_ID))
           .isInstanceOf(HabitNotFoundException.class)
           .hasMessage(HABIT_NOT_FOUND_MESSAGE);
     }
@@ -200,8 +209,7 @@ class ExternalHabitServiceImplTest {
       when(habitRepository.findById(testHabitEntity.getId()))
           .thenReturn(Optional.of(testHabitEntity));
 
-      habitService.delete(testHabitEntity.getId(), testUser.getId());
-      verify(internalHabitService).softDelete(testHabitEntity);
+      habitService.delete(testHabitEntity.getId());
     }
   }
 }
