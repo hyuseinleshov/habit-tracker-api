@@ -55,7 +55,8 @@ public class HabitController {
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<HabitResponse> update(@NotNull @PathVariable UUID id, @Valid @RequestBody UpdateHabitRequest updateRequest) {
+  public ResponseEntity<HabitResponse> update(
+      @NotNull @PathVariable UUID id, @Valid @RequestBody UpdateHabitRequest updateRequest) {
     return ResponseEntity.ok(habitService.update(id, updateRequest));
   }
 

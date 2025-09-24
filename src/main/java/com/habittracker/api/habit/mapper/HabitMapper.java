@@ -8,7 +8,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface HabitMapper {
 
   @Mapping(
@@ -16,5 +18,6 @@ public interface HabitMapper {
       expression = "java(com.habittracker.api.habit.model.Frequency.DAILY)")
   HabitResponse toResponse(HabitEntity entity);
 
-  HabitEntity updateHabitFromUpdateRequest(UpdateHabitRequest updateHabitRequest, @MappingTarget HabitEntity habit);
+  HabitEntity updateHabitFromUpdateRequest(
+      UpdateHabitRequest updateHabitRequest, @MappingTarget HabitEntity habit);
 }

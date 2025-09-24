@@ -1,5 +1,7 @@
 package com.habittracker.api.habit.service.impl;
 
+import static com.habittracker.api.habit.specs.HabitSpecs.*;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
@@ -11,6 +13,8 @@ import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.service.HabitService;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,11 +23,6 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.UUID;
-
-import static com.habittracker.api.habit.specs.HabitSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -94,8 +93,8 @@ public class HabitServiceImpl implements HabitService {
   @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
   public HabitResponse update(UUID id, UpdateHabitRequest updateRequest) {
     HabitEntity toUpdate = getNotDeletedOrThrow(id);
-    habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate);
-    return habitMapper.toResponse(toUpdate);
+    return habitMapper.toResponse(
+        habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate));
   }
 
   private HabitEntity getNotDeletedOrThrow(UUID id) {
