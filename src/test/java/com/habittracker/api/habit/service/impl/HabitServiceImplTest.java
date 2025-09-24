@@ -74,7 +74,7 @@ class HabitServiceImplTest {
 
     @Test
     void shouldCreateHabit_WhenValidRequest() {
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, validRequest.name()))
+      when(habitRepository.existsByNameIgnoreCaseAndUserId(validRequest.name(), testUser.getId()))
           .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
@@ -97,7 +97,7 @@ class HabitServiceImplTest {
     void shouldTrimWhitespace_WhenCreatingHabit() {
       CreateHabitRequest requestWithWhitespace =
           new CreateHabitRequest(HABIT_NAME_WHITESPACE, HABIT_DESCRIPTION_WHITESPACE);
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_WHITESPACE))
+      when(habitRepository.existsByNameIgnoreCaseAndUserId(HABIT_NAME_WHITESPACE, testUser.getId()))
           .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
@@ -116,7 +116,7 @@ class HabitServiceImplTest {
     void shouldHandleNullDescription_WhenCreatingHabit() {
       CreateHabitRequest requestWithNullDescription =
           new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_READ_DAILY))
+      when(habitRepository.existsByNameIgnoreCaseAndUserId(HABIT_NAME_READ_DAILY, testUser.getId()))
           .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
@@ -132,7 +132,7 @@ class HabitServiceImplTest {
 
     @Test
     void shouldThrowException_WhenHabitNameAlreadyExists() {
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, validRequest.name()))
+      when(habitRepository.existsByNameIgnoreCaseAndUserId(validRequest.name(), testUser.getId()))
           .thenReturn(true);
 
       assertThatThrownBy(() -> habitService.createHabit(testUser, validRequest))
@@ -146,7 +146,8 @@ class HabitServiceImplTest {
     void shouldCheckNameIgnoreCase_WhenValidatingUniqueness() {
       CreateHabitRequest requestWithDifferentCase =
           new CreateHabitRequest(HABIT_NAME_DIFFERENT_CASE, HABIT_DESCRIPTION_GENERIC);
-      when(habitRepository.existsByUserAndNameIgnoreCase(testUser, HABIT_NAME_DIFFERENT_CASE))
+      when(habitRepository.existsByNameIgnoreCaseAndUserId(
+              HABIT_NAME_DIFFERENT_CASE, testUser.getId()))
           .thenReturn(true);
 
       assertThatThrownBy(() -> habitService.createHabit(testUser, requestWithDifferentCase))

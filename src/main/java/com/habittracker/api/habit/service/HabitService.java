@@ -20,5 +20,5 @@ public interface HabitService {
 
   HabitResponse getById(@NotNull UUID id);
 
-  HabitResponse update(@NotNull UUID id, @Valid UpdateHabitRequest updateRequest);
+  HabitResponse update(@NotNull UUID id, UUID userId, @Valid UpdateHabitRequest updateRequest);
 }

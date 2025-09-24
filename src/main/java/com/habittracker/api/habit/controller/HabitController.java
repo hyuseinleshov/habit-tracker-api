@@ -56,8 +56,10 @@ public class HabitController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<HabitResponse> update(
-      @NotNull @PathVariable UUID id, @Valid @RequestBody UpdateHabitRequest updateRequest) {
-    return ResponseEntity.ok(habitService.update(id, updateRequest));
+      @NotNull @PathVariable UUID id,
+      @Valid @RequestBody UpdateHabitRequest updateRequest,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return ResponseEntity.ok(habitService.update(id, userDetails.getId(), updateRequest));
   }
 
   @DeleteMapping("/{id}")

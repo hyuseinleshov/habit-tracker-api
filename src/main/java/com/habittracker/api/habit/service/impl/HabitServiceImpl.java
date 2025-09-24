@@ -38,13 +38,7 @@ public class HabitServiceImpl implements HabitService {
     log.debug("Creating habit with name '{}' for user {}", request.name(), user.getId());
 
     // Check if habit name already exists for this user
-    if (habitRepository.existsByUserAndNameIgnoreCase(user, request.name())) {
-      log.warn(
-          "Attempt to create habit with duplicate name '{}' for user {}",
-          request.name(),
-          user.getId());
-      throw new HabitNameAlreadyExistsException();
-    }
+    isUniqueName(user.getId(), request.name());
 
     HabitEntity habit = new HabitEntity();
     habit.setUser(user);
@@ -60,6 +54,13 @@ public class HabitServiceImpl implements HabitService {
         user.getId());
 
     return habitMapper.toResponse(savedHabit);
+  }
+
+  private void isUniqueName(UUID userId, String habitName) {
+    if (habitRepository.existsByNameIgnoreCaseAndUserId(habitName, userId)) {
+      log.warn("Attempt to create habit with duplicate name '{}' for user {}", habitName, userId);
+      throw new HabitNameAlreadyExistsException();
+    }
   }
 
   @Override
@@ -90,9 +91,10 @@ public class HabitServiceImpl implements HabitService {
   }
 
   @Override
-  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
-  public HabitResponse update(UUID id, UpdateHabitRequest updateRequest) {
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, #userId)")
+  public HabitResponse update(UUID id, UUID userId, UpdateHabitRequest updateRequest) {
     HabitEntity toUpdate = getNotDeletedOrThrow(id);
+    if (updateRequest.name() != null) isUniqueName(userId, updateRequest.name());
     return habitMapper.toResponse(
         habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate));
   }
