@@ -1,10 +1,9 @@
 package com.habittracker.api.habit.service.impl;
 
-import static com.habittracker.api.habit.specs.HabitSpecs.*;
-
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
+import com.habittracker.api.habit.dto.UpdateHabitRequest;
 import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
@@ -12,8 +11,6 @@ import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.service.HabitService;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +19,11 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static com.habittracker.api.habit.specs.HabitSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -81,8 +83,19 @@ public class HabitServiceImpl implements HabitService {
     return habitMapper.toResponse(habit);
   }
 
-  public boolean isOwnedByUser(UUID id, UUID userId) {
-    return habitRepository.existsByIdAndUserId(id, userId);
+  @Override
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
+  public void delete(UUID id) {
+    HabitEntity toDelete = getNotDeletedOrThrow(id);
+    toDelete.setDeletedAt(Instant.now());
+  }
+
+  @Override
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
+  public HabitResponse update(UUID id, UpdateHabitRequest updateRequest) {
+    HabitEntity toUpdate = getNotDeletedOrThrow(id);
+    habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate);
+    return habitMapper.toResponse(toUpdate);
   }
 
   private HabitEntity getNotDeletedOrThrow(UUID id) {
@@ -93,10 +106,7 @@ public class HabitServiceImpl implements HabitService {
     return habit;
   }
 
-  @Override
-  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
-  public void delete(UUID id) {
-    HabitEntity toDelete = getNotDeletedOrThrow(id);
-    toDelete.setDeletedAt(Instant.now());
+  public boolean isOwnedByUser(UUID id, UUID userId) {
+    return habitRepository.existsByIdAndUserId(id, userId);
   }
 }
