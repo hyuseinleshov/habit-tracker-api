@@ -56,13 +56,6 @@ public class HabitServiceImpl implements HabitService {
     return habitMapper.toResponse(savedHabit);
   }
 
-  private void isUniqueName(UUID userId, String habitName) {
-    if (habitRepository.existsByNameIgnoreCaseAndUserId(habitName, userId)) {
-      log.warn("Attempt to create habit with duplicate name '{}' for user {}", habitName, userId);
-      throw new HabitNameAlreadyExistsException();
-    }
-  }
-
   @Override
   @Transactional(readOnly = true)
   public PagedModel<HabitResponse> getUserHabits(
@@ -105,6 +98,13 @@ public class HabitServiceImpl implements HabitService {
       throw new HabitAlreadyDeletedException();
     }
     return habit;
+  }
+
+  private void isUniqueName(UUID userId, String habitName) {
+    if (habitRepository.existsByNameIgnoreCaseAndUserId(habitName, userId)) {
+      log.warn("Attempt to create habit with duplicate name '{}' for user {}", habitName, userId);
+      throw new HabitNameAlreadyExistsException();
+    }
   }
 
   public boolean isOwnedByUser(UUID id, UUID userId) {
