@@ -64,7 +64,8 @@ class HabitCleanupSchedulerIT {
             .toList();
     assertEquals(beforeCleanup - deletedEmails.size(), habitRepository.count());
     deletedEmails.forEach(
-        name -> assertFalse(habitRepository.existsByUserAndNameIgnoreCase(testUser, name)));
+        name ->
+            assertFalse(habitRepository.existsByNameIgnoreCaseAndUserId(name, testUser.getId())));
   }
 
   private void setUpDeledHabits() {

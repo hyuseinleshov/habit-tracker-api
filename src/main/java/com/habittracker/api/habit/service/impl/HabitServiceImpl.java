@@ -5,6 +5,7 @@ import static com.habittracker.api.habit.specs.HabitSpecs.*;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
+import com.habittracker.api.habit.dto.UpdateHabitRequest;
 import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
@@ -37,13 +38,7 @@ public class HabitServiceImpl implements HabitService {
     log.debug("Creating habit with name '{}' for user {}", request.name(), user.getId());
 
     // Check if habit name already exists for this user
-    if (habitRepository.existsByUserAndNameIgnoreCase(user, request.name())) {
-      log.warn(
-          "Attempt to create habit with duplicate name '{}' for user {}",
-          request.name(),
-          user.getId());
-      throw new HabitNameAlreadyExistsException();
-    }
+    isUniqueName(user.getId(), request.name());
 
     HabitEntity habit = new HabitEntity();
     habit.setUser(user);
@@ -81,8 +76,20 @@ public class HabitServiceImpl implements HabitService {
     return habitMapper.toResponse(habit);
   }
 
-  public boolean isOwnedByUser(UUID id, UUID userId) {
-    return habitRepository.existsByIdAndUserId(id, userId);
+  @Override
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
+  public void delete(UUID id) {
+    HabitEntity toDelete = getNotDeletedOrThrow(id);
+    toDelete.setDeletedAt(Instant.now());
+  }
+
+  @Override
+  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, #userId)")
+  public HabitResponse update(UUID id, UUID userId, UpdateHabitRequest updateRequest) {
+    HabitEntity toUpdate = getNotDeletedOrThrow(id);
+    if (updateRequest.name() != null) isUniqueName(userId, updateRequest.name());
+    return habitMapper.toResponse(
+        habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate));
   }
 
   private HabitEntity getNotDeletedOrThrow(UUID id) {
@@ -93,10 +100,14 @@ public class HabitServiceImpl implements HabitService {
     return habit;
   }
 
-  @Override
-  @PreAuthorize("@habitServiceImpl.isOwnedByUser(#id, principal.id)")
-  public void delete(UUID id) {
-    HabitEntity toDelete = getNotDeletedOrThrow(id);
-    toDelete.setDeletedAt(Instant.now());
+  private void isUniqueName(UUID userId, String habitName) {
+    if (habitRepository.existsByNameIgnoreCaseAndUserId(habitName, userId)) {
+      log.warn("Attempt to create habit with duplicate name '{}' for user {}", habitName, userId);
+      throw new HabitNameAlreadyExistsException();
+    }
+  }
+
+  public boolean isOwnedByUser(UUID id, UUID userId) {
+    return habitRepository.existsByIdAndUserId(id, userId);
   }
 }

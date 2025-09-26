@@ -3,6 +3,7 @@ package com.habittracker.api.habit.controller;
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
+import com.habittracker.api.habit.dto.UpdateHabitRequest;
 import com.habittracker.api.habit.service.HabitService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -51,6 +52,14 @@ public class HabitController {
   @GetMapping("/{id}")
   public ResponseEntity<HabitResponse> byId(@NotNull @PathVariable UUID id) {
     return ResponseEntity.ok(habitService.getById(id));
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<HabitResponse> update(
+      @NotNull @PathVariable UUID id,
+      @Valid @RequestBody UpdateHabitRequest updateRequest,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return ResponseEntity.ok(habitService.update(id, userDetails.getId(), updateRequest));
   }
 
   @DeleteMapping("/{id}")
