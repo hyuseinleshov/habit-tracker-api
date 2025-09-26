@@ -8,13 +8,12 @@ import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
+import java.time.ZoneId;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.ZoneId;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

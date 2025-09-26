@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class CheckInExceptionHandler {
 
-    @ExceptionHandler(DuplicateCheckinException.class)
-    public ResponseEntity<ApiError> handleDuplicateCheckInException(
-            DuplicateCheckinException ex, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
-    }
+  @ExceptionHandler(DuplicateCheckinException.class)
+  public ResponseEntity<ApiError> handleDuplicateCheckInException(
+      DuplicateCheckinException ex, HttpServletRequest request) {
+    HttpStatus status = HttpStatus.CONFLICT;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
 }
