@@ -1,6 +1,9 @@
-package com.habittracker.api.habit.exception;
+package com.habittracker.api.habit.exception.handler;
 
 import com.habittracker.api.core.exception.ApiError;
+import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
+import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
+import com.habittracker.api.habit.exception.HabitNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
