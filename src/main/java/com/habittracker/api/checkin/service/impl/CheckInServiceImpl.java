@@ -1,5 +1,6 @@
 package com.habittracker.api.checkin.service.impl;
 
+import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.mapper.CheckInMapper;
 import com.habittracker.api.checkin.model.CheckInEntity;
@@ -27,11 +28,12 @@ public class CheckInServiceImpl implements CheckInService {
   private final DailyCheckInService dailyCheckInService;
 
   @Override
-  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, principal.id)")
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
   @Transactional
-  public CheckInResponse checkIn(UUID habitId, String userTimezone) {
+  public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
-    dailyCheckInService.registerTodayCheckin(habit, ZoneId.of(userTimezone));
+    dailyCheckInService.registerTodayCheckin(
+        habit, user.getId(), ZoneId.of(user.getUserProfile().getTimezone()));
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
     CheckInEntity saved = checkInRepository.save(checkInEntity);
