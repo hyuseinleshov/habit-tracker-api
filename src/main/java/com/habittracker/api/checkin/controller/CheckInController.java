@@ -27,6 +27,6 @@ public class CheckInController {
       @NotNull @PathVariable("id") UUID habitId,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     return ResponseEntity.status(CREATED)
-        .body(checkInService.checkIn(habitId, userDetails.getProfile().getTimezone()));
+        .body(checkInService.checkIn(habitId, userDetails.getUser()));
   }
 }
