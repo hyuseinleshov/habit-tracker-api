@@ -20,7 +20,6 @@ public final class TimezoneUtils {
   public static Duration calculateDurationUntilMidnight(ZoneId userTimeZone) {
     LocalDateTime now = LocalDateTime.now(userTimeZone);
     LocalDateTime midnight = now.plusDays(1).truncatedTo(ChronoUnit.DAYS);
-    System.out.println(now.truncatedTo(ChronoUnit.MINUTES));
     return Duration.between(now, midnight);
   }
 }
