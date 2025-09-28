@@ -1,5 +1,7 @@
 package com.habittracker.api.checkin.service.impl;
 
+import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.mapper.CheckInMapper;
@@ -9,7 +11,6 @@ import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
-import java.time.ZoneId;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class CheckInServiceImpl implements CheckInService {
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     dailyCheckInService.registerTodayCheckin(
-        habit, user.getId(), ZoneId.of(user.getUserProfile().getTimezone()));
+        habit, user.getId(), parseTimeZone(user.getUserProfile().getTimezone()));
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
     CheckInEntity saved = checkInRepository.save(checkInEntity);

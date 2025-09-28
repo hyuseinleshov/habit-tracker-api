@@ -1,9 +1,10 @@
 package com.habittracker.api.user.service.impl;
 
-import static com.habittracker.api.user.constants.UserProfileConstants.*;
+import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
+import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
+import static com.habittracker.api.user.constants.UserProfileConstants.USER_PROFILE_DATA_NOT_VALID_MESSAGE;
 
 import com.habittracker.api.auth.model.UserEntity;
-import com.habittracker.api.core.utils.TimezoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
@@ -29,8 +30,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   @Transactional
   public UserProfileEntity createProfile(UserEntity user, String timezone) {
     if (user == null) throw new IllegalArgumentException(USER_CANT_BE_NULL_MESSAGE);
-    if (!TimezoneUtils.isValidTimezone(timezone))
-      throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+    parseTimeZone(timezone);
     UserProfileEntity userProfile = new UserProfileEntity();
     userProfile.setUser(user);
     userProfile.setTimezone(timezone);

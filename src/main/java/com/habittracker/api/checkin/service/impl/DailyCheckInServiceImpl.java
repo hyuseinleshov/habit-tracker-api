@@ -2,7 +2,7 @@ package com.habittracker.api.checkin.service.impl;
 
 import com.habittracker.api.checkin.exception.DuplicateCheckinException;
 import com.habittracker.api.checkin.service.DailyCheckInService;
-import com.habittracker.api.core.utils.TimezoneUtils;
+import com.habittracker.api.core.utils.TimeZoneUtils;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -27,6 +27,6 @@ public class DailyCheckInServiceImpl implements DailyCheckInService {
     }
     redisTemplate
         .opsForValue()
-        .set(key, "1", TimezoneUtils.calculateDurationUntilMidnight(userTimeZone));
+        .set(key, "1", TimeZoneUtils.calculateDurationUntilMidnight(userTimeZone));
   }
 }
