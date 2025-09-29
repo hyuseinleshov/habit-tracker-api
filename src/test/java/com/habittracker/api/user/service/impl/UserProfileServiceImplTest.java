@@ -2,13 +2,15 @@ package com.habittracker.api.user.service.impl;
 
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUser;
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUserRole;
-import static com.habittracker.api.user.constants.UserProfileConstants.*;
+import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
+import static com.habittracker.api.user.constants.UserProfileConstants.USER_PROFILE_DATA_NOT_VALID_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.core.utils.TimeZoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
@@ -59,7 +61,7 @@ class UserProfileServiceImplTest {
   void test_CreateProfile_Should_ThrowException_When_Timezone_Is_Invalid(String timezone) {
     assertThatThrownBy(() -> toTest.createProfile(TEST_USER, timezone))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(INVALID_TIMEZONE_MESSAGE);
+        .hasMessage(TimeZoneUtils.INVALID_TIMEZONE_MESSAGE);
   }
 
   @Test

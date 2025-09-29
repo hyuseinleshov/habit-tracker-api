@@ -12,12 +12,12 @@ import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
+import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.Frequency;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +38,7 @@ class HabitServiceImplTest {
 
   @Mock private HabitRepository habitRepository;
   @Mock private HabitMapper habitMapper;
+  @Mock private HabitHelper habitHelper;
   @InjectMocks private HabitServiceImpl habitService;
 
   private UserEntity testUser;
@@ -74,8 +75,6 @@ class HabitServiceImplTest {
 
     @Test
     void shouldCreateHabit_WhenValidRequest() {
-      when(habitRepository.existsByNameIgnoreCaseAndUserId(validRequest.name(), testUser.getId()))
-          .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -97,8 +96,6 @@ class HabitServiceImplTest {
     void shouldTrimWhitespace_WhenCreatingHabit() {
       CreateHabitRequest requestWithWhitespace =
           new CreateHabitRequest(HABIT_NAME_WHITESPACE, HABIT_DESCRIPTION_WHITESPACE);
-      when(habitRepository.existsByNameIgnoreCaseAndUserId(HABIT_NAME_WHITESPACE, testUser.getId()))
-          .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -116,8 +113,6 @@ class HabitServiceImplTest {
     void shouldHandleNullDescription_WhenCreatingHabit() {
       CreateHabitRequest requestWithNullDescription =
           new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
-      when(habitRepository.existsByNameIgnoreCaseAndUserId(HABIT_NAME_READ_DAILY, testUser.getId()))
-          .thenReturn(false);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
@@ -132,9 +127,9 @@ class HabitServiceImplTest {
 
     @Test
     void shouldThrowException_WhenHabitNameAlreadyExists() {
-      when(habitRepository.existsByNameIgnoreCaseAndUserId(validRequest.name(), testUser.getId()))
-          .thenReturn(true);
-
+      doThrow(new HabitNameAlreadyExistsException())
+          .when(habitHelper)
+          .isUniqueName(testUser.getId(), validRequest.name());
       assertThatThrownBy(() -> habitService.createHabit(testUser, validRequest))
           .isInstanceOf(HabitNameAlreadyExistsException.class);
 
@@ -146,10 +141,9 @@ class HabitServiceImplTest {
     void shouldCheckNameIgnoreCase_WhenValidatingUniqueness() {
       CreateHabitRequest requestWithDifferentCase =
           new CreateHabitRequest(HABIT_NAME_DIFFERENT_CASE, HABIT_DESCRIPTION_GENERIC);
-      when(habitRepository.existsByNameIgnoreCaseAndUserId(
-              HABIT_NAME_DIFFERENT_CASE, testUser.getId()))
-          .thenReturn(true);
-
+      doThrow(new HabitNameAlreadyExistsException())
+          .when(habitHelper)
+          .isUniqueName(testUser.getId(), HABIT_NAME_DIFFERENT_CASE);
       assertThatThrownBy(() -> habitService.createHabit(testUser, requestWithDifferentCase))
           .isInstanceOf(HabitNameAlreadyExistsException.class);
     }
@@ -198,7 +192,7 @@ class HabitServiceImplTest {
     @Test
     void shouldThrowNotFound_WhenHabitNotExist() {
       final UUID TEST_ID = UUID.randomUUID();
-      when(habitRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+      when(habitHelper.getNotDeletedOrThrow(TEST_ID)).thenThrow(new HabitNotFoundException());
 
       assertThatThrownBy(() -> habitService.delete(TEST_ID))
           .isInstanceOf(HabitNotFoundException.class)
@@ -207,8 +201,7 @@ class HabitServiceImplTest {
 
     @Test
     void shouldDeleteHabit() {
-      when(habitRepository.findById(testHabitEntity.getId()))
-          .thenReturn(Optional.of(testHabitEntity));
+      when(habitHelper.getNotDeletedOrThrow(testHabitEntity.getId())).thenReturn((testHabitEntity));
 
       habitService.delete(testHabitEntity.getId());
     }
