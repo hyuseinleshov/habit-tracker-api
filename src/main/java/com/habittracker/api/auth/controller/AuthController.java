@@ -3,9 +3,9 @@ package com.habittracker.api.auth.controller;
 import com.habittracker.api.auth.dto.*;
 import com.habittracker.api.auth.service.AuthService;
 import jakarta.validation.Valid;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +24,7 @@ public class AuthController {
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     AuthResponse response = userService.register(request);
     log.info("User with email - {}, registered successfully", request.email());
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    return ResponseEntity.created(URI.create("/api/me")).body(response);
   }
 
   @PostMapping("/login")

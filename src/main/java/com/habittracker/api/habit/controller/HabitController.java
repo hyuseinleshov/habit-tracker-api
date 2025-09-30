@@ -13,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/habits")
@@ -33,7 +33,9 @@ public class HabitController {
 
     log.info("Creating habit '{}' for user {}", request.name(), principal.getUser().getId());
     HabitResponse response = habitService.createHabit(principal.getUser(), request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    return ResponseEntity.created(
+            ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(response.id()))
+        .body(response);
   }
 
   @GetMapping
