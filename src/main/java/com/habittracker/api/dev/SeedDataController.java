@@ -39,7 +39,8 @@ public class SeedDataController {
       @RequestParam(defaultValue = "60") int daysBack,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     SeedSummary summary =
-        seedDataService.seedFullDataForUser(userDetails.getUser(), habitCount, checkInCount, daysBack);
+        seedDataService.seedFullDataForUser(
+            userDetails.getUser(), habitCount, checkInCount, daysBack);
     return ResponseEntity.ok(
         new SeedResponse(
             String.format(

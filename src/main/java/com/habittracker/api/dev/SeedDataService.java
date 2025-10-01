@@ -80,16 +80,18 @@ public class SeedDataService {
   public int seedCheckInsForUser(UserEntity user, int count, int daysBack) {
     log.info("Seeding {} check-ins for user {} over {} days", count, user.getEmail(), daysBack);
 
-    List<HabitEntity> userHabits = habitRepository.findAll().stream()
-        .filter(h -> h.getUser().getId().equals(user.getId()) && h.getDeletedAt() == null)
-        .toList();
+    List<HabitEntity> userHabits =
+        habitRepository.findAll().stream()
+            .filter(h -> h.getUser().getId().equals(user.getId()) && h.getDeletedAt() == null)
+            .toList();
 
     if (userHabits.isEmpty()) {
       log.warn("No habits found for user. Creating some first.");
       seedHabitsForUser(user, 5);
-      userHabits = habitRepository.findAll().stream()
-          .filter(h -> h.getUser().getId().equals(user.getId()))
-          .toList();
+      userHabits =
+          habitRepository.findAll().stream()
+              .filter(h -> h.getUser().getId().equals(user.getId()))
+              .toList();
     }
 
     List<CheckInEntity> checkIns = new ArrayList<>();
@@ -153,9 +155,10 @@ public class SeedDataService {
   public int clearUserData(UserEntity user) {
     log.info("Clearing all data for user {}", user.getEmail());
 
-    List<HabitEntity> userHabits = habitRepository.findAll().stream()
-        .filter(h -> h.getUser().getId().equals(user.getId()))
-        .toList();
+    List<HabitEntity> userHabits =
+        habitRepository.findAll().stream()
+            .filter(h -> h.getUser().getId().equals(user.getId()))
+            .toList();
 
     int checkInsDeleted = 0;
     for (HabitEntity habit : userHabits) {
