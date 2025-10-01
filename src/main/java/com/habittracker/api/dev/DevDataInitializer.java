@@ -1,4 +1,4 @@
-package com.habittracker.api;
+package com.habittracker.api.dev;
 
 import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.model.RoleEntity;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 @Profile("dev")
-public class DataInitializer implements CommandLineRunner {
+public class DevDataInitializer implements CommandLineRunner {
 
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
