@@ -29,7 +29,6 @@ public class CheckInSpecs {
   }
 
   public static Specification<CheckInEntity> createdBefore(Instant to) {
-    return (root, query, builder) ->
-        builder.lessThanOrEqualTo(root.get(BaseEntity_.createdAt), to);
+    return (root, query, builder) -> builder.lessThanOrEqualTo(root.get(BaseEntity_.createdAt), to);
   }
 }
