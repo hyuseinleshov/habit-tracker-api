@@ -24,11 +24,20 @@ public class CheckInSpecs {
   }
 
   public static Specification<CheckInEntity> createdAfter(Instant from) {
-    return (root, query, builder) ->
-        builder.greaterThanOrEqualTo(root.get(BaseEntity_.createdAt), from);
+    return (root, query, builder) -> {
+      if (from == null) {
+        return builder.conjunction();
+      }
+      return builder.greaterThanOrEqualTo(root.get(BaseEntity_.createdAt), from);
+    };
   }
 
   public static Specification<CheckInEntity> createdBefore(Instant to) {
-    return (root, query, builder) -> builder.lessThanOrEqualTo(root.get(BaseEntity_.createdAt), to);
+    return (root, query, builder) -> {
+      if (to == null) {
+        return builder.conjunction();
+      }
+      return builder.lessThanOrEqualTo(root.get(BaseEntity_.createdAt), to);
+    };
   }
 }

@@ -54,13 +54,7 @@ public class CheckInServiceImpl implements CheckInService {
   public Page<CheckInResponse> getCheckInsByHabit(
       UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
-    Specification<CheckInEntity> spec = hasHabit(habit);
-    if (from != null) {
-      spec = spec.and(createdAfter(from));
-    }
-    if (to != null) {
-      spec = spec.and(createdBefore(to));
-    }
+    Specification<CheckInEntity> spec = hasHabit(habit).and(createdAfter(from)).and(createdBefore(to));
     return checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponse);
   }
 
@@ -68,13 +62,7 @@ public class CheckInServiceImpl implements CheckInService {
   @Transactional(readOnly = true)
   public Page<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable) {
-    Specification<CheckInEntity> spec = hasUser(user);
-    if (from != null) {
-      spec = spec.and(createdAfter(from));
-    }
-    if (to != null) {
-      spec = spec.and(createdBefore(to));
-    }
+    Specification<CheckInEntity> spec = hasUser(user).and(createdAfter(from)).and(createdBefore(to));
     return checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
   }
 }
