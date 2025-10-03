@@ -56,7 +56,8 @@ public class CheckInServiceImpl implements CheckInService {
       UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasHabit(habit), from, to);
-    Page<CheckInResponse> page = checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponse);
+    Page<CheckInResponse> page =
+        checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponse);
     return new PagedModel<>(page);
   }
 
@@ -65,7 +66,8 @@ public class CheckInServiceImpl implements CheckInService {
   public PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable) {
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasUser(user), from, to);
-    Page<CheckInWithHabitResponse> page = checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
+    Page<CheckInWithHabitResponse> page =
+        checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
     return new PagedModel<>(page);
   }
 
