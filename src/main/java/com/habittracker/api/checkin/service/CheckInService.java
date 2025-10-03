@@ -5,16 +5,16 @@ import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 
 public interface CheckInService {
 
   CheckInResponse checkIn(UUID habitId, UserEntity user);
 
-  Page<CheckInResponse> getCheckInsByHabit(
+  PagedModel<CheckInResponse> getCheckInsByHabit(
       UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable);
 
-  Page<CheckInWithHabitResponse> getAllCheckIns(
+  PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable);
 }

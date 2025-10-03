@@ -10,9 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class CheckInController {
   }
 
   @GetMapping("/api/habits/{id}/check-ins")
-  public ResponseEntity<Page<CheckInResponse>> getCheckInsByHabit(
+  public ResponseEntity<PagedModel<CheckInResponse>> getCheckInsByHabit(
       @NotNull @PathVariable("id") UUID habitId,
       @RequestParam(required = false) Instant from,
       @RequestParam(required = false) Instant to,
@@ -43,7 +43,7 @@ public class CheckInController {
   }
 
   @GetMapping("/api/check-ins")
-  public ResponseEntity<Page<CheckInWithHabitResponse>> getAllCheckIns(
+  public ResponseEntity<PagedModel<CheckInWithHabitResponse>> getAllCheckIns(
       @RequestParam(required = false) Instant from,
       @RequestParam(required = false) Instant to,
       @PageableDefault(size = 20) Pageable pageable,

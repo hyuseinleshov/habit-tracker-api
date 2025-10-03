@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,19 +52,21 @@ public class CheckInServiceImpl implements CheckInService {
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
   @Transactional(readOnly = true)
-  public Page<CheckInResponse> getCheckInsByHabit(
+  public PagedModel<CheckInResponse> getCheckInsByHabit(
       UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasHabit(habit), from, to);
-    return checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponse);
+    Page<CheckInResponse> page = checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponse);
+    return new PagedModel<>(page);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<CheckInWithHabitResponse> getAllCheckIns(
+  public PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable) {
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasUser(user), from, to);
-    return checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
+    Page<CheckInWithHabitResponse> page = checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
+    return new PagedModel<>(page);
   }
 
   private Specification<CheckInEntity> buildSpecificationWithDateRange(
