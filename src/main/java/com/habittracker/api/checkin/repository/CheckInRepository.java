@@ -6,4 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface CheckInRepository
-    extends JpaRepository<CheckInEntity, UUID>, JpaSpecificationExecutor<CheckInEntity> {}
+    extends JpaRepository<CheckInEntity, UUID>, JpaSpecificationExecutor<CheckInEntity> {
+
+  boolean existsByIdAndHabitUserId(UUID id, UUID userId);
+}
