@@ -6,6 +6,7 @@ import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
+import com.habittracker.api.checkin.exception.CheckInNotFoundException;
 import com.habittracker.api.checkin.mapper.CheckInMapper;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
@@ -69,6 +70,20 @@ public class CheckInServiceImpl implements CheckInService {
     Page<CheckInWithHabitResponse> page =
         checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
     return new PagedModel<>(page);
+  }
+
+  @Override
+  @Transactional
+  public void deleteCheckIn(UUID checkInId, UserEntity user) {
+    CheckInEntity checkIn =
+        checkInRepository.findById(checkInId).orElseThrow(CheckInNotFoundException::new);
+
+    if (!checkIn.getHabit().getUser().getId().equals(user.getId())) {
+      throw new CheckInNotFoundException();
+    }
+
+    checkInRepository.delete(checkIn);
+    log.debug("Deleted check-in with id {} for user {}", checkInId, user.getId());
   }
 
   private Specification<CheckInEntity> buildSpecificationWithDateRange(

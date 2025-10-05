@@ -17,4 +17,6 @@ public interface CheckInService {
 
   PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable);
+
+  void deleteCheckIn(UUID checkInId, UserEntity user);
 }
