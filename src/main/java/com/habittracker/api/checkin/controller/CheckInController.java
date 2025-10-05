@@ -54,8 +54,7 @@ public class CheckInController {
 
   @DeleteMapping("/api/check-ins/{checkInId}")
   public ResponseEntity<Void> deleteCheckIn(
-      @NotNull @PathVariable UUID checkInId,
-      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+      @NotNull @PathVariable UUID checkInId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
     checkInService.deleteCheckIn(checkInId, userDetails.getUser());
     return ResponseEntity.noContent().build();
   }
