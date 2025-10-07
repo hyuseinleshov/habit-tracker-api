@@ -1,5 +1,6 @@
 package com.habittracker.api.checkin.service.impl;
 
+import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
 import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
@@ -13,6 +14,7 @@ import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.checkin.service.DailyCheckInService;
+import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Instant;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,8 @@ public class CheckInServiceImpl implements CheckInService {
   private final CheckInHelper checkInHelper;
   private final CheckInMapper checkInMapper;
   private final DailyCheckInService dailyCheckInService;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final StreakService streakService;
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
@@ -48,6 +53,13 @@ public class CheckInServiceImpl implements CheckInService {
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
     CheckInEntity saved = checkInRepository.save(checkInEntity);
+
+    String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
+    Integer currentStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
+    if (currentStreak != null) {
+      redisTemplate.opsForValue().increment(cacheKey);
+    }
+
     log.debug("Check in for habit with id {}.", habit.getId());
     return checkInMapper.toResponse(saved);
   }
@@ -80,8 +92,13 @@ public class CheckInServiceImpl implements CheckInService {
   public void deleteCheckIn(UUID checkInId, UserEntity user) {
     CheckInEntity checkIn =
         checkInRepository.findById(checkInId).orElseThrow(CheckInNotFoundException::new);
-
+    UUID habitId = checkIn.getHabit().getId();
     checkInRepository.delete(checkIn);
+
+    // For now, we just handle the deletion of check-in like this.
+    // We will discuss if we will keep the delete functionality
+    streakService.calculateStreak(habitId);
+
     log.debug("Deleted check-in with id {} for user {}", checkInId, user.getId());
   }
 
