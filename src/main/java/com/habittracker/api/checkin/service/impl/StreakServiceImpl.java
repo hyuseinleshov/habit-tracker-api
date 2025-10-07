@@ -3,6 +3,7 @@ package com.habittracker.api.checkin.service.impl;
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
 import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
+
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
