@@ -1,19 +1,18 @@
 package com.habittracker.api.checkin.service.impl;
 
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
-import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
+import com.habittracker.api.checkin.service.StreakCalculator;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +30,7 @@ public class StreakServiceImpl implements StreakService {
   private final CheckInRepository checkInRepository;
   private final HabitHelper habitHelper;
   private final RedisTemplate<String, Object> redisTemplate;
+  private final StreakCalculator streakCalculator;
 
   @Override
   @Transactional(readOnly = true)
@@ -79,18 +79,7 @@ public class StreakServiceImpl implements StreakService {
 
   private int calculateStreakFromDatabase(UUID habitId, ZoneId userTimeZone) {
     List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
-
-    if (checkIns.isEmpty()) {
-      return 0;
-    }
-
-    LocalDate mostRecentDate = checkIns.get(0).getCreatedAt().atZone(userTimeZone).toLocalDate();
-
-    if (!isTodayOrYesterday(mostRecentDate, userTimeZone)) {
-      return 0;
-    }
-
-    return calculateConsecutiveDays(checkIns, userTimeZone);
+    return streakCalculator.calculateConsecutiveStreak(checkIns, userTimeZone);
   }
 
   private void cacheStreak(UUID habitId, int streak, ZoneId userTimeZone) {
@@ -104,25 +93,5 @@ public class StreakServiceImpl implements StreakService {
   private Duration calculateDurationUntilDayAfterTomorrowMidnight(ZoneId userTimeZone) {
     Duration untilMidnight = calculateDurationUntilMidnight(userTimeZone);
     return untilMidnight.plusDays(1);
-  }
-
-  private int calculateConsecutiveDays(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
-    int streak = 1;
-    LocalDate previousDate = checkIns.getFirst().getCreatedAt().atZone(userTimeZone).toLocalDate();
-
-    for (int i = 1; i < checkIns.size(); i++) {
-      LocalDate currentDate = checkIns.get(i).getCreatedAt().atZone(userTimeZone).toLocalDate();
-
-      // Check if current date is exactly one day before previous date
-      if (currentDate.plusDays(1).isEqual(previousDate)) {
-        streak++;
-        previousDate = currentDate;
-      } else {
-        // Gap found, streak is broken
-        break;
-      }
-    }
-
-    return streak;
   }
 }
