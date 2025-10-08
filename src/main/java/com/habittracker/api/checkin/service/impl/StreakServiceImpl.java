@@ -50,16 +50,30 @@ public class StreakServiceImpl implements StreakService {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
-    List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
+    // 3. Check if the most recent check-in is from today or yesterday
+    CheckInEntity mostRecentCheckIn =
+        checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(habitId).orElse(null);
 
     int currentStreak;
-    if (checkIns.isEmpty()) {
+    if (mostRecentCheckIn == null) {
       currentStreak = 0;
     } else {
-      currentStreak = calculateConsecutiveDays(checkIns, userTimeZone);
+      LocalDate mostRecentDate =
+          mostRecentCheckIn.getCreatedAt().atZone(userTimeZone).toLocalDate();
+      LocalDate today = LocalDate.now(userTimeZone);
+      LocalDate yesterday = today.minusDays(1);
+
+      // Current streak exists only if most recent check-in is today or yesterday
+      if (mostRecentDate.isEqual(today) || mostRecentDate.isEqual(yesterday)) {
+        List<CheckInEntity> checkIns =
+            checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
+        currentStreak = calculateConsecutiveDays(checkIns, userTimeZone);
+      } else {
+        currentStreak = 0;
+      }
     }
 
-    // 3. Store in Redis with TTL until midnight of the day after tomorrow (user's timezone)
+    // 4. Store in Redis with TTL until midnight of the day after tomorrow (user's timezone)
     Duration untilMidnight = calculateDurationUntilMidnight(userTimeZone);
     Duration cacheTtl = untilMidnight.plusDays(1);
     redisTemplate.opsForValue().set(cacheKey, currentStreak, cacheTtl);
