@@ -58,6 +58,8 @@ public class CheckInServiceImpl implements CheckInService {
     Integer currentStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
     if (currentStreak != null) {
       redisTemplate.opsForValue().increment(cacheKey);
+    } else {
+        streakService.calculateStreak(habitId);
     }
 
     log.debug("Check in for habit with id {}.", habit.getId());
