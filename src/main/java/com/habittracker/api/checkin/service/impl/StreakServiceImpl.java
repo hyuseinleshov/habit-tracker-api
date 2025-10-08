@@ -1,6 +1,7 @@
 package com.habittracker.api.checkin.service.impl;
 
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
+import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
@@ -34,13 +35,30 @@ public class StreakServiceImpl implements StreakService {
   @Override
   @Transactional(readOnly = true)
   public StreakResponse calculateStreak(UUID habitId) {
+    int currentStreak = getOrCalculateStreak(habitId);
+    return new StreakResponse(habitId, currentStreak, Instant.now());
+  }
+
+  @Override
+  public void incrementStreak(UUID habitId) {
+    int currentStreak = getOrCalculateStreak(habitId);
+    int newStreak = currentStreak + 1;
+
+    HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
+    ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
+
+    cacheStreak(habitId, newStreak, userTimeZone);
+    log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
+  }
+
+  private int getOrCalculateStreak(UUID habitId) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
 
     // 1. Check Redis cache (O(1) fast path - NO DB query!)
     Integer cachedStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
     if (cachedStreak != null) {
       log.debug("Streak cache hit for habit ID: {}", habitId);
-      return new StreakResponse(habitId, cachedStreak, Instant.now());
+      return cachedStreak;
     }
 
     // 2. Cache miss - calculate from database
@@ -50,34 +68,42 @@ public class StreakServiceImpl implements StreakService {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
-    // 3. Check if the most recent check-in is from today or yesterday
-    CheckInEntity mostRecentCheckIn =
-        checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(habitId).orElse(null);
-
-    int currentStreak;
-    if (mostRecentCheckIn == null) {
-      currentStreak = 0;
-    } else {
-      LocalDate mostRecentDate =
-          mostRecentCheckIn.getCreatedAt().atZone(userTimeZone).toLocalDate();
-      LocalDate today = LocalDate.now(userTimeZone);
-      LocalDate yesterday = today.minusDays(1);
-
-      // Current streak exists only if most recent check-in is today or yesterday
-      if (mostRecentDate.isEqual(today) || mostRecentDate.isEqual(yesterday)) {
-        List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
-        currentStreak = calculateConsecutiveDays(checkIns, userTimeZone);
-      } else {
-        currentStreak = 0;
-      }
-    }
+    // 3. Calculate streak from database
+    int currentStreak = calculateStreakFromDatabase(habitId, userTimeZone);
 
     // 4. Store in Redis with TTL until midnight of the day after tomorrow (user's timezone)
-    Duration untilMidnight = calculateDurationUntilMidnight(userTimeZone);
-    Duration cacheTtl = untilMidnight.plusDays(1);
-    redisTemplate.opsForValue().set(cacheKey, currentStreak, cacheTtl);
+    cacheStreak(habitId, currentStreak, userTimeZone);
 
-    return new StreakResponse(habitId, currentStreak, Instant.now());
+    return currentStreak;
+  }
+
+  private int calculateStreakFromDatabase(UUID habitId, ZoneId userTimeZone) {
+    List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
+
+    if (checkIns.isEmpty()) {
+      return 0;
+    }
+
+    LocalDate mostRecentDate = checkIns.get(0).getCreatedAt().atZone(userTimeZone).toLocalDate();
+
+    if (!isTodayOrYesterday(mostRecentDate, userTimeZone)) {
+      return 0;
+    }
+
+    return calculateConsecutiveDays(checkIns, userTimeZone);
+  }
+
+  private void cacheStreak(UUID habitId, int streak, ZoneId userTimeZone) {
+    String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
+    // Cache expires at midnight of the day after tomorrow (user's timezone)
+    // This gives users until end of tomorrow to maintain their streak
+    Duration cacheTtl = calculateDurationUntilDayAfterTomorrowMidnight(userTimeZone);
+    redisTemplate.opsForValue().set(cacheKey, streak, cacheTtl);
+  }
+
+  private Duration calculateDurationUntilDayAfterTomorrowMidnight(ZoneId userTimeZone) {
+    Duration untilMidnight = calculateDurationUntilMidnight(userTimeZone);
+    return untilMidnight.plusDays(1);
   }
 
   private int calculateConsecutiveDays(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
