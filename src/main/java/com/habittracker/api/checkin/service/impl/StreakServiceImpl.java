@@ -65,8 +65,7 @@ public class StreakServiceImpl implements StreakService {
 
       // Current streak exists only if most recent check-in is today or yesterday
       if (mostRecentDate.isEqual(today) || mostRecentDate.isEqual(yesterday)) {
-        List<CheckInEntity> checkIns =
-            checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
+        List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
         currentStreak = calculateConsecutiveDays(checkIns, userTimeZone);
       } else {
         currentStreak = 0;
@@ -82,10 +81,6 @@ public class StreakServiceImpl implements StreakService {
   }
 
   private int calculateConsecutiveDays(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
-    if (checkIns.isEmpty()) {
-      return 0;
-    }
-
     int streak = 1;
     LocalDate previousDate = checkIns.getFirst().getCreatedAt().atZone(userTimeZone).toLocalDate();
 
