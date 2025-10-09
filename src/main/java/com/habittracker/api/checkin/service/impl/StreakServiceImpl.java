@@ -71,7 +71,7 @@ public class StreakServiceImpl implements StreakService {
     // 3. Calculate streak from database
     int currentStreak = calculateStreakFromDatabase(habitId, userTimeZone);
 
-    // 4. Store in Redis with TTL until midnight of the day after tomorrow (user's timezone)
+    // 4. Store in Redis with TTL until midnight tomorrow (user's timezone)
     cacheStreak(habitId, currentStreak, userTimeZone);
 
     return currentStreak;
@@ -84,14 +84,9 @@ public class StreakServiceImpl implements StreakService {
 
   private void cacheStreak(UUID habitId, int streak, ZoneId userTimeZone) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
-    // Cache expires at midnight of the day after tomorrow (user's timezone)
-    // This gives users until end of tomorrow to maintain their streak
-    Duration cacheTtl = calculateDurationUntilDayAfterTomorrowMidnight(userTimeZone);
+    // Cache expires at midnight tomorrow (user's timezone)
+    // This aligns with streak expiration: user has until end of tomorrow to check in
+    Duration cacheTtl = calculateDurationUntilMidnight(userTimeZone, 2);
     redisTemplate.opsForValue().set(cacheKey, streak, cacheTtl);
-  }
-
-  private Duration calculateDurationUntilDayAfterTomorrowMidnight(ZoneId userTimeZone) {
-    Duration untilMidnight = calculateDurationUntilMidnight(userTimeZone);
-    return untilMidnight.plusDays(1);
   }
 }
