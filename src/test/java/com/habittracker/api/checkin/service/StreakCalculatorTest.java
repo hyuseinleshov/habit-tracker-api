@@ -173,8 +173,6 @@ class StreakCalculatorTest {
       assertThat(streak).isEqualTo(100);
     }
 
-    // ========== TIMEZONE-AWARE SCENARIOS ==========
-
     @Test
     void shouldHandleCheckInsAtMidnightBoundary() {
       LocalDate today = LocalDate.now(testTimeZone);
@@ -223,8 +221,6 @@ class StreakCalculatorTest {
 
       assertThat(streak).isEqualTo(2);
     }
-
-    // ========== EDGE CASES ==========
 
     @Test
     void shouldReturnZero_WhenOnlyCheckInIsFromLastYear() {
