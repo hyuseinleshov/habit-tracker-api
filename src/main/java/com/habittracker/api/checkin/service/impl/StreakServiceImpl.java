@@ -1,6 +1,7 @@
 package com.habittracker.api.checkin.service.impl;
 
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
+import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
@@ -13,6 +14,7 @@ import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -78,8 +80,31 @@ public class StreakServiceImpl implements StreakService {
   }
 
   private int calculateStreakFromDatabase(UUID habitId, ZoneId userTimeZone) {
-    List<CheckInEntity> checkIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
-    return streakCalculator.calculateConsecutiveStreak(checkIns, userTimeZone);
+    return checkInRepository
+        .findFirstByHabitIdOrderByCreatedAtDesc(habitId)
+        .map(mostRecent -> calculateStreakIfActive(habitId, mostRecent, userTimeZone))
+        .orElseGet(
+            () -> {
+              log.debug("No check-ins found for habit ID: {}, streak is 0", habitId);
+              return 0;
+            });
+  }
+
+  private int calculateStreakIfActive(
+      UUID habitId, CheckInEntity mostRecentCheckIn, ZoneId userTimeZone) {
+    LocalDate mostRecentDate = mostRecentCheckIn.getCreatedAt().atZone(userTimeZone).toLocalDate();
+
+    if (!isTodayOrYesterday(mostRecentDate, userTimeZone)) {
+      log.debug(
+          "Most recent check-in for habit ID: {} is from {}, streak broken (not today/yesterday)",
+          habitId,
+          mostRecentDate);
+      return 0;
+    }
+
+    log.debug("Most recent check-in is active, fetching all check-ins for calculation");
+    List<CheckInEntity> allCheckIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
+    return streakCalculator.calculateConsecutiveStreak(allCheckIns, userTimeZone);
   }
 
   private void cacheStreak(UUID habitId, int streak, ZoneId userTimeZone) {
