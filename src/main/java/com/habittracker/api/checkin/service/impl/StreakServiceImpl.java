@@ -112,6 +112,11 @@ public class StreakServiceImpl implements StreakService {
 
   private void cacheStreak(
       UUID habitId, int streak, LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
+    if (mostRecentCheckInDate == null) {
+      log.debug("Skipping cache for habit ID: {} - no check-ins exist", habitId);
+      return;
+    }
+
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
     int daysUntilExpiry = calculateDaysUntilExpiry(mostRecentCheckInDate, userTimeZone);
 
@@ -124,10 +129,6 @@ public class StreakServiceImpl implements StreakService {
   }
 
   private int calculateDaysUntilExpiry(LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
-    if (mostRecentCheckInDate == null) {
-      return 2;
-    }
-
     LocalDate today = LocalDate.now(userTimeZone);
 
     if (mostRecentCheckInDate.isBefore(today)) {

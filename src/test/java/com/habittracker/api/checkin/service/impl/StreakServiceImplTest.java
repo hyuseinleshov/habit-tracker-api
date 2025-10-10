@@ -222,11 +222,11 @@ class StreakServiceImplTest {
       streakService.incrementStreak(testHabitId);
 
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
-      verify(valueOperations, times(2)).set(eq("streak:" + testHabitId), valueCaptor.capture());
+      // Only caches once when incrementing (0 is not cached, but 1 is)
+      verify(valueOperations, times(1)).set(eq("streak:" + testHabitId), valueCaptor.capture());
 
-      // First cache: 0, then increment to 1
       assertThat(valueCaptor.getValue()).isEqualTo(1);
-      verify(redisTemplate, times(2)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
+      verify(redisTemplate, times(1)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
     }
 
     @Test
@@ -328,7 +328,7 @@ class StreakServiceImplTest {
     }
 
     @Test
-    void shouldSetCacheTTLToTwoDays_WhenNoCheckInsExist() {
+    void shouldNotCache_WhenNoCheckInsExist() {
       when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
       when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
 
@@ -336,19 +336,13 @@ class StreakServiceImplTest {
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.empty());
 
-      Instant beforeCall = Instant.now();
-      streakService.calculateStreak(testHabitId);
+      StreakResponse response = streakService.calculateStreak(testHabitId);
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), any());
+      assertThat(response.currentStreak()).isZero();
 
-      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
-
-      // Default expiration should be at midnight tomorrow (between 24-48 hours)
-      long hoursUntilExpiry =
-          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
-      assertThat(hoursUntilExpiry).isGreaterThanOrEqualTo(24);
-      assertThat(hoursUntilExpiry).isLessThan(48);
+      // Should not cache when there are no check-ins
+      verify(valueOperations, never()).set(any(), any());
+      verify(redisTemplate, never()).expireAt(any(), any(Instant.class));
     }
 
     @Test
