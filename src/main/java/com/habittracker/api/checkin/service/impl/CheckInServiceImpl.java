@@ -13,6 +13,7 @@ import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.checkin.service.DailyCheckInService;
+import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Instant;
@@ -37,6 +38,7 @@ public class CheckInServiceImpl implements CheckInService {
   private final CheckInHelper checkInHelper;
   private final CheckInMapper checkInMapper;
   private final DailyCheckInService dailyCheckInService;
+  private final StreakService streakService;
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
@@ -48,6 +50,9 @@ public class CheckInServiceImpl implements CheckInService {
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
     CheckInEntity saved = checkInRepository.save(checkInEntity);
+
+    streakService.incrementStreak(habitId);
+
     log.debug("Check in for habit with id {}.", habit.getId());
     return checkInMapper.toResponse(saved);
   }
@@ -80,8 +85,13 @@ public class CheckInServiceImpl implements CheckInService {
   public void deleteCheckIn(UUID checkInId, UserEntity user) {
     CheckInEntity checkIn =
         checkInRepository.findById(checkInId).orElseThrow(CheckInNotFoundException::new);
-
+    UUID habitId = checkIn.getHabit().getId();
     checkInRepository.delete(checkIn);
+
+    // For now, we just handle the deletion of check-in like this.
+    // We will discuss if we will keep the delete functionality
+    streakService.calculateStreak(habitId);
+
     log.debug("Deleted check-in with id {} for user {}", checkInId, user.getId());
   }
 

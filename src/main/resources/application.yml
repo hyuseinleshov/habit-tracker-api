@@ -9,6 +9,11 @@ spring:
   properties:
    hibernate:
     format_sql: true
+ flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
  data:
   redis:
    host: localhost

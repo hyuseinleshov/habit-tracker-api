@@ -26,8 +26,15 @@ public final class TimeZoneUtils {
   }
 
   public static Duration calculateDurationUntilMidnight(ZoneId userTimeZone) {
+    return calculateDurationUntilMidnight(userTimeZone, 1);
+  }
+
+  public static Duration calculateDurationUntilMidnight(ZoneId userTimeZone, int daysFromNow) {
+    if (daysFromNow < 1) {
+      throw new IllegalArgumentException("daysFromNow must be at least 1");
+    }
     LocalDateTime now = LocalDateTime.now(userTimeZone);
-    LocalDateTime midnight = now.plusDays(1).truncatedTo(ChronoUnit.DAYS);
+    LocalDateTime midnight = now.plusDays(daysFromNow).truncatedTo(ChronoUnit.DAYS);
     return Duration.between(now, midnight);
   }
 }
