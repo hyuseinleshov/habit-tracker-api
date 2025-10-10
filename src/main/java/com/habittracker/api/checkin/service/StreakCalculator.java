@@ -1,7 +1,5 @@
 package com.habittracker.api.checkin.service;
 
-import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
-
 import com.habittracker.api.checkin.model.CheckInEntity;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -23,14 +21,6 @@ public class StreakCalculator {
 
     if (checkIns.isEmpty()) {
       log.debug("No check-ins found, streak is 0");
-      return 0;
-    }
-
-    LocalDate mostRecentDate = checkIns.get(0).getCreatedAt().atZone(userTimeZone).toLocalDate();
-
-    if (!isTodayOrYesterday(mostRecentDate, userTimeZone)) {
-      log.debug(
-          "Most recent check-in date {} is not today or yesterday, streak broken", mostRecentDate);
       return 0;
     }
 

@@ -76,25 +76,25 @@ class StreakCalculatorTest {
     }
 
     @Test
-    void shouldReturnZero_WhenMostRecentCheckInIsTwoDaysAgo() {
+    void shouldReturnOne_WhenSingleCheckInIsTwoDaysAgo() {
       Instant twoDaysAgo =
           ZonedDateTime.now(testTimeZone).minusDays(2).withHour(14).withMinute(0).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(twoDaysAgo));
 
       int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
 
-      assertThat(streak).isZero();
+      assertThat(streak).isEqualTo(1);
     }
 
     @Test
-    void shouldReturnZero_WhenMostRecentCheckInIsOneWeekAgo() {
+    void shouldReturnOne_WhenSingleCheckInIsOneWeekAgo() {
       Instant oneWeekAgo =
           ZonedDateTime.now(testTimeZone).minusDays(7).withHour(10).withMinute(0).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(oneWeekAgo));
 
       int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
 
-      assertThat(streak).isZero();
+      assertThat(streak).isEqualTo(1);
     }
 
     @Test
@@ -223,14 +223,14 @@ class StreakCalculatorTest {
     }
 
     @Test
-    void shouldReturnZero_WhenOnlyCheckInIsFromLastYear() {
+    void shouldReturnOne_WhenOnlyCheckInIsFromLastYear() {
       ZonedDateTime now = ZonedDateTime.now(testTimeZone);
       Instant lastYear = now.minusYears(1).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(lastYear));
 
       int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
 
-      assertThat(streak).isZero();
+      assertThat(streak).isEqualTo(1);
     }
 
     @Test
