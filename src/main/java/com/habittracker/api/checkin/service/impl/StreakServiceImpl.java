@@ -2,7 +2,6 @@ package com.habittracker.api.checkin.service.impl;
 
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
 import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
-import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 import com.habittracker.api.checkin.dto.StreakCalculationResult;
@@ -13,10 +12,11 @@ import com.habittracker.api.checkin.service.StreakCalculator;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -114,8 +114,13 @@ public class StreakServiceImpl implements StreakService {
       UUID habitId, int streak, LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
     int daysUntilExpiry = calculateDaysUntilExpiry(mostRecentCheckInDate, userTimeZone);
-    Duration cacheTtl = calculateDurationUntilMidnight(userTimeZone, daysUntilExpiry);
-    redisTemplate.opsForValue().set(cacheKey, streak, cacheTtl);
+
+    LocalDateTime midnight =
+        LocalDateTime.now(userTimeZone).plusDays(daysUntilExpiry).truncatedTo(ChronoUnit.DAYS);
+    Instant expireAt = midnight.atZone(userTimeZone).toInstant();
+
+    redisTemplate.opsForValue().set(cacheKey, streak);
+    redisTemplate.expireAt(cacheKey, expireAt);
   }
 
   private int calculateDaysUntilExpiry(LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {

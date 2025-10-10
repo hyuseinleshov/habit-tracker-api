@@ -13,7 +13,6 @@ import com.habittracker.api.checkin.service.StreakCalculator;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.user.model.UserProfileEntity;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -164,15 +163,15 @@ class StreakServiceImplTest {
 
       ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
 
-      verify(valueOperations)
-          .set(keyCaptor.capture(), valueCaptor.capture(), durationCaptor.capture());
+      verify(valueOperations).set(keyCaptor.capture(), valueCaptor.capture());
 
       assertThat(keyCaptor.getValue()).isEqualTo("streak:" + testHabitId);
       assertThat(valueCaptor.getValue()).isEqualTo(1);
-      assertThat(durationCaptor.getValue()).isNotNull();
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThan(24); // At least a day
+
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      assertThat(expireAtCaptor.getValue()).isNotNull();
     }
 
     @Test
@@ -207,10 +206,10 @@ class StreakServiceImplTest {
       streakService.incrementStreak(testHabitId);
 
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
-      verify(valueOperations)
-          .set(eq("streak:" + testHabitId), valueCaptor.capture(), any(Duration.class));
+      verify(valueOperations).set(eq("streak:" + testHabitId), valueCaptor.capture());
 
       assertThat(valueCaptor.getValue()).isEqualTo(6);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), any(Instant.class));
     }
 
     @Test
@@ -223,11 +222,11 @@ class StreakServiceImplTest {
       streakService.incrementStreak(testHabitId);
 
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
-      verify(valueOperations, times(2))
-          .set(eq("streak:" + testHabitId), valueCaptor.capture(), any(Duration.class));
+      verify(valueOperations, times(2)).set(eq("streak:" + testHabitId), valueCaptor.capture());
 
       // First cache: 0, then increment to 1
       assertThat(valueCaptor.getValue()).isEqualTo(1);
+      verify(redisTemplate, times(2)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
     }
 
     @Test
@@ -246,8 +245,8 @@ class StreakServiceImplTest {
       streakService.incrementStreak(testHabitId);
 
       // Should cache calculated streak (1), then increment and cache again (2)
-      verify(valueOperations, times(2))
-          .set(eq("streak:" + testHabitId), any(), any(Duration.class));
+      verify(valueOperations, times(2)).set(eq("streak:" + testHabitId), any());
+      verify(redisTemplate, times(2)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
     }
 
     @Test
@@ -257,12 +256,13 @@ class StreakServiceImplTest {
 
       streakService.incrementStreak(testHabitId);
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), eq(4), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), eq(4));
 
-      // TTL should be until midnight of day after tomorrow (at least 24 hours)
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
-      assertThat(durationCaptor.getValue().toHours()).isLessThanOrEqualTo(72);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Expiration should be set to midnight tomorrow (in the future)
+      assertThat(expireAtCaptor.getValue()).isAfter(Instant.now());
     }
   }
 
@@ -283,15 +283,20 @@ class StreakServiceImplTest {
           .thenReturn(List.of(yesterdayCheckIn));
       when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
 
+      Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
+      Instant afterCall = Instant.now();
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), any());
 
-      // TTL should be until midnight tonight (1 day from now)
-      // Should be less than 24 hours (since we're partway through today)
-      assertThat(durationCaptor.getValue().toHours()).isLessThan(24);
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThan(0);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Expiration should be at midnight tonight (less than 24 hours from now)
+      long hoursUntilExpiry =
+          (expireAtCaptor.getValue().toEpochMilli() - afterCall.toEpochMilli()) / (1000 * 60 * 60);
+      assertThat(hoursUntilExpiry).isLessThan(24);
+      assertThat(expireAtCaptor.getValue()).isAfter(beforeCall);
     }
 
     @Test
@@ -307,15 +312,19 @@ class StreakServiceImplTest {
           .thenReturn(List.of(todayCheckIn));
       when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
 
+      Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), any());
 
-      // TTL should be until midnight tomorrow (2 days from now)
-      // Should be at least 24 hours, but less than 48 hours
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
-      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Expiration should be at midnight tomorrow (between 24-48 hours from now)
+      long hoursUntilExpiry =
+          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
+      assertThat(hoursUntilExpiry).isGreaterThanOrEqualTo(24);
+      assertThat(hoursUntilExpiry).isLessThan(48);
     }
 
     @Test
@@ -327,14 +336,19 @@ class StreakServiceImplTest {
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.empty());
 
+      Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), any());
 
-      // Default TTL should be 2 days (until midnight tomorrow)
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
-      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Default expiration should be at midnight tomorrow (between 24-48 hours)
+      long hoursUntilExpiry =
+          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
+      assertThat(hoursUntilExpiry).isGreaterThanOrEqualTo(24);
+      assertThat(hoursUntilExpiry).isLessThan(48);
     }
 
     @Test
@@ -343,15 +357,20 @@ class StreakServiceImplTest {
       when(valueOperations.get("streak:" + testHabitId)).thenReturn(5);
       when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
 
+      Instant beforeCall = Instant.now();
       // After optimization, incrementStreak uses today's date directly (no DB query)
       streakService.incrementStreak(testHabitId);
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), eq(6), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), eq(6));
 
-      // Since check-in is today, TTL should be ~48 hours (until tomorrow midnight)
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
-      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Since check-in is today, expiration should be at midnight tomorrow (24-48 hours)
+      long hoursUntilExpiry =
+          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
+      assertThat(hoursUntilExpiry).isGreaterThanOrEqualTo(24);
+      assertThat(hoursUntilExpiry).isLessThan(48);
     }
 
     @Test
@@ -371,14 +390,19 @@ class StreakServiceImplTest {
           .thenReturn(List.of(yesterdayCheckIn));
       when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
 
+      Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
 
-      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+      verify(valueOperations).set(eq("streak:" + testHabitId), any());
 
-      // TTL should be until Tokyo midnight tonight (less than 24 hours)
-      assertThat(durationCaptor.getValue().toHours()).isLessThan(24);
-      assertThat(durationCaptor.getValue().toHours()).isGreaterThan(0);
+      ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
+      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+
+      // Expiration should be at Tokyo midnight tonight (less than 24 hours)
+      long hoursUntilExpiry =
+          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
+      assertThat(hoursUntilExpiry).isLessThan(24);
+      assertThat(hoursUntilExpiry).isGreaterThan(0);
     }
   }
 
