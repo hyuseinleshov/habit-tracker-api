@@ -38,13 +38,13 @@ public class StreakServiceImpl implements StreakService {
   @Override
   @Transactional(readOnly = true)
   public StreakResponse calculateStreak(UUID habitId) {
-    int currentStreak = getOrCalculateStreak(habitId);
+    int currentStreak = getStreak(habitId);
     return new StreakResponse(habitId, currentStreak, Instant.now());
   }
 
   @Override
   public void incrementStreak(UUID habitId) {
-    int currentStreak = getOrCalculateStreak(habitId);
+    int currentStreak = getStreak(habitId);
     int newStreak = currentStreak + 1;
 
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
@@ -55,7 +55,7 @@ public class StreakServiceImpl implements StreakService {
     log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
   }
 
-  private int getOrCalculateStreak(UUID habitId) {
+  private int getStreak(UUID habitId) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
 
     Integer cachedStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
