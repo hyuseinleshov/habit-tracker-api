@@ -5,6 +5,7 @@ import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 import static com.habittracker.api.core.utils.TimeZoneUtils.calculateDurationUntilMidnight;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
+import com.habittracker.api.checkin.dto.StreakCalculationResult;
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
@@ -49,44 +50,46 @@ public class StreakServiceImpl implements StreakService {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
-    cacheStreak(habitId, newStreak, userTimeZone);
+    LocalDate today = LocalDate.now(userTimeZone);
+    cacheStreak(habitId, newStreak, today, userTimeZone);
     log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
   }
 
   private int getOrCalculateStreak(UUID habitId) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
 
-    // 1. Check Redis cache (O(1) fast path - NO DB query!)
     Integer cachedStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
     if (cachedStreak != null) {
       log.debug("Streak cache hit for habit ID: {}", habitId);
       return cachedStreak;
     }
 
-    // 2. Cache miss - calculate from database
     log.debug("Streak cache miss for habit ID: {}", habitId);
     log.debug("Calculating streak for habit ID: {}", habitId);
 
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
-    // 3. Calculate streak from database
-    int currentStreak = calculateStreakFromDatabase(habitId, userTimeZone);
+    StreakCalculationResult result = calculateStreakFromDatabase(habitId, userTimeZone);
+    cacheStreak(habitId, result.streak(), result.mostRecentCheckInDate(), userTimeZone);
 
-    // 4. Store in Redis with TTL until midnight tomorrow (user's timezone)
-    cacheStreak(habitId, currentStreak, userTimeZone);
-
-    return currentStreak;
+    return result.streak();
   }
 
-  private int calculateStreakFromDatabase(UUID habitId, ZoneId userTimeZone) {
+  private StreakCalculationResult calculateStreakFromDatabase(UUID habitId, ZoneId userTimeZone) {
     return checkInRepository
         .findFirstByHabitIdOrderByCreatedAtDesc(habitId)
-        .map(mostRecent -> calculateStreakIfActive(habitId, mostRecent, userTimeZone))
+        .map(
+            mostRecent -> {
+              LocalDate mostRecentDate =
+                  mostRecent.getCreatedAt().atZone(userTimeZone).toLocalDate();
+              int streak = calculateStreakIfActive(habitId, mostRecent, userTimeZone);
+              return new StreakCalculationResult(streak, mostRecentDate);
+            })
         .orElseGet(
             () -> {
               log.debug("No check-ins found for habit ID: {}, streak is 0", habitId);
-              return 0;
+              return new StreakCalculationResult(0, null);
             });
   }
 
@@ -107,11 +110,31 @@ public class StreakServiceImpl implements StreakService {
     return streakCalculator.calculateConsecutiveStreak(allCheckIns, userTimeZone);
   }
 
-  private void cacheStreak(UUID habitId, int streak, ZoneId userTimeZone) {
+  private void cacheStreak(
+      UUID habitId, int streak, LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
-    // Cache expires at midnight tomorrow (user's timezone)
-    // This aligns with streak expiration: user has until end of tomorrow to check in
-    Duration cacheTtl = calculateDurationUntilMidnight(userTimeZone, 2);
+    int daysUntilExpiry = calculateDaysUntilExpiry(mostRecentCheckInDate, userTimeZone);
+    Duration cacheTtl = calculateDurationUntilMidnight(userTimeZone, daysUntilExpiry);
     redisTemplate.opsForValue().set(cacheKey, streak, cacheTtl);
+  }
+
+  private int calculateDaysUntilExpiry(LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
+    if (mostRecentCheckInDate == null) {
+      return 2;
+    }
+
+    LocalDate today = LocalDate.now(userTimeZone);
+
+    if (mostRecentCheckInDate.isBefore(today)) {
+      log.debug(
+          "Last check-in was on {}, setting cache to expire tonight at midnight",
+          mostRecentCheckInDate);
+      return 1;
+    }
+
+    log.debug(
+        "Last check-in was today ({}), setting cache to expire tomorrow at midnight",
+        mostRecentCheckInDate);
+    return 2;
   }
 }

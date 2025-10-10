@@ -267,6 +267,122 @@ class StreakServiceImplTest {
   }
 
   @Nested
+  class CacheTTLTests {
+
+    @Test
+    void shouldSetCacheTTLToOneDayFromNow_WhenLastCheckInWasYesterday() {
+      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
+
+      // Last check-in was yesterday
+      CheckInEntity yesterdayCheckIn =
+          createCheckIn(ZonedDateTime.now(testTimeZone).minusDays(1).toInstant());
+      when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(Optional.of(yesterdayCheckIn));
+      when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(List.of(yesterdayCheckIn));
+      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+
+      streakService.calculateStreak(testHabitId);
+
+      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
+      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+
+      // TTL should be until midnight tonight (1 day from now)
+      // Should be less than 24 hours (since we're partway through today)
+      assertThat(durationCaptor.getValue().toHours()).isLessThan(24);
+      assertThat(durationCaptor.getValue().toHours()).isGreaterThan(0);
+    }
+
+    @Test
+    void shouldSetCacheTTLToTwoDaysFromNow_WhenLastCheckInWasToday() {
+      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
+
+      // Last check-in was today
+      CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(testTimeZone).toInstant());
+      when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(Optional.of(todayCheckIn));
+      when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(List.of(todayCheckIn));
+      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+
+      streakService.calculateStreak(testHabitId);
+
+      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
+      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+
+      // TTL should be until midnight tomorrow (2 days from now)
+      // Should be at least 24 hours, but less than 48 hours
+      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
+      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+    }
+
+    @Test
+    void shouldSetCacheTTLToTwoDays_WhenNoCheckInsExist() {
+      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
+
+      // No check-ins
+      when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(Optional.empty());
+
+      streakService.calculateStreak(testHabitId);
+
+      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
+      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+
+      // Default TTL should be 2 days (until midnight tomorrow)
+      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
+      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+    }
+
+    @Test
+    void shouldUseTodaysTTL_WhenIncrementingStreakAfterTodaysCheckIn() {
+      // Simulate having a cached streak and incrementing after today's check-in
+      when(valueOperations.get("streak:" + testHabitId)).thenReturn(5);
+      when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
+
+      // After optimization, incrementStreak uses today's date directly (no DB query)
+      streakService.incrementStreak(testHabitId);
+
+      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
+      verify(valueOperations).set(eq("streak:" + testHabitId), eq(6), durationCaptor.capture());
+
+      // Since check-in is today, TTL should be ~48 hours (until tomorrow midnight)
+      assertThat(durationCaptor.getValue().toHours()).isGreaterThanOrEqualTo(24);
+      assertThat(durationCaptor.getValue().toHours()).isLessThan(48);
+    }
+
+    @Test
+    void shouldSetCorrectTTL_ForDifferentTimezones_Yesterday() {
+      testUserProfile.setTimezone("Asia/Tokyo");
+      ZoneId tokyoTz = ZoneId.of("Asia/Tokyo");
+
+      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(habitHelper.getNotDeletedOrThrow(testHabitId)).thenReturn(testHabit);
+
+      // Last check-in was yesterday in Tokyo timezone
+      CheckInEntity yesterdayCheckIn =
+          createCheckIn(ZonedDateTime.now(tokyoTz).minusDays(1).toInstant());
+      when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(Optional.of(yesterdayCheckIn));
+      when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
+          .thenReturn(List.of(yesterdayCheckIn));
+      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+
+      streakService.calculateStreak(testHabitId);
+
+      ArgumentCaptor<Duration> durationCaptor = ArgumentCaptor.forClass(Duration.class);
+      verify(valueOperations).set(eq("streak:" + testHabitId), any(), durationCaptor.capture());
+
+      // TTL should be until Tokyo midnight tonight (less than 24 hours)
+      assertThat(durationCaptor.getValue().toHours()).isLessThan(24);
+      assertThat(durationCaptor.getValue().toHours()).isGreaterThan(0);
+    }
+  }
+
+  @Nested
   class TimezoneTests {
 
     @Test
