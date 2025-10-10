@@ -84,7 +84,7 @@ class StreakServiceImplTest {
       // Should not hit database when cache exists
       verify(checkInRepository, never()).findFirstByHabitIdOrderByCreatedAtDesc(any());
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
-      verify(streakCalculator, never()).calculateConsecutiveStreak(any(), any());
+      verify(streakCalculator, never()).calculateCurrentStreak(any(), any());
     }
 
     @Test
@@ -100,7 +100,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn, yesterdayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), eq(testTimeZone))).thenReturn(2);
+      when(streakCalculator.calculateCurrentStreak(any(), eq(testTimeZone))).thenReturn(2);
 
       StreakResponse response = streakService.calculateStreak(testHabitId);
 
@@ -109,7 +109,7 @@ class StreakServiceImplTest {
 
       verify(checkInRepository).findFirstByHabitIdOrderByCreatedAtDesc(testHabitId);
       verify(checkInRepository).findByHabitIdOrderByCreatedAtDesc(testHabitId);
-      verify(streakCalculator).calculateConsecutiveStreak(any(), eq(testTimeZone));
+      verify(streakCalculator).calculateCurrentStreak(any(), eq(testTimeZone));
     }
 
     @Test
@@ -125,7 +125,7 @@ class StreakServiceImplTest {
 
       // Should not fetch all check-ins if most recent doesn't exist
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
-      verify(streakCalculator, never()).calculateConsecutiveStreak(any(), any());
+      verify(streakCalculator, never()).calculateCurrentStreak(any(), any());
     }
 
     @Test
@@ -144,7 +144,7 @@ class StreakServiceImplTest {
 
       // Should not fetch all check-ins if streak is broken
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
-      verify(streakCalculator, never()).calculateConsecutiveStreak(any(), any());
+      verify(streakCalculator, never()).calculateCurrentStreak(any(), any());
     }
 
     @Test
@@ -157,7 +157,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       streakService.calculateStreak(testHabitId);
 
@@ -184,7 +184,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       streakService.calculateStreak(testHabitId);
 
@@ -240,7 +240,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(yesterdayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(yesterdayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       streakService.incrementStreak(testHabitId);
 
@@ -281,7 +281,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(yesterdayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(yesterdayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
@@ -310,7 +310,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
@@ -382,7 +382,7 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(yesterdayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(yesterdayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), any())).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
       streakService.calculateStreak(testHabitId);
@@ -416,11 +416,11 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), eq(tokyoTz))).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), eq(tokyoTz))).thenReturn(1);
 
       streakService.calculateStreak(testHabitId);
 
-      verify(streakCalculator).calculateConsecutiveStreak(any(), eq(tokyoTz));
+      verify(streakCalculator).calculateCurrentStreak(any(), eq(tokyoTz));
     }
 
     @Test
@@ -436,11 +436,11 @@ class StreakServiceImplTest {
           .thenReturn(Optional.of(todayCheckIn));
       when(checkInRepository.findByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(List.of(todayCheckIn));
-      when(streakCalculator.calculateConsecutiveStreak(any(), eq(londonTz))).thenReturn(1);
+      when(streakCalculator.calculateCurrentStreak(any(), eq(londonTz))).thenReturn(1);
 
       streakService.calculateStreak(testHabitId);
 
-      verify(streakCalculator).calculateConsecutiveStreak(any(), eq(londonTz));
+      verify(streakCalculator).calculateCurrentStreak(any(), eq(londonTz));
     }
   }
 

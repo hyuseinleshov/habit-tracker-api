@@ -33,14 +33,14 @@ class StreakCalculatorTest {
     void shouldReturnZero_WhenCheckInsListIsEmpty() {
       List<CheckInEntity> emptyList = Collections.emptyList();
 
-      int streak = streakCalculator.calculateConsecutiveStreak(emptyList, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(emptyList, testTimeZone);
 
       assertThat(streak).isZero();
     }
 
     @Test
     void shouldThrowException_WhenCheckInsIsNull() {
-      assertThatThrownBy(() -> streakCalculator.calculateConsecutiveStreak(null, testTimeZone))
+      assertThatThrownBy(() -> streakCalculator.calculateCurrentStreak(null, testTimeZone))
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessage("checkIns cannot be null");
     }
@@ -49,7 +49,7 @@ class StreakCalculatorTest {
     void shouldThrowException_WhenTimeZoneIsNull() {
       List<CheckInEntity> checkIns = List.of(createCheckIn(Instant.now()));
 
-      assertThatThrownBy(() -> streakCalculator.calculateConsecutiveStreak(checkIns, null))
+      assertThatThrownBy(() -> streakCalculator.calculateCurrentStreak(checkIns, null))
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessage("userTimeZone cannot be null");
     }
@@ -59,7 +59,7 @@ class StreakCalculatorTest {
       Instant today = ZonedDateTime.now(testTimeZone).withHour(14).withMinute(30).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(today));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -70,7 +70,7 @@ class StreakCalculatorTest {
           ZonedDateTime.now(testTimeZone).minusDays(1).withHour(14).withMinute(0).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(yesterday));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -81,7 +81,7 @@ class StreakCalculatorTest {
           ZonedDateTime.now(testTimeZone).minusDays(2).withHour(14).withMinute(0).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(twoDaysAgo));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -92,7 +92,7 @@ class StreakCalculatorTest {
           ZonedDateTime.now(testTimeZone).minusDays(7).withHour(10).withMinute(0).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(oneWeekAgo));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -107,7 +107,7 @@ class StreakCalculatorTest {
               createCheckIn(now.minusDays(2).toInstant()), // 2 days ago
               createCheckIn(now.minusDays(3).toInstant())); // 3 days ago
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(4);
     }
@@ -121,7 +121,7 @@ class StreakCalculatorTest {
               createCheckIn(now.minusDays(2).toInstant()), // 2 days ago
               createCheckIn(now.minusDays(3).toInstant())); // 3 days ago
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(3);
     }
@@ -138,7 +138,7 @@ class StreakCalculatorTest {
               createCheckIn(now.minusDays(4).toInstant()), // 4 days ago (should not count)
               createCheckIn(now.minusDays(5).toInstant())); // 5 days ago (should not count)
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(3);
     }
@@ -153,7 +153,7 @@ class StreakCalculatorTest {
         checkIns.add(createCheckIn(now.minusDays(i).withHour(14).toInstant()));
       }
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(30);
     }
@@ -168,7 +168,7 @@ class StreakCalculatorTest {
         checkIns.add(createCheckIn(now.minusDays(i).withHour(10).toInstant()));
       }
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(100);
     }
@@ -186,7 +186,7 @@ class StreakCalculatorTest {
       List<CheckInEntity> checkIns =
           List.of(createCheckIn(todayAfterMidnight), createCheckIn(yesterdayBeforeMidnight));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(2);
     }
@@ -202,7 +202,7 @@ class StreakCalculatorTest {
               createCheckIn(nowTokyo.minusDays(1).toInstant()),
               createCheckIn(nowTokyo.minusDays(2).toInstant()));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, tokyoTz);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, tokyoTz);
 
       assertThat(streak).isEqualTo(3);
     }
@@ -217,7 +217,7 @@ class StreakCalculatorTest {
               createCheckIn(nowLondon.toInstant()),
               createCheckIn(nowLondon.minusDays(1).toInstant()));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, londonTz);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, londonTz);
 
       assertThat(streak).isEqualTo(2);
     }
@@ -228,7 +228,7 @@ class StreakCalculatorTest {
       Instant lastYear = now.minusYears(1).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(lastYear));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -239,7 +239,7 @@ class StreakCalculatorTest {
       Instant startOfToday = today.atStartOfDay(testTimeZone).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(startOfToday));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }
@@ -250,7 +250,7 @@ class StreakCalculatorTest {
       Instant endOfToday = today.atTime(23, 59, 59).atZone(testTimeZone).toInstant();
       List<CheckInEntity> checkIns = List.of(createCheckIn(endOfToday));
 
-      int streak = streakCalculator.calculateConsecutiveStreak(checkIns, testTimeZone);
+      int streak = streakCalculator.calculateCurrentStreak(checkIns, testTimeZone);
 
       assertThat(streak).isEqualTo(1);
     }

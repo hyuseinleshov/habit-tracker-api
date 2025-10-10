@@ -107,7 +107,7 @@ public class StreakServiceImpl implements StreakService {
 
     log.debug("Most recent check-in is active, fetching all check-ins for calculation");
     List<CheckInEntity> allCheckIns = checkInRepository.findByHabitIdOrderByCreatedAtDesc(habitId);
-    return streakCalculator.calculateConsecutiveStreak(allCheckIns, userTimeZone);
+    return streakCalculator.calculateCurrentStreak(allCheckIns, userTimeZone);
   }
 
   private void cacheStreak(

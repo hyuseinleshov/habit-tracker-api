@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class StreakCalculator {
 
-  public int calculateConsecutiveStreak(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
+  public int calculateCurrentStreak(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
     if (checkIns == null) {
       throw new IllegalArgumentException("checkIns cannot be null");
     }
