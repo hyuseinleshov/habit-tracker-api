@@ -41,7 +41,6 @@ public class StreakCalculator {
         previousDate = currentDate;
       } else if (currentDate.isEqual(previousDate)) {
         log.trace("Multiple check-ins detected on date: {}", currentDate);
-        continue;
       } else {
         log.debug(
             "Gap detected between {} and {}, stopping streak calculation",
