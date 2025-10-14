@@ -22,6 +22,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class StreakServiceImpl implements StreakService {
   private final StreakCalculator streakCalculator;
 
   @Override
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
   @Transactional(readOnly = true)
   public StreakResponse calculateStreak(UUID habitId) {
     int currentStreak = getStreak(habitId);
@@ -43,6 +45,7 @@ public class StreakServiceImpl implements StreakService {
   }
 
   @Override
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
   public void incrementStreak(UUID habitId) {
     int currentStreak = getStreak(habitId);
     int newStreak = currentStreak + 1;
