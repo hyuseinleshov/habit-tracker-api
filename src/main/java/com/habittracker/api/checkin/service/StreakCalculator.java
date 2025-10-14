@@ -31,7 +31,7 @@ public class StreakCalculator {
 
   private int calculateConsecutiveDays(List<CheckInEntity> checkIns, ZoneId userTimeZone) {
     int streak = 1;
-    LocalDate previousDate = checkIns.get(0).getCreatedAt().atZone(userTimeZone).toLocalDate();
+    LocalDate previousDate = checkIns.getFirst().getCreatedAt().atZone(userTimeZone).toLocalDate();
 
     for (int i = 1; i < checkIns.size(); i++) {
       LocalDate currentDate = checkIns.get(i).getCreatedAt().atZone(userTimeZone).toLocalDate();
