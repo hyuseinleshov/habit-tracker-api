@@ -392,11 +392,13 @@ class StreakServiceImplTest {
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
       verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
 
-      // Expiration should be at Tokyo midnight tonight (less than 24 hours)
-      long hoursUntilExpiry =
-          (expireAtCaptor.getValue().toEpochMilli() - beforeCall.toEpochMilli()) / (1000 * 60 * 60);
+      // Expiration should be at Tokyo midnight tonight (less than 24 hours, but could be very soon)
+      Instant expireAt = expireAtCaptor.getValue();
+      assertThat(expireAt).isAfter(beforeCall);
+
+      long millisUntilExpiry = expireAt.toEpochMilli() - beforeCall.toEpochMilli();
+      long hoursUntilExpiry = millisUntilExpiry / (1000 * 60 * 60);
       assertThat(hoursUntilExpiry).isLessThan(24);
-      assertThat(hoursUntilExpiry).isGreaterThan(0);
     }
   }
 

@@ -124,7 +124,7 @@ public class StreakServiceImpl implements StreakService {
     int daysUntilExpiry = calculateDaysUntilExpiry(mostRecentCheckInDate, userTimeZone);
 
     LocalDateTime midnight =
-        LocalDateTime.now(userTimeZone).plusDays(daysUntilExpiry).truncatedTo(ChronoUnit.DAYS);
+        LocalDateTime.now(userTimeZone).truncatedTo(ChronoUnit.DAYS).plusDays(daysUntilExpiry);
     Instant expireAt = midnight.atZone(userTimeZone).toInstant();
 
     redisTemplate.opsForValue().set(cacheKey, streak);
