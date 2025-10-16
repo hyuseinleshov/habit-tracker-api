@@ -6,6 +6,7 @@ import com.habittracker.api.core.entity.DeletableEntity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class HabitEntity extends DeletableEntity {
 
   private Integer bestStreak;
 
-  private Instant bestStreakStartDate;
+  private LocalDate bestStreakStartDate;
 
   @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL)
   private Set<CheckInEntity> checkIns = new HashSet<>();
