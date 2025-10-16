@@ -11,6 +11,7 @@ import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.StreakCalculator;
+import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.user.model.UserProfileEntity;
 import java.time.Instant;
@@ -38,6 +39,7 @@ class StreakServiceImplTest {
   @Mock private RedisTemplate<String, Object> redisTemplate;
   @Mock private StreakCalculator streakCalculator;
   @Mock private ValueOperations<String, Object> valueOperations;
+  @Mock private HabitHelper habitHelper;
 
   @InjectMocks private StreakServiceImpl streakService;
 
