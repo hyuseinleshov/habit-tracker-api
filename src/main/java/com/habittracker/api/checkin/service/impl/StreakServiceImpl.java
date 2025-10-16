@@ -7,6 +7,7 @@ import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.StreakCalculator;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
+import com.habittracker.api.habit.model.HabitEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -49,15 +50,24 @@ public class StreakServiceImpl implements StreakService {
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
   @Transactional
   public void incrementStreak(UUID habitId) {
-    habitHelper.ensureHabitNotDeleted(habitId);
+    HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     ZoneId userTimeZone = getUserTimeZone();
     int currentStreak = getStreak(habitId, userTimeZone);
     int newStreak = currentStreak + 1;
 
+    updateBestStreakIfNeeded(habit, newStreak, userTimeZone);
 
     LocalDate today = LocalDate.now(userTimeZone);
     cacheStreak(habitId, newStreak, today, userTimeZone);
     log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
+  }
+
+  private void updateBestStreakIfNeeded(HabitEntity habit, int newStreak, ZoneId userTimeZone) {
+      if(newStreak <= habit.getBestStreak()) {
+        return;
+      }
+      habit.setBestStreak(newStreak);
+      habit.setBestStreakStartDate(LocalDate.now(userTimeZone).minusDays(newStreak - 1));
   }
 
   private int getStreak(UUID habitId, ZoneId userTimeZone) {
