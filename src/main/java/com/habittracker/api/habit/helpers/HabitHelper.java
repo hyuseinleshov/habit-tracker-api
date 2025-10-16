@@ -4,11 +4,14 @@ import com.habittracker.api.habit.exception.HabitAlreadyDeletedException;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
 import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.model.HabitEntity;
+import com.habittracker.api.habit.projections.HabitStatusProjection;
 import com.habittracker.api.habit.repository.HabitRepository;
-import java.util.UUID;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -17,12 +20,18 @@ public class HabitHelper {
 
   private final HabitRepository habitRepository;
 
+  @Transactional
   public HabitEntity getNotDeletedOrThrow(UUID id) {
-    HabitEntity habit = habitRepository.findById(id).orElseThrow(HabitNotFoundException::new);
-    if (habit.isDeleted()) {
+    ensureHabitNotDeleted(id);
+    return habitRepository.getReferenceById(id);
+  }
+
+  public void ensureHabitNotDeleted(UUID id) {
+    HabitStatusProjection habitStatus = habitRepository.findStatusById(id)
+            .orElseThrow(HabitNotFoundException::new);
+    if(habitStatus.deletedAt() != null) {
       throw new HabitAlreadyDeletedException();
     }
-    return habit;
   }
 
   public void isUniqueName(UUID userId, String habitName) {

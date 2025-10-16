@@ -1,9 +1,5 @@
 package com.habittracker.api.checkin.service.impl;
 
-import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
-import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
-import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
-
 import com.habittracker.api.checkin.dto.StreakCalculationResult;
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
@@ -11,7 +7,13 @@ import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.StreakCalculator;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
-import com.habittracker.api.habit.model.HabitEntity;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,12 +21,10 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
+import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
+import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 
 @Service
 @RequiredArgsConstructor
@@ -40,25 +40,27 @@ public class StreakServiceImpl implements StreakService {
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
   @Transactional(readOnly = true)
   public StreakResponse calculateStreak(UUID habitId) {
-    int currentStreak = getStreak(habitId);
+    habitHelper.ensureHabitNotDeleted(habitId);
+    int currentStreak = getStreak(habitId, getUserTimeZone());
     return new StreakResponse(habitId, currentStreak, Instant.now());
   }
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
+  @Transactional
   public void incrementStreak(UUID habitId) {
-    int currentStreak = getStreak(habitId);
+    habitHelper.ensureHabitNotDeleted(habitId);
+    ZoneId userTimeZone = getUserTimeZone();
+    int currentStreak = getStreak(habitId, userTimeZone);
     int newStreak = currentStreak + 1;
 
-    HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
-    ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
     LocalDate today = LocalDate.now(userTimeZone);
     cacheStreak(habitId, newStreak, today, userTimeZone);
     log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
   }
 
-  private int getStreak(UUID habitId) {
+  private int getStreak(UUID habitId, ZoneId userTimeZone) {
     String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
 
     Integer cachedStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
@@ -69,9 +71,6 @@ public class StreakServiceImpl implements StreakService {
 
     log.debug("Streak cache miss for habit ID: {}", habitId);
     log.debug("Calculating streak for habit ID: {}", habitId);
-
-    HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
-    ZoneId userTimeZone = parseTimeZone(habit.getUser().getUserProfile().getTimezone());
 
     StreakCalculationResult result = calculateStreakFromDatabase(habitId, userTimeZone);
     cacheStreak(habitId, result.streak(), result.mostRecentCheckInDate(), userTimeZone);
