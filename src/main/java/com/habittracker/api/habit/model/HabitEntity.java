@@ -31,7 +31,7 @@ public class HabitEntity extends DeletableEntity {
   @Column(nullable = false)
   private boolean archived;
 
-  private Integer bestStreak;
+  private int bestStreak;
 
   private LocalDate bestStreakStartDate;
 

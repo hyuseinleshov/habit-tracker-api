@@ -47,19 +47,18 @@ public class StreakServiceImpl implements StreakService {
   }
 
   @Override
-  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, authentication.principal.id)")
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habit.id, authentication.principal.id)")
   @Transactional
-  public void incrementStreak(UUID habitId) {
-    HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
+  public void incrementStreak(HabitEntity habit) {
     ZoneId userTimeZone = getUserTimeZone();
-    int currentStreak = getStreak(habitId, userTimeZone);
+    int currentStreak = getStreak(habit.getId(), userTimeZone);
     int newStreak = currentStreak + 1;
 
     updateBestStreakIfNeeded(habit, newStreak, userTimeZone);
 
     LocalDate today = LocalDate.now(userTimeZone);
-    cacheStreak(habitId, newStreak, today, userTimeZone);
-    log.debug("Incremented streak for habit ID: {} to {}", habitId, newStreak);
+    cacheStreak(habit.getId(), newStreak, today, userTimeZone);
+    log.debug("Incremented streak for habit ID: {} to {}", habit.getId(), newStreak);
   }
 
   private void updateBestStreakIfNeeded(HabitEntity habit, int newStreak, ZoneId userTimeZone) {

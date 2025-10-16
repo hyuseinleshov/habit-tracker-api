@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public interface HabitStatusProjection {
     UUID getId();
-    Instant deletedAt();
+    Instant getDeletedAt();
 }

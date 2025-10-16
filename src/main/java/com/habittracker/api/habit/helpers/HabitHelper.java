@@ -29,7 +29,7 @@ public class HabitHelper {
   public void ensureHabitNotDeleted(UUID id) {
     HabitStatusProjection habitStatus = habitRepository.findStatusById(id)
             .orElseThrow(HabitNotFoundException::new);
-    if(habitStatus.deletedAt() != null) {
+    if(habitStatus.getDeletedAt() != null) {
       throw new HabitAlreadyDeletedException();
     }
   }
