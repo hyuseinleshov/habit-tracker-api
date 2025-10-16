@@ -7,11 +7,10 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.projections.HabitStatusProjection;
 import com.habittracker.api.habit.repository.HabitRepository;
 import jakarta.transaction.Transactional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,9 +26,9 @@ public class HabitHelper {
   }
 
   public void ensureHabitNotDeleted(UUID id) {
-    HabitStatusProjection habitStatus = habitRepository.findStatusById(id)
-            .orElseThrow(HabitNotFoundException::new);
-    if(habitStatus.getDeletedAt() != null) {
+    HabitStatusProjection habitStatus =
+        habitRepository.findStatusById(id).orElseThrow(HabitNotFoundException::new);
+    if (habitStatus.getDeletedAt() != null) {
       throw new HabitAlreadyDeletedException();
     }
   }

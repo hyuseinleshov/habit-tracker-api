@@ -2,7 +2,6 @@ package com.habittracker.api.checkin.service;
 
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.habit.model.HabitEntity;
-
 import java.util.UUID;
 
 public interface StreakService {

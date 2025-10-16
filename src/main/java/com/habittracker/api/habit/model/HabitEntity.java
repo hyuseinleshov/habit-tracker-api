@@ -4,8 +4,6 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.core.entity.DeletableEntity;
 import jakarta.persistence.*;
-
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;

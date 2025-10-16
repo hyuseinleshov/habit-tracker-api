@@ -1,11 +1,10 @@
 package com.habittracker.api.habit.repository;
 
 import com.habittracker.api.habit.model.HabitEntity;
+import com.habittracker.api.habit.projections.HabitStatusProjection;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.habittracker.api.habit.projections.HabitStatusProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

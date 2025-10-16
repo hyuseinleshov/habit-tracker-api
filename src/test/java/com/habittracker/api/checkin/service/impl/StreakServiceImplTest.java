@@ -11,7 +11,6 @@ import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.StreakCalculator;
-import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.user.model.UserProfileEntity;
 import java.time.Instant;
@@ -36,7 +35,6 @@ import org.springframework.data.redis.core.ValueOperations;
 class StreakServiceImplTest {
 
   @Mock private CheckInRepository checkInRepository;
-  @Mock private HabitHelper habitHelper;
   @Mock private RedisTemplate<String, Object> redisTemplate;
   @Mock private StreakCalculator streakCalculator;
   @Mock private ValueOperations<String, Object> valueOperations;
@@ -45,7 +43,6 @@ class StreakServiceImplTest {
 
   private UUID testHabitId;
   private HabitEntity testHabit;
-  private UserEntity testUser;
   private UserProfileEntity testUserProfile;
   private ZoneId testTimeZone;
 
@@ -54,7 +51,7 @@ class StreakServiceImplTest {
     testHabitId = UUID.randomUUID();
     testTimeZone = ZoneId.of("America/New_York");
 
-    testUser = new UserEntity();
+    UserEntity testUser = new UserEntity();
     testUser.setId(UUID.randomUUID());
 
     testUserProfile = new UserProfileEntity();
@@ -102,8 +99,6 @@ class StreakServiceImplTest {
         StreakResponse response = streakService.calculateStreak(testHabitId);
         assertThat(response.currentStreak()).isZero();
       }
-
-
 
       // Should not fetch all check-ins if most recent doesn't exist
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
@@ -188,7 +183,6 @@ class StreakServiceImplTest {
     void shouldIncrementStreak_WhenCacheExists() {
       int currentStreak = 5;
       when(valueOperations.get("streak:" + testHabitId)).thenReturn(currentStreak);
-
 
       try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
         mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
@@ -340,7 +334,6 @@ class StreakServiceImplTest {
         StreakResponse response = streakService.calculateStreak(testHabitId);
         assertThat(response.currentStreak()).isZero();
       }
-
 
       // Should not cache when there are no check-ins
       verify(valueOperations, never()).set(any(), any());
