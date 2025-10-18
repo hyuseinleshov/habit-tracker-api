@@ -7,7 +7,6 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.exception.CheckInNotFoundException;
-import com.habittracker.api.checkin.helpers.CheckInHelper;
 import com.habittracker.api.checkin.mapper.CheckInMapper;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
@@ -35,7 +34,6 @@ public class CheckInServiceImpl implements CheckInService {
 
   private final CheckInRepository checkInRepository;
   private final HabitHelper habitHelper;
-  private final CheckInHelper checkInHelper;
   private final CheckInMapper checkInMapper;
   private final DailyCheckInService dailyCheckInService;
   private final StreakService streakService;
@@ -45,13 +43,14 @@ public class CheckInServiceImpl implements CheckInService {
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
+    streakService.incrementStreak(habit);
+
     dailyCheckInService.registerTodayCheckin(
         habit, user.getId(), parseTimeZone(user.getUserProfile().getTimezone()));
+
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
     CheckInEntity saved = checkInRepository.save(checkInEntity);
-
-    streakService.incrementStreak(habitId);
 
     log.debug("Check in for habit with id {}.", habit.getId());
     return checkInMapper.toResponse(saved);

@@ -85,6 +85,13 @@ public class GlobalExceptionHandler {
         .body(ApiError.from(ILLEGAL_ARGUMENT_MESSAGE, status, request));
   }
 
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ApiError> handleIllegalStateException(
+      HttpServletRequest request, IllegalStateException ex) {
+    HttpStatus status = HttpStatus.UNAUTHORIZED;
+    return ResponseEntity.status(status).body(ApiError.from(ex.getMessage(), status, request));
+  }
+
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ApiError> handleMethodArgumentTypeMismatchException(
       MethodArgumentTypeMismatchException ex, HttpServletRequest request) {

@@ -11,6 +11,8 @@ public final class ExceptionConstants {
   public static final String ILLEGAL_ARGUMENT_MESSAGE =
       "One of the arguments provided was illegal or inappropriate for the method. Please review the input parameters.";
 
+  public static final String ILLEGAL_STATE_MESSAGE = "No authenticated user found.";
+
   public static final String INVALID_UUID_MESSAGE = "Invalid id provided.";
   public static final String ARGUMENT_TYPE_MISMATCH_MESSAGE =
       "The value you entered is not in the correct format.";

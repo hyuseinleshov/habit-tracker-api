@@ -43,6 +43,8 @@ CREATE TABLE habits (
     name VARCHAR(255) NOT NULL,
     description VARCHAR(2000),
     archived BOOLEAN NOT NULL,
+    best_streak INT,
+    best_streak_start_date DATE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

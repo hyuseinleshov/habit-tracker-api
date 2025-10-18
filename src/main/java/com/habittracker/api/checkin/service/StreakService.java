@@ -1,6 +1,7 @@
 package com.habittracker.api.checkin.service;
 
 import com.habittracker.api.checkin.dto.StreakResponse;
+import com.habittracker.api.habit.model.HabitEntity;
 import java.util.UUID;
 
 public interface StreakService {
@@ -22,7 +23,7 @@ public interface StreakService {
    *
    * <p>Retrieves current streak via {@link #calculateStreak}, increments it, and updates the cache.
    *
-   * @param habitId the UUID of the habit
+   * @param habit the habit
    */
-  void incrementStreak(UUID habitId);
+  void incrementStreak(HabitEntity habit);
 }
