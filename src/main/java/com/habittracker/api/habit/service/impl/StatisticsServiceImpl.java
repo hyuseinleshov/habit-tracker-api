@@ -9,6 +9,7 @@ import com.habittracker.api.habit.service.StatisticsService;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class StatisticsServiceImpl implements StatisticsService {
   @Override
   @Transactional(readOnly = true)
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, principal.id)")
+  @Cacheable(value = "habitStatistics", key = "#habitId")
   public HabitStatisticResponse calculateStatistics(UUID habitId) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     long totalCheckins = checkInService.getCheckInsCount(habitId);

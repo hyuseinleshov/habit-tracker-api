@@ -1,8 +1,5 @@
 package com.habittracker.api.checkin.service.impl;
 
-import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
-import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
-
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.CheckInResponse;
@@ -16,11 +13,9 @@ import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +23,13 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
+import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class CheckInServiceImpl implements CheckInService {
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
+  @CacheEvict(value = "habitStatistics", key = "#habitId")
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
