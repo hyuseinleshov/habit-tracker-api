@@ -6,6 +6,7 @@ import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.service.StatisticsService;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         habit.getName(),
         totalCheckins,
         new HabitStatisticResponse.StreakData(currentStreak, buildBestSteakData(habit)),
-        lastCheckInDate);
+        lastCheckInDate,
+        Instant.now());
   }
 
   private HabitStatisticResponse.BestStreakData buildBestSteakData(HabitEntity habit) {
