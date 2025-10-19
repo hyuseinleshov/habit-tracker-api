@@ -42,6 +42,6 @@ public class StatisticsServiceImpl implements StatisticsService {
   private HabitStatisticResponse.BestStreakData buildBestSteakData(HabitEntity habit) {
     LocalDate startDate = habit.getBestStreakStartDate();
     LocalDate endDate = startDate != null ? startDate.plusDays(habit.getBestStreak()) : null;
-    return new HabitStatisticResponse.BestStreakData(habit.getBestStreak(), startDate, endDate);
+    return HabitStatisticResponse.BestStreakData.of(habit.getBestStreak(), startDate, endDate);
   }
 }
