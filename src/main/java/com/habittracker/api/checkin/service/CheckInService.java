@@ -4,6 +4,7 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -17,6 +18,10 @@ public interface CheckInService {
 
   PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable);
+
+  long getCheckInsCount(UUID habitId);
+
+  LocalDate getLastCheckInDate(UUID habitId);
 
   void deleteCheckIn(UUID checkInId, UserEntity user);
 }
