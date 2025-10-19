@@ -14,5 +14,7 @@ public interface CheckInRepository
 
   List<CheckInEntity> findByHabitIdOrderByCreatedAtDesc(UUID habitId);
 
+  long countByHabitId(UUID habitId);
+
   Optional<CheckInEntity> findFirstByHabitIdOrderByCreatedAtDesc(UUID habitId);
 }
