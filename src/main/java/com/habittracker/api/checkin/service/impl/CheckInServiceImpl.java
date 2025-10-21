@@ -22,6 +22,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,6 +45,12 @@ public class CheckInServiceImpl implements CheckInService {
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
   @CacheEvict(value = "habitStatistics", key = "#habitId")
+  @Caching(
+          evict = {
+                  @CacheEvict(value = "habitStatistics", key = "#habitId"),
+                  @CacheEvict(value = "userStatistics", key = "#user.id")
+          }
+  )
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);

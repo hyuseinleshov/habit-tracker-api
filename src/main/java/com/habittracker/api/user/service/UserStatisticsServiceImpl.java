@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
 
   @Override
   @Transactional(readOnly = true)
+  @Cacheable(value = "userStatistics", key = "#user.id")
   public UserStatisticsResponse calculateStatistics(UserEntity user) {
     long totalCheckIns = checkInService.getUserCheckInsCount(user.getId());
     HabitStatisticResponse.BestStreakData userBestStreak = getUserBestStreak(user);
