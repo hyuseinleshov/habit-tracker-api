@@ -5,7 +5,7 @@ import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
-import com.habittracker.api.habit.service.StatisticsService;
+import com.habittracker.api.habit.service.HabitStatisticsService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class StatisticsServiceImpl implements StatisticsService {
+public class HabitStatisticsServiceImpl implements HabitStatisticsService {
 
   private final HabitHelper habitHelper;
   private final CheckInService checkInService;
