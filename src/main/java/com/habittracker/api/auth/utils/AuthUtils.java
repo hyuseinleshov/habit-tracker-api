@@ -5,6 +5,7 @@ import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import java.time.ZoneId;
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -12,6 +13,10 @@ public final class AuthUtils {
 
   public static ZoneId getUserTimeZone() {
     return parseTimeZone(getDetails().getProfile().getTimezone());
+  }
+
+  public static UUID getUserId() {
+    return getDetails().getId();
   }
 
   private static UserDetailsImpl getDetails() {

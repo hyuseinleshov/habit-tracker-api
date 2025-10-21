@@ -20,9 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -47,6 +45,21 @@ class StreakServiceImplTest {
   private HabitEntity testHabit;
   private UserProfileEntity testUserProfile;
   private ZoneId testTimeZone;
+  private static UUID testUserId;
+  private static MockedStatic<AuthUtils> utilsMock;
+
+  @BeforeAll
+  static void beforeAll() {
+    testUserId = UUID.randomUUID();
+    utilsMock = mockStatic(AuthUtils.class);
+    utilsMock.when(AuthUtils::getUserId).thenReturn(testUserId);
+    utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
+  }
+
+  @AfterAll
+  static void afterAll() {
+    utilsMock.close();
+  }
 
   @BeforeEach
   void setUp() {
@@ -74,15 +87,13 @@ class StreakServiceImplTest {
     @Test
     void shouldReturnCachedStreak_WhenCacheHit() {
       int cachedStreak = 5;
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(cachedStreak);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId))
+          .thenReturn(cachedStreak);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        StreakResponse response = streakService.calculateStreak(testHabitId);
-        assertThat(response.habitId()).isEqualTo(testHabitId);
-        assertThat(response.currentStreak()).isEqualTo(5);
-        assertThat(response.calculatedAt()).isNotNull();
-      }
+      StreakResponse response = streakService.calculateStreak(testHabitId);
+      assertThat(response.habitId()).isEqualTo(testHabitId);
+      assertThat(response.currentStreak()).isEqualTo(5);
+      assertThat(response.calculatedAt()).isNotNull();
 
       // Should not hit database when cache exists
       verify(checkInRepository, never()).findFirstByHabitIdOrderByCreatedAtDesc(any());
@@ -92,15 +103,12 @@ class StreakServiceImplTest {
 
     @Test
     void shouldReturnZero_WhenNoCheckInsExist() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.empty());
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        StreakResponse response = streakService.calculateStreak(testHabitId);
-        assertThat(response.currentStreak()).isZero();
-      }
+      StreakResponse response = streakService.calculateStreak(testHabitId);
+      assertThat(response.currentStreak()).isZero();
 
       // Should not fetch all check-ins if most recent doesn't exist
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
@@ -109,18 +117,15 @@ class StreakServiceImplTest {
 
     @Test
     void shouldReturnZero_WhenMostRecentCheckInIsTooOld() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity oldCheckIn =
           createCheckIn(ZonedDateTime.now(testTimeZone).minusDays(5).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.of(oldCheckIn));
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        StreakResponse response = streakService.calculateStreak(testHabitId);
-        assertThat(response.currentStreak()).isZero();
-      }
+      StreakResponse response = streakService.calculateStreak(testHabitId);
+      assertThat(response.currentStreak()).isZero();
 
       // Should not fetch all check-ins if streak is broken
       verify(checkInRepository, never()).findByHabitIdOrderByCreatedAtDesc(any());
@@ -129,7 +134,7 @@ class StreakServiceImplTest {
 
     @Test
     void shouldCacheCalculatedStreak_WhenCacheMiss() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(testTimeZone).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
@@ -138,27 +143,25 @@ class StreakServiceImplTest {
           .thenReturn(List.of(todayCheckIn));
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.calculateStreak(testHabitId);
-      }
+      streakService.calculateStreak(testHabitId);
 
       ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
 
       verify(valueOperations).set(keyCaptor.capture(), valueCaptor.capture());
 
-      assertThat(keyCaptor.getValue()).isEqualTo("streak:" + testHabitId);
+      assertThat(keyCaptor.getValue()).isEqualTo("streak:" + testUserId + ":" + testHabitId);
       assertThat(valueCaptor.getValue()).isEqualTo(1);
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
       assertThat(expireAtCaptor.getValue()).isNotNull();
     }
 
     @Test
     void shouldFetchAllCheckIns_OnlyWhenStreakIsActive() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(testTimeZone).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
@@ -167,10 +170,7 @@ class StreakServiceImplTest {
           .thenReturn(List.of(todayCheckIn));
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.calculateStreak(testHabitId);
-      }
+      streakService.calculateStreak(testHabitId);
 
       // Verify optimization: first query for most recent, then all if active
       verify(checkInRepository).findFirstByHabitIdOrderByCreatedAtDesc(testHabitId);
@@ -184,42 +184,41 @@ class StreakServiceImplTest {
     @Test
     void shouldIncrementStreak_WhenCacheExists() {
       int currentStreak = 5;
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(currentStreak);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId))
+          .thenReturn(currentStreak);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.incrementStreak(testHabit);
-      }
+      streakService.incrementStreak(testHabit);
 
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
-      verify(valueOperations).set(eq("streak:" + testHabitId), valueCaptor.capture());
+      verify(valueOperations)
+          .set(eq("streak:" + testUserId + ":" + testHabitId), valueCaptor.capture());
 
       assertThat(valueCaptor.getValue()).isEqualTo(6);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), any(Instant.class));
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), any(Instant.class));
     }
 
     @Test
     void shouldIncrementFromOne_WhenNoExistingStreak() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.empty());
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.incrementStreak(testHabit);
-      }
+      streakService.incrementStreak(testHabit);
 
       ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
       // Only caches once when incrementing (0 is not cached, but 1 is)
-      verify(valueOperations, times(1)).set(eq("streak:" + testHabitId), valueCaptor.capture());
+      verify(valueOperations, times(1))
+          .set(eq("streak:" + testUserId + ":" + testHabitId), valueCaptor.capture());
 
       assertThat(valueCaptor.getValue()).isEqualTo(1);
-      verify(redisTemplate, times(1)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
+      verify(redisTemplate, times(1))
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), any(Instant.class));
     }
 
     @Test
     void shouldCalculateThenIncrement_WhenCacheMiss() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity yesterdayCheckIn =
           createCheckIn(ZonedDateTime.now(testTimeZone).minusDays(1).toInstant());
@@ -229,29 +228,25 @@ class StreakServiceImplTest {
           .thenReturn(List.of(yesterdayCheckIn));
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.incrementStreak(testHabit);
-      }
+      streakService.incrementStreak(testHabit);
 
       // Should cache calculated streak (1), then increment and cache again (2)
-      verify(valueOperations, times(2)).set(eq("streak:" + testHabitId), any());
-      verify(redisTemplate, times(2)).expireAt(eq("streak:" + testHabitId), any(Instant.class));
+      verify(valueOperations, times(2)).set(eq("streak:" + testUserId + ":" + testHabitId), any());
+      verify(redisTemplate, times(2))
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), any(Instant.class));
     }
 
     @Test
     void shouldUpdateCacheWithCorrectTTL() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(3);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(3);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.incrementStreak(testHabit);
-      }
+      streakService.incrementStreak(testHabit);
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), eq(4));
+      verify(valueOperations).set(eq("streak:" + testUserId + ":" + testHabitId), eq(4));
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
 
       // Expiration should be set to midnight tomorrow (in the future)
       assertThat(expireAtCaptor.getValue()).isAfter(Instant.now());
@@ -263,7 +258,7 @@ class StreakServiceImplTest {
 
     @Test
     void shouldSetCacheTTLToOneDayFromNow_WhenLastCheckInWasYesterday() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       // Last check-in was yesterday
       CheckInEntity yesterdayCheckIn =
@@ -275,16 +270,15 @@ class StreakServiceImplTest {
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.calculateStreak(testHabitId);
-      }
+      streakService.calculateStreak(testHabitId);
+
       Instant afterCall = Instant.now();
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), any());
+      verify(valueOperations).set(eq("streak:" + testUserId + ":" + testHabitId), any());
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
 
       // Expiration should be at midnight tonight (less than 24 hours from now)
       long hoursUntilExpiry =
@@ -295,7 +289,7 @@ class StreakServiceImplTest {
 
     @Test
     void shouldSetCacheTTLToTwoDaysFromNow_WhenLastCheckInWasToday() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       // Last check-in was today
       CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(testTimeZone).toInstant());
@@ -306,15 +300,14 @@ class StreakServiceImplTest {
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.calculateStreak(testHabitId);
-      }
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), any());
+      streakService.calculateStreak(testHabitId);
+
+      verify(valueOperations).set(eq("streak:" + testUserId + ":" + testHabitId), any());
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
 
       // Expiration should be at midnight tomorrow (between 24-48 hours from now)
       long hoursUntilExpiry =
@@ -325,17 +318,15 @@ class StreakServiceImplTest {
 
     @Test
     void shouldNotCache_WhenNoCheckInsExist() {
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       // No check-ins
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
           .thenReturn(Optional.empty());
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        StreakResponse response = streakService.calculateStreak(testHabitId);
-        assertThat(response.currentStreak()).isZero();
-      }
+      utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
+      StreakResponse response = streakService.calculateStreak(testHabitId);
+      assertThat(response.currentStreak()).isZero();
 
       // Should not cache when there are no check-ins
       verify(valueOperations, never()).set(any(), any());
@@ -345,19 +336,18 @@ class StreakServiceImplTest {
     @Test
     void shouldUseTodaysTTL_WhenIncrementingStreakAfterTodaysCheckIn() {
       // Simulate having a cached streak and incrementing after today's check-in
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(5);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(5);
 
       Instant beforeCall = Instant.now();
       // After optimization, incrementStreak uses today's date directly (no DB query)
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.incrementStreak(testHabit);
-      }
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), eq(6));
+      streakService.incrementStreak(testHabit);
+
+      verify(valueOperations).set(eq("streak:" + testUserId + ":" + testHabitId), eq(6));
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
 
       // Since check-in is today, expiration should be at midnight tomorrow (24-48 hours)
       long hoursUntilExpiry =
@@ -371,7 +361,7 @@ class StreakServiceImplTest {
       testUserProfile.setTimezone("Asia/Tokyo");
       ZoneId tokyoTz = ZoneId.of("Asia/Tokyo");
 
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       // Last check-in was yesterday in Tokyo timezone
       CheckInEntity yesterdayCheckIn =
@@ -383,15 +373,14 @@ class StreakServiceImplTest {
       when(streakCalculator.calculateCurrentStreak(any(), any())).thenReturn(1);
 
       Instant beforeCall = Instant.now();
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(ZoneId.systemDefault());
-        streakService.calculateStreak(testHabitId);
-      }
 
-      verify(valueOperations).set(eq("streak:" + testHabitId), any());
+      streakService.calculateStreak(testHabitId);
+
+      verify(valueOperations).set(eq("streak:" + testUserId + ":" + testHabitId), any());
 
       ArgumentCaptor<Instant> expireAtCaptor = ArgumentCaptor.forClass(Instant.class);
-      verify(redisTemplate).expireAt(eq("streak:" + testHabitId), expireAtCaptor.capture());
+      verify(redisTemplate)
+          .expireAt(eq("streak:" + testUserId + ":" + testHabitId), expireAtCaptor.capture());
 
       // Expiration should be at Tokyo midnight tonight (less than 24 hours, but could be very soon)
       Instant expireAt = expireAtCaptor.getValue();
@@ -410,8 +399,9 @@ class StreakServiceImplTest {
     void shouldRespectTokyoTimezone() {
       testUserProfile.setTimezone("Asia/Tokyo");
       ZoneId tokyoTz = ZoneId.of("Asia/Tokyo");
+      utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(tokyoTz);
 
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(tokyoTz).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
@@ -420,10 +410,7 @@ class StreakServiceImplTest {
           .thenReturn(List.of(todayCheckIn));
       when(streakCalculator.calculateCurrentStreak(any(), eq(tokyoTz))).thenReturn(1);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(tokyoTz);
-        streakService.calculateStreak(testHabitId);
-      }
+      streakService.calculateStreak(testHabitId);
 
       verify(streakCalculator).calculateCurrentStreak(any(), eq(tokyoTz));
     }
@@ -432,8 +419,9 @@ class StreakServiceImplTest {
     void shouldRespectLondonTimezone() {
       testUserProfile.setTimezone("Europe/London");
       ZoneId londonTz = ZoneId.of("Europe/London");
+      utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(londonTz);
 
-      when(valueOperations.get("streak:" + testHabitId)).thenReturn(null);
+      when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
       CheckInEntity todayCheckIn = createCheckIn(ZonedDateTime.now(londonTz).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
@@ -442,10 +430,8 @@ class StreakServiceImplTest {
           .thenReturn(List.of(todayCheckIn));
       when(streakCalculator.calculateCurrentStreak(any(), eq(londonTz))).thenReturn(1);
 
-      try (MockedStatic<AuthUtils> mocked = mockStatic(AuthUtils.class)) {
-        mocked.when(AuthUtils::getUserTimeZone).thenReturn(londonTz);
-        streakService.calculateStreak(testHabitId);
-      }
+      streakService.calculateStreak(testHabitId);
+
       verify(streakCalculator).calculateCurrentStreak(any(), eq(londonTz));
     }
   }
