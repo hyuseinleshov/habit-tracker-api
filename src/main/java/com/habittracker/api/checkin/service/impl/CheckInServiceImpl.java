@@ -83,14 +83,28 @@ public class CheckInServiceImpl implements CheckInService {
   }
 
   @Override
-  public long getCheckInsCount(UUID habitId) {
+  public long getHabitCheckInsCount(UUID habitId) {
     return checkInRepository.countByHabitId(habitId);
   }
 
   @Override
-  public LocalDate getLastCheckInDate(UUID habitId) {
+  public long getUserCheckInsCount(UUID userId) {
+    return checkInRepository.countByHabitUserId(userId);
+  }
+
+  @Override
+  public LocalDate getHabitLastCheckInDate(UUID habitId) {
     return checkInRepository
         .findFirstByHabitIdOrderByCreatedAtDesc(habitId)
+        .map(CheckInEntity::getCreatedAt)
+        .map(instant -> instant.atZone(AuthUtils.getUserTimeZone()).toLocalDate())
+        .orElse(null);
+  }
+
+  @Override
+  public LocalDate getUserLastCheckInDate(UUID userId) {
+    return checkInRepository
+        .findFirstByHabitUserIdOrderByCreatedAtDesc(userId)
         .map(CheckInEntity::getCreatedAt)
         .map(instant -> instant.atZone(AuthUtils.getUserTimeZone()).toLocalDate())
         .orElse(null);

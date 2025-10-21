@@ -19,12 +19,8 @@ public record HabitStatisticResponse(
       LocalDate startDate,
       LocalDate endDate,
       @JsonInclude(JsonInclude.Include.NON_NULL) UUID habitId) {
-    public static BestStreakData of(int days, LocalDate startDate, LocalDate endDate) {
-      return new BestStreakData(days, startDate, endDate, null);
-    }
-
-    public static BestStreakData of(
-        int days, LocalDate startDate, LocalDate endDate, UUID habitId) {
+    public static BestStreakData of(int days, LocalDate startDate, UUID habitId) {
+      LocalDate endDate = startDate != null ? startDate.plusDays(days) : null;
       return new BestStreakData(days, startDate, endDate, habitId);
     }
   }

@@ -29,21 +29,18 @@ public class HabitStatisticsServiceImpl implements HabitStatisticsService {
   @Cacheable(value = "habitStatistics", key = "#habitId")
   public HabitStatisticResponse calculateStatistics(UUID habitId) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
-    long totalCheckins = checkInService.getCheckInsCount(habitId);
+    long totalCheckins = checkInService.getHabitCheckInsCount(habitId);
     int currentStreak = streakService.calculateStreak(habitId).currentStreak();
-    LocalDate lastCheckInDate = checkInService.getLastCheckInDate(habitId);
+    LocalDate lastCheckInDate = checkInService.getHabitLastCheckInDate(habitId);
     return new HabitStatisticResponse(
         habitId,
         habit.getName(),
         totalCheckins,
-        new HabitStatisticResponse.StreakData(currentStreak, buildBestSteakData(habit)),
+        new HabitStatisticResponse.StreakData(
+            currentStreak,
+            HabitStatisticResponse.BestStreakData.of(
+                habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
         lastCheckInDate,
         Instant.now());
-  }
-
-  private HabitStatisticResponse.BestStreakData buildBestSteakData(HabitEntity habit) {
-    LocalDate startDate = habit.getBestStreakStartDate();
-    LocalDate endDate = startDate != null ? startDate.plusDays(habit.getBestStreak()) : null;
-    return HabitStatisticResponse.BestStreakData.of(habit.getBestStreak(), startDate, endDate);
   }
 }

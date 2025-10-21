@@ -19,9 +19,13 @@ public interface CheckInService {
   PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UserEntity user, Instant from, Instant to, Pageable pageable);
 
-  long getCheckInsCount(UUID habitId);
+  long getHabitCheckInsCount(UUID habitId);
 
-  LocalDate getLastCheckInDate(UUID habitId);
+  long getUserCheckInsCount(UUID userId);
+
+  LocalDate getHabitLastCheckInDate(UUID habitId);
+
+  LocalDate getUserLastCheckInDate(UUID userId);
 
   void deleteCheckIn(UUID checkInId, UserEntity user);
 }
