@@ -46,11 +46,10 @@ public class CheckInServiceImpl implements CheckInService {
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
   @CacheEvict(value = "habitStatistics", key = "#habitId")
   @Caching(
-          evict = {
-                  @CacheEvict(value = "habitStatistics", key = "#habitId"),
-                  @CacheEvict(value = "userStatistics", key = "#user.id")
-          }
-  )
+      evict = {
+        @CacheEvict(value = "habitStatistics", key = "#habitId"),
+        @CacheEvict(value = "userStatistics", key = "#user.id")
+      })
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);

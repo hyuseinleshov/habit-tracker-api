@@ -145,7 +145,7 @@ public class StreakServiceImpl implements StreakService {
   }
 
   private String buildStreakCacheKey(UUID userId, UUID habitId) {
-    return String.format("%s:%s:%s", STREAK_CACHE_KEY_PREFIX, userId, habitId);
+    return String.format("%s%s:%s", STREAK_CACHE_KEY_PREFIX, userId, habitId);
   }
 
   private int calculateDaysUntilExpiry(LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {

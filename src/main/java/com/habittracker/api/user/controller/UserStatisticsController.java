@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserStatisticsController {
 
-    private final UserStatisticsService statisticsService;
+  private final UserStatisticsService statisticsService;
 
-    @GetMapping
-    public ResponseEntity<UserStatisticsResponse> getStatistics(@AuthenticationPrincipal UserDetailsImpl principal) {
-        return ResponseEntity.ok(statisticsService.calculateStatistics(principal.getUser()));
-    }
+  @GetMapping
+  public ResponseEntity<UserStatisticsResponse> getStatistics(
+      @AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(statisticsService.calculateStatistics(principal.getUser()));
+  }
 }
