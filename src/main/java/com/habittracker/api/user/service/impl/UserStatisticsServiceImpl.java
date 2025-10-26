@@ -7,14 +7,13 @@ import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +36,9 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   }
 
   private HabitStatisticResponse.BestStreakData getUserBestStreak(UUID userId) {
-    return habitRepository.findBestStreakByUserId(userId)
-            .map(
+    return habitRepository
+        .findBestStreakByUserId(userId)
+        .map(
             habit ->
                 HabitStatisticResponse.BestStreakData.of(
                     habit.getBestStreak(), habit.getBestStreakStartDate(), habit.getId()))

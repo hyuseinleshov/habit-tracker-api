@@ -71,7 +71,7 @@ public class StreakServiceImpl implements StreakService {
       return;
     }
     habit.setBestStreak(newStreak);
-    habit.setBestStreakStartDate(LocalDate.now(userTimeZone).minusDays(newStreak - 1));
+    habit.setBestStreakStartDate(LocalDate.now(userTimeZone).minusDays(newStreak + 1));
   }
 
   private int getStreak(UUID habitId, ZoneId userTimeZone) {
