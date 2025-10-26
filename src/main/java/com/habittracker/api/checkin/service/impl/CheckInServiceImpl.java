@@ -44,7 +44,6 @@ public class CheckInServiceImpl implements CheckInService {
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
-  @CacheEvict(value = "habitStatistics", key = "#habitId")
   @Caching(
       evict = {
         @CacheEvict(value = "habitStatistics", key = "#habitId"),
