@@ -1,14 +1,16 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
+
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.service.CheckInService;
-import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserStatisticsServiceImpl implements UserStatisticsService {
 
   private final CheckInService checkInService;
-  private final StreakService streakService;
   private final HabitRepository habitRepository;
 
   @Override
@@ -29,10 +30,17 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   public UserStatisticsResponse calculateStatistics(UserEntity user) {
     long totalCheckIns = checkInService.getUserCheckInsCount(user.getId());
     HabitStatisticResponse.BestStreakData userBestStreak = getUserBestStreak(user.getId());
-    long activeStreaks = streakService.getUserActiveStreaks(user.getId());
+    long activeStreaks = getUserActiveStreaks(user.getId());
     LocalDate lastCheckInDate = checkInService.getUserLastCheckInDate(user.getId());
     return new UserStatisticsResponse(
         user.getId(), totalCheckIns, userBestStreak, activeStreaks, lastCheckInDate, Instant.now());
+  }
+
+  private long getUserActiveStreaks(UUID userId) {
+    ZoneId userTimeZone = getUserTimeZone();
+    LocalDate yesterday = LocalDate.now(userTimeZone).minusDays(1);
+    Instant since = yesterday.atStartOfDay(userTimeZone).toInstant();
+    return habitRepository.countHabitsWithRecentCheckIns(userId, since);
   }
 
   private HabitStatisticResponse.BestStreakData getUserBestStreak(UUID userId) {

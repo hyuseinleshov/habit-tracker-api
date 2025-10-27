@@ -21,6 +21,12 @@ public interface HabitRepository
           + "LIMIT 1")
   Optional<HabitEntity> findBestStreakByUserId(@Param("userId") UUID userId);
 
+  @Query(
+      "SELECT COUNT(DISTINCT h.id) FROM HabitEntity h "
+          + "WHERE h.user.id = :userId AND h.deletedAt IS NULL AND "
+          + "EXISTS (SELECT 1 FROM CheckInEntity c WHERE c.habit = h AND c.createdAt >= :since)")
+  long countHabitsWithRecentCheckIns(@Param("userId") UUID userId, @Param("since") Instant since);
+
   boolean existsByNameIgnoreCaseAndUserId(String name, UUID userId);
 
   boolean existsByIdAndUserId(UUID id, UUID userId);

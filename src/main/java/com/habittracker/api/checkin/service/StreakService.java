@@ -26,6 +26,4 @@ public interface StreakService {
    * @param habit the habit
    */
   void incrementStreak(HabitEntity habit);
-
-  long getUserActiveStreaks(UUID userId);
 }
