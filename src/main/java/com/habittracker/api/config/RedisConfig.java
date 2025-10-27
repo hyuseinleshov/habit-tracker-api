@@ -21,12 +21,16 @@ public class RedisConfig {
 
   @Bean
   public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
     RedisCacheConfiguration cacheConfig =
         RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.of(1, ChronoUnit.HOURS))
             .serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(
-                    new GenericJackson2JsonRedisSerializer()))
+                    new GenericJackson2JsonRedisSerializer(objectMapper)))
             .disableCachingNullValues();
     return RedisCacheManager.builder(connectionFactory).cacheDefaults(cacheConfig).build();
   }
