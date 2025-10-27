@@ -63,6 +63,7 @@ public class StreakServiceImpl implements StreakService {
 
   @Override
   public long getUserActiveStreaks(UUID userId) {
+
     return redisTemplate.keys(String.format("%s:%s:*", STREAK_CACHE_KEY_PREFIX, userId)).size();
   }
 
@@ -71,7 +72,7 @@ public class StreakServiceImpl implements StreakService {
       return;
     }
     habit.setBestStreak(newStreak);
-    habit.setBestStreakStartDate(LocalDate.now(userTimeZone).minusDays(newStreak + 1));
+    habit.setBestStreakStartDate(LocalDate.now(userTimeZone).minusDays(newStreak -1));
   }
 
   private int getStreak(UUID habitId, ZoneId userTimeZone) {
