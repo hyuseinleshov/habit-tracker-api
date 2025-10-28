@@ -4,6 +4,7 @@ import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.exception.CheckInNotFoundException;
@@ -16,9 +17,12 @@ import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,6 +44,11 @@ public class CheckInServiceImpl implements CheckInService {
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
+  @Caching(
+      evict = {
+        @CacheEvict(value = "habitStatistics", key = "#habitId"),
+        @CacheEvict(value = "userStatistics", key = "#user.id")
+      })
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UserEntity user) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
@@ -76,6 +85,34 @@ public class CheckInServiceImpl implements CheckInService {
     Page<CheckInWithHabitResponse> page =
         checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
     return new PagedModel<>(page);
+  }
+
+  @Override
+  public long getHabitCheckInsCount(UUID habitId) {
+    return checkInRepository.countByHabitId(habitId);
+  }
+
+  @Override
+  public long getUserCheckInsCount(UUID userId) {
+    return checkInRepository.countByHabitUserId(userId);
+  }
+
+  @Override
+  public LocalDate getHabitLastCheckInDate(UUID habitId) {
+    return checkInRepository
+        .findFirstByHabitIdOrderByCreatedAtDesc(habitId)
+        .map(CheckInEntity::getCreatedAt)
+        .map(instant -> instant.atZone(AuthUtils.getUserTimeZone()).toLocalDate())
+        .orElse(null);
+  }
+
+  @Override
+  public LocalDate getUserLastCheckInDate(UUID userId) {
+    return checkInRepository
+        .findFirstByHabitUserIdOrderByCreatedAtDesc(userId)
+        .map(CheckInEntity::getCreatedAt)
+        .map(instant -> instant.atZone(AuthUtils.getUserTimeZone()).toLocalDate())
+        .orElse(null);
   }
 
   @Override

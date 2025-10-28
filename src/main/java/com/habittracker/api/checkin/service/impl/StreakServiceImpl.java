@@ -4,6 +4,7 @@ import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
 import static com.habittracker.api.core.utils.TemporalUtils.isTodayOrYesterday;
 
+import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.dto.StreakCalculationResult;
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
@@ -69,7 +70,7 @@ public class StreakServiceImpl implements StreakService {
   }
 
   private int getStreak(UUID habitId, ZoneId userTimeZone) {
-    String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
+    String cacheKey = buildStreakCacheKey(AuthUtils.getUserId(), habitId);
 
     Integer cachedStreak = (Integer) redisTemplate.opsForValue().get(cacheKey);
     if (cachedStreak != null) {
@@ -127,7 +128,7 @@ public class StreakServiceImpl implements StreakService {
       return;
     }
 
-    String cacheKey = STREAK_CACHE_KEY_PREFIX + habitId;
+    String cacheKey = buildStreakCacheKey(AuthUtils.getUserId(), habitId);
     int daysUntilExpiry = calculateDaysUntilExpiry(mostRecentCheckInDate, userTimeZone);
 
     LocalDateTime midnight =
@@ -136,6 +137,10 @@ public class StreakServiceImpl implements StreakService {
 
     redisTemplate.opsForValue().set(cacheKey, streak);
     redisTemplate.expireAt(cacheKey, expireAt);
+  }
+
+  private String buildStreakCacheKey(UUID userId, UUID habitId) {
+    return String.format("%s%s:%s", STREAK_CACHE_KEY_PREFIX, userId, habitId);
   }
 
   private int calculateDaysUntilExpiry(LocalDate mostRecentCheckInDate, ZoneId userTimeZone) {
