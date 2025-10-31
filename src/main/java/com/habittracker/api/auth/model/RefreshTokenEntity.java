@@ -3,6 +3,7 @@ package com.habittracker.api.auth.model;
 import com.habittracker.api.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +17,7 @@ public class RefreshTokenEntity extends BaseEntity {
   private String token;
 
   @Column(nullable = false)
-  private String email;
+  private UUID userId;
 
   @Column(nullable = false)
   private Instant expiresAt;
