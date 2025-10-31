@@ -1,3 +1,5 @@
 package com.habittracker.api.auth.dto;
 
-public record AuthResponse(String email, String token, String refreshToken, String message) {}
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public record AuthResponse(String email, String token, @JsonIgnore String refreshToken, String message) {}
