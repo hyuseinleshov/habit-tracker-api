@@ -63,10 +63,10 @@ public class CheckInServiceImpl implements CheckInService {
   }
 
   @Override
-  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #userId)")
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, principal.id())")
   @Transactional(readOnly = true)
   public PagedModel<CheckInResponse> getCheckInsByHabit(
-      UUID habitId, UUID userId, Instant from, Instant to, Pageable pageable) {
+      UUID habitId, Instant from, Instant to, Pageable pageable) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasHabit(habit), from, to);
     Page<CheckInResponse> page =
@@ -113,19 +113,17 @@ public class CheckInServiceImpl implements CheckInService {
   }
 
   @Override
-  @PreAuthorize("@checkInHelper.isOwnedByUser(#checkInId, principal.id)")
+  @PreAuthorize("@checkInHelper.isOwnedByUser(#checkInId, principal.id())")
   @Transactional
-  public void deleteCheckIn(UUID checkInId, UUID userId) {
+  public void deleteCheckIn(UUID checkInId) {
     CheckInEntity checkIn =
         checkInRepository.findById(checkInId).orElseThrow(CheckInNotFoundException::new);
     UUID habitId = checkIn.getHabit().getId();
     checkInRepository.delete(checkIn);
 
-    // For now, we just handle the deletion of check-in like this.
-    // We will discuss if we will keep the delete functionality
+    // TODO
+    // FIX
     streakService.calculateStreak(habitId);
-
-    log.debug("Deleted check-in with id {} for user {}", checkInId, userId);
   }
 
   private Specification<CheckInEntity> buildSpecificationWithDateRange(

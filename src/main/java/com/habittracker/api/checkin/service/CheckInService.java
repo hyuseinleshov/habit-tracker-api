@@ -13,7 +13,7 @@ public interface CheckInService {
   CheckInResponse checkIn(UUID habitId, UUID userId);
 
   PagedModel<CheckInResponse> getCheckInsByHabit(
-      UUID habitId, UUID userId, Instant from, Instant to, Pageable pageable);
+      UUID habitId, Instant from, Instant to, Pageable pageable);
 
   PagedModel<CheckInWithHabitResponse> getAllCheckIns(
       UUID userId, Instant from, Instant to, Pageable pageable);
@@ -26,5 +26,5 @@ public interface CheckInService {
 
   LocalDate getUserLastCheckInDate(UUID userId);
 
-  void deleteCheckIn(UUID checkInId, UUID userId);
+  void deleteCheckIn(UUID checkInId);
 }
