@@ -7,6 +7,7 @@ import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
@@ -31,25 +32,17 @@ class UserServiceImplTest {
   @InjectMocks private UserServiceImpl toTest;
 
   @Test
-  void test_DeleteUser_Should_Throw_When_Id_Is_Invalid() {
-
-    assertThatThrownBy(() -> toTest.delete(null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(USER_CANT_BE_NULL_MESSAGE);
-  }
-
-  @Test
   void test_Delete_Should_Delete_UserProfile_WithValid_Id() {
-
+    when(userRepository.getReferenceById(TEST_USER.getId())).thenReturn(TEST_USER);
     Instant before = Instant.now();
-    toTest.delete(TEST_USER);
+    toTest.delete(TEST_USER.getId());
     Instant after = Instant.now();
 
     assertThat(TEST_USER.isDeleted()).isTrue();
     assertThat(TEST_USER.getDeletedAt())
         .isInstanceOf(Instant.class)
         .isBetween(before.minusSeconds(1), after.plusSeconds(1));
-    verify(refreshTokenService).revokeAllRefreshTokensForUser(TEST_USER.getEmail());
+    verify(refreshTokenService).revokeAllRefreshTokensForUser(TEST_USER.getId());
   }
 
   @Test
@@ -68,10 +61,9 @@ class UserServiceImplTest {
 
   @Test
   void test_updateEmail_Should_UpdateEmail_With_ValidUser() {
-    final String CHANGED_EMAIL = TEST_USER.getEmail();
     final String NEW_EMAIL = "new@gmail.com";
     toTest.updateEmail(TEST_USER, NEW_EMAIL);
-    verify(refreshTokenService).revokeAllRefreshTokensForUser(CHANGED_EMAIL);
+    verify(refreshTokenService).revokeAllRefreshTokensForUser(TEST_USER.getId());
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
     verify(userRepository).save(userCaptor.capture());
     assertThat(userCaptor.getValue().getEmail()).isEqualTo(NEW_EMAIL);
