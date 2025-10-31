@@ -1,10 +1,11 @@
 package com.habittracker.api.security.jwt.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface JwtService {
 
-  String generateToken(String email);
+  String generateToken(UUID userId);
 
   boolean isValid(String token);
 

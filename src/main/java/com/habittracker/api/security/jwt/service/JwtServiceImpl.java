@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -65,21 +66,21 @@ public class JwtServiceImpl implements JwtService {
     this.jwtProperties = jwtProperties;
   }
 
-  public String generateToken(String email) {
+  public String generateToken(UUID userId) {
     Instant now = Instant.now();
     String token =
         Jwts.builder()
             .header()
             .type("JWT")
             .and()
-            .subject(email)
+            .subject(userId.toString())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
             .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))
             .issuer(jwtProperties.getIssuer())
             .signWith(secretKey)
             .compact();
-    log.info("Generate token for user with email: {}", email);
+    log.info("Generate token for user with id: {}", userId);
     return token;
   }
 
