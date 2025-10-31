@@ -22,7 +22,7 @@ public final class AuthConstants {
       "Validation failed for one or more fields in your request.";
   public static final String MALFORMED_JSON_MESSAGE = "Request body is missing or malformed.";
   public static final String INVALID_REFRESH_TOKEN_MESSAGE = "Invalid refresh token";
-  public static final String MISSING_REFRESH_TOKEN_MESSAGE = "Refresh token is missing";
+  public static final String MISSING_REFRESH_TOKEN_MESSAGE = "Refresh token cookie is missing";
 
   // Validation messages
   public static final String EMAIL_REQUIRED_MESSAGE = "Email is required";
