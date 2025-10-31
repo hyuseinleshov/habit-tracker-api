@@ -37,8 +37,4 @@ public class UserEntity extends DeletableEntity {
   public boolean isAdmin() {
     return roles.stream().anyMatch(r -> r.getType().equals(RoleType.ADMIN));
   }
-
-  public String getFullName() {
-    return this.userProfile.getFirstName() + " " + this.userProfile.getLastName();
-  }
 }
