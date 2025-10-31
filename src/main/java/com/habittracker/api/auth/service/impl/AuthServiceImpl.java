@@ -13,14 +13,14 @@ import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.service.UserProfileService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     UserEntity savedUser = userRepository.save(user);
 
     refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getId());
-    String token = jwtService.generateToken(savedUser.getId());
+    String token = jwtService.generateToken(user);
     String refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
     return new AuthResponse(savedUser.getEmail(), token, refreshToken, REGISTER_SUCCESS_MESSAGE);
   }
@@ -66,22 +66,26 @@ public class AuthServiceImpl implements AuthService {
 
     log.info("User authenticated: {}", request.email());
     refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
-    String token = jwtService.generateToken(user.getId());
+    String token = jwtService.generateToken(user);
     String refreshToken = refreshTokenService.createRefreshToken(user.getId());
     return new AuthResponse(request.email(), token, refreshToken, LOGIN_SUCCESS_MESSAGE);
   }
 
   @Override
+  @Transactional(readOnly = true)
   public RefreshTokenResponse refreshToken(String refreshToken) {
     if (!refreshTokenService.isValid(refreshToken)) {
       throw new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    UUID userId = refreshTokenService.getUserIdFromRefreshToken(refreshToken);
-    String newAccessToken = jwtService.generateToken(userId);
+    UserEntity userEntity = refreshTokenService.getUserIdFromRefreshToken(refreshToken)
+            .map(userRepository::getReferenceById)
+            .orElseThrow(() -> new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE));
+
+    String newAccessToken = jwtService.generateToken(userEntity);
 
     refreshTokenService.revokeRefreshToken(refreshToken);
-    String newRefreshToken = refreshTokenService.createRefreshToken(userId);
+    String newRefreshToken = refreshTokenService.createRefreshToken(userEntity.getId());
     return new RefreshTokenResponse(newAccessToken, newRefreshToken, REFRESH_SUCCESS_MESSAGE);
   }
 }

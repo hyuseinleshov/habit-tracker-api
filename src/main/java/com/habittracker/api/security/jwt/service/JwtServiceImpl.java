@@ -1,5 +1,6 @@
 package com.habittracker.api.security.jwt.service;
 
+import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.security.jwt.config.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
@@ -7,7 +8,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -66,21 +66,24 @@ public class JwtServiceImpl implements JwtService {
     this.jwtProperties = jwtProperties;
   }
 
-  public String generateToken(UUID userId) {
+  public String generateToken(UserEntity user) {
     Instant now = Instant.now();
     String token =
         Jwts.builder()
             .header()
             .type("JWT")
             .and()
-            .subject(userId.toString())
+            .subject(user.getEmail())
+                .claim("username", user.getFullName())
+                .claim("isAdmin", Boolean.toString(user.isAdmin()))
+                .claim("timeZone", user.getUserProfile().getTimezone())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
             .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))
             .issuer(jwtProperties.getIssuer())
             .signWith(secretKey)
             .compact();
-    log.info("Generate token for user with id: {}", userId);
+    log.info("Generate token for user with email: {}", user.getEmail());
     return token;
   }
 

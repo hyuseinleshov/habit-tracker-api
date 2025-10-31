@@ -1,5 +1,6 @@
 package com.habittracker.api.auth.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenService {
@@ -7,7 +8,7 @@ public interface RefreshTokenService {
 
   boolean isValid(String refreshToken);
 
-  UUID getUserIdFromRefreshToken(String refreshToken);
+  Optional<UUID> getUserIdFromRefreshToken(String refreshToken);
 
   void revokeRefreshToken(String refreshToken);
 

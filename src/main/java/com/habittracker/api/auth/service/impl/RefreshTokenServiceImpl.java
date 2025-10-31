@@ -40,11 +40,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public UUID getUserIdFromRefreshToken(String refreshToken) {
+  public Optional<UUID> getUserIdFromRefreshToken(String refreshToken) {
     return refreshTokenRepository
         .findByToken(refreshToken)
-        .map(RefreshTokenEntity::getId)
-        .orElse(null);
+        .map(RefreshTokenEntity::getUserId);
   }
 
   @Override
