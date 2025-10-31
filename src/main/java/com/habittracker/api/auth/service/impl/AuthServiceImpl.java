@@ -14,7 +14,6 @@ import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.service.UserProfileService;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -51,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
     UserEntity savedUser = userRepository.save(user);
 
     refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getId());
-    String token = jwtService.generateToken(user);
+    String token = jwtService.generateToken(savedUser);
     String refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
     return new AuthResponse(savedUser.getEmail(), token, refreshToken, REGISTER_SUCCESS_MESSAGE);
   }
@@ -78,7 +77,9 @@ public class AuthServiceImpl implements AuthService {
       throw new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    UserEntity userEntity = refreshTokenService.getUserIdFromRefreshToken(refreshToken)
+    UserEntity userEntity =
+        refreshTokenService
+            .getUserIdFromRefreshToken(refreshToken)
             .map(userRepository::getReferenceById)
             .orElseThrow(() -> new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE));
 

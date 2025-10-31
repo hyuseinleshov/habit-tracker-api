@@ -73,10 +73,10 @@ public class JwtServiceImpl implements JwtService {
             .header()
             .type("JWT")
             .and()
-            .subject(user.getEmail())
-                .claim("username", user.getFullName())
-                .claim("isAdmin", Boolean.toString(user.isAdmin()))
-                .claim("timeZone", user.getUserProfile().getTimezone())
+            .subject(user.getId().toString())
+            .claim("email", user.getEmail())
+            .claim("isAdmin", Boolean.toString(user.isAdmin()))
+            .claim("timeZone", user.getUserProfile().getTimezone())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
             .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))
@@ -112,7 +112,7 @@ public class JwtServiceImpl implements JwtService {
   }
 
   @Override
-  public Optional<String> extractSubject(String token) {
-    return extractClaims(token).map(Claims::getSubject);
+  public Optional<Claims> getClaims(String token) {
+    return extractClaims(token);
   }
 }

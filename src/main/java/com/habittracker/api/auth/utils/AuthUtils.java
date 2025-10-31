@@ -1,7 +1,6 @@
 package com.habittracker.api.auth.utils;
 
 import static com.habittracker.api.core.exception.ExceptionConstants.ILLEGAL_STATE_MESSAGE;
-import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import java.time.ZoneId;
@@ -12,11 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public final class AuthUtils {
 
   public static ZoneId getUserTimeZone() {
-    return parseTimeZone(getDetails().getProfile().getTimezone());
+    return getDetails().timeZone();
   }
 
   public static UUID getUserId() {
-    return getDetails().getId();
+    return getDetails().id();
   }
 
   private static UserDetailsImpl getDetails() {

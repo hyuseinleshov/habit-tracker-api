@@ -8,6 +8,7 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.user.service.UserService;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,10 +33,9 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void delete(UserEntity user) {
-    checkForNullUser(user);
-    String deletedEmail = user.getEmail();
-    log.debug("Soft delete user with email {}", deletedEmail);
+  public void delete(UUID userId) {
+    log.debug("Soft delete user with id {}", userId);
+    UserEntity user = userRepository.getReferenceById(userId);
     Instant now = Instant.now();
     user.setDeletedAt(now);
     user.getHabits().forEach(h -> h.setDeletedAt(now));

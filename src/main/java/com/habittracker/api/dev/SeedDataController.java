@@ -20,7 +20,7 @@ public class SeedDataController {
       @RequestParam(defaultValue = "50") int count,
       @RequestParam(defaultValue = "30") int daysBack,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    int created = seedDataService.seedCheckInsForUser(userDetails.getUser(), count, daysBack);
+    int created = seedDataService.seedCheckInsForUser(userDetails.id(), count, daysBack);
     return ResponseEntity.ok(new SeedResponse("Check-ins seeded successfully", created));
   }
 
@@ -28,7 +28,7 @@ public class SeedDataController {
   public ResponseEntity<SeedResponse> seedHabits(
       @RequestParam(defaultValue = "10") int count,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    int created = seedDataService.seedHabitsForUser(userDetails.getUser(), count);
+    int created = seedDataService.seedHabitsForUser(userDetails.id(), count);
     return ResponseEntity.ok(new SeedResponse("Habits seeded successfully", created));
   }
 
@@ -39,8 +39,7 @@ public class SeedDataController {
       @RequestParam(defaultValue = "60") int daysBack,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     SeedSummary summary =
-        seedDataService.seedFullDataForUser(
-            userDetails.getUser(), habitCount, checkInCount, daysBack);
+        seedDataService.seedFullDataForUser(userDetails.id(), habitCount, checkInCount, daysBack);
     return ResponseEntity.ok(
         new SeedResponse(
             String.format(
@@ -52,7 +51,7 @@ public class SeedDataController {
   @DeleteMapping("/clear")
   public ResponseEntity<SeedResponse> clearUserData(
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    int deleted = seedDataService.clearUserData(userDetails.getUser());
+    int deleted = seedDataService.clearUserData(userDetails.id());
     return ResponseEntity.ok(new SeedResponse("User data cleared successfully", deleted));
   }
 }

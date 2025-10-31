@@ -41,9 +41,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
   @Override
   public Optional<UUID> getUserIdFromRefreshToken(String refreshToken) {
-    return refreshTokenRepository
-        .findByToken(refreshToken)
-        .map(RefreshTokenEntity::getUserId);
+    return refreshTokenRepository.findByToken(refreshToken).map(RefreshTokenEntity::getUserId);
   }
 
   @Override

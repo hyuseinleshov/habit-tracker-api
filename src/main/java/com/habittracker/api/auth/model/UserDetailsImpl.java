@@ -1,43 +1,33 @@
 package com.habittracker.api.auth.model;
 
-import com.habittracker.api.user.model.UserProfileEntity;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Getter
-@RequiredArgsConstructor
-public class UserDetailsImpl implements UserDetails {
-
-  private final UserEntity user;
+public record UserDetailsImpl(UUID id, String email, boolean isAdmin, ZoneId timeZone)
+    implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return user.getRoles().stream()
-        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getType()))
-        .collect(Collectors.toSet());
-  }
-
-  public UUID getId() {
-    return user.getId();
-  }
-
-  public UserProfileEntity getProfile() {
-    return user.getUserProfile();
+    HashSet<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_" + RoleType.USER));
+    if (isAdmin) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_" + RoleType.ADMIN));
+    }
+    return authorities;
   }
 
   @Override
   public String getPassword() {
-    return user.getPassword();
+    return null;
   }
 
   @Override
   public String getUsername() {
-    return user.getEmail();
+    return email;
   }
 }

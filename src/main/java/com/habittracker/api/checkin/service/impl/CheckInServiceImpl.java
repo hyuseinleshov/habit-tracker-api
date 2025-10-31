@@ -1,9 +1,7 @@
 package com.habittracker.api.checkin.service.impl;
 
 import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
-import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
@@ -43,19 +41,18 @@ public class CheckInServiceImpl implements CheckInService {
   private final StreakService streakService;
 
   @Override
-  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #userId)")
   @Caching(
       evict = {
         @CacheEvict(value = "habitStatistics", key = "#habitId"),
-        @CacheEvict(value = "userStatistics", key = "#user.id")
+        @CacheEvict(value = "userStatistics", key = "#userId")
       })
   @Transactional
-  public CheckInResponse checkIn(UUID habitId, UserEntity user) {
+  public CheckInResponse checkIn(UUID habitId, UUID userId) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     streakService.incrementStreak(habit);
 
-    dailyCheckInService.registerTodayCheckin(
-        habit, user.getId(), parseTimeZone(user.getUserProfile().getTimezone()));
+    dailyCheckInService.registerTodayCheckin(habit, userId, AuthUtils.getUserTimeZone());
 
     CheckInEntity checkInEntity = new CheckInEntity();
     checkInEntity.setHabit(habit);
@@ -66,10 +63,10 @@ public class CheckInServiceImpl implements CheckInService {
   }
 
   @Override
-  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #user.id)")
+  @PreAuthorize("@habitHelper.isOwnedByUser(#habitId, #userId)")
   @Transactional(readOnly = true)
   public PagedModel<CheckInResponse> getCheckInsByHabit(
-      UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable) {
+      UUID habitId, UUID userId, Instant from, Instant to, Pageable pageable) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(habitId);
     Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasHabit(habit), from, to);
     Page<CheckInResponse> page =
@@ -80,8 +77,8 @@ public class CheckInServiceImpl implements CheckInService {
   @Override
   @Transactional(readOnly = true)
   public PagedModel<CheckInWithHabitResponse> getAllCheckIns(
-      UserEntity user, Instant from, Instant to, Pageable pageable) {
-    Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasUser(user), from, to);
+      UUID userId, Instant from, Instant to, Pageable pageable) {
+    Specification<CheckInEntity> spec = buildSpecificationWithDateRange(hasUser(userId), from, to);
     Page<CheckInWithHabitResponse> page =
         checkInRepository.findAll(spec, pageable).map(checkInMapper::toResponseWithHabit);
     return new PagedModel<>(page);
@@ -118,7 +115,7 @@ public class CheckInServiceImpl implements CheckInService {
   @Override
   @PreAuthorize("@checkInHelper.isOwnedByUser(#checkInId, principal.id)")
   @Transactional
-  public void deleteCheckIn(UUID checkInId, UserEntity user) {
+  public void deleteCheckIn(UUID checkInId, UUID userId) {
     CheckInEntity checkIn =
         checkInRepository.findById(checkInId).orElseThrow(CheckInNotFoundException::new);
     UUID habitId = checkIn.getHabit().getId();
@@ -128,7 +125,7 @@ public class CheckInServiceImpl implements CheckInService {
     // We will discuss if we will keep the delete functionality
     streakService.calculateStreak(habitId);
 
-    log.debug("Deleted check-in with id {} for user {}", checkInId, user.getId());
+    log.debug("Deleted check-in with id {} for user {}", checkInId, userId);
   }
 
   private Specification<CheckInEntity> buildSpecificationWithDateRange(

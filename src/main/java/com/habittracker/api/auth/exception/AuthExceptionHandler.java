@@ -26,6 +26,6 @@ public class AuthExceptionHandler {
   public ResponseEntity<ApiError> handleMissingRequestCookieException(HttpServletRequest request) {
     HttpStatus status = HttpStatus.BAD_REQUEST;
     return ResponseEntity.status(status)
-            .body(ApiError.from(MISSING_REFRESH_TOKEN_MESSAGE, status, request));
+        .body(ApiError.from(MISSING_REFRESH_TOKEN_MESSAGE, status, request));
   }
 }
