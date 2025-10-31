@@ -15,13 +15,10 @@ import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.service.UserProfileService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +30,6 @@ public class AuthServiceImpl implements AuthService {
 
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
-  private final AuthenticationManager authManager;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
@@ -54,33 +50,25 @@ public class AuthServiceImpl implements AuthService {
     user.setUserProfile(profile);
     UserEntity savedUser = userRepository.save(user);
 
-    refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getEmail());
-    String token = jwtService.generateToken(savedUser.getEmail());
-    String refreshToken = refreshTokenService.createRefreshToken(savedUser.getEmail());
+    refreshTokenService.revokeAllRefreshTokensForUser(savedUser.getId());
+    String token = jwtService.generateToken(savedUser.getId());
+    String refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
     return new AuthResponse(savedUser.getEmail(), token, refreshToken, REGISTER_SUCCESS_MESSAGE);
   }
 
   @Override
   public AuthResponse login(LoginRequest request) {
-    try {
-      Authentication auth =
-          authManager.authenticate(
-              new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    UserEntity user =
+        userRepository
+            .findByEmailAndDeletedAtIsNull(request.email())
+            .filter(u -> passwordEncoder.matches(request.password(), u.getPassword()))
+            .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS_ERROR));
 
-      if (auth.isAuthenticated()) {
-        log.info("User authenticated: {}", request.email());
-        refreshTokenService.revokeAllRefreshTokensForUser(request.email());
-        String token = jwtService.generateToken(request.email());
-        String refreshToken = refreshTokenService.createRefreshToken(request.email());
-        return new AuthResponse(request.email(), token, refreshToken, LOGIN_SUCCESS_MESSAGE);
-      }
-
-      log.error("Authentication failed for user with email: {}", request.email());
-      throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
-    } catch (AuthenticationException e) {
-      log.error("Authentication error: {}", e.getMessage());
-      throw new BadCredentialsException(INVALID_CREDENTIALS_ERROR);
-    }
+    log.info("User authenticated: {}", request.email());
+    refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
+    String token = jwtService.generateToken(user.getId());
+    String refreshToken = refreshTokenService.createRefreshToken(user.getId());
+    return new AuthResponse(request.email(), token, refreshToken, LOGIN_SUCCESS_MESSAGE);
   }
 
   @Override
@@ -90,11 +78,11 @@ public class AuthServiceImpl implements AuthService {
       throw new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    String email = refreshTokenService.getEmailFromRefreshToken(refreshToken);
-    String newAccessToken = jwtService.generateToken(email);
+    UUID userId = refreshTokenService.getUserIdFromRefreshToken(refreshToken);
+    String newAccessToken = jwtService.generateToken(userId);
 
     refreshTokenService.revokeRefreshToken(refreshToken);
-    String newRefreshToken = refreshTokenService.createRefreshToken(email);
+    String newRefreshToken = refreshTokenService.createRefreshToken(userId);
     return new RefreshTokenResponse(newAccessToken, newRefreshToken, REFRESH_SUCCESS_MESSAGE);
   }
 }

@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
   public void updateEmail(UserEntity user, String email) {
     checkForNullUser(user);
     if (email == null) throw new IllegalArgumentException(EMAIL_CANT_BE_NULL_MESSAGE);
-    refreshTokenService.revokeAllRefreshTokensForUser(user.getEmail());
+    refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
     user.setEmail(email);
     userRepository.save(user);
   }
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     Instant now = Instant.now();
     user.setDeletedAt(now);
     user.getHabits().forEach(h -> h.setDeletedAt(now));
-    refreshTokenService.revokeAllRefreshTokensForUser(deletedEmail);
+    refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
   }
 
   private void checkForNullUser(UserEntity user) {
