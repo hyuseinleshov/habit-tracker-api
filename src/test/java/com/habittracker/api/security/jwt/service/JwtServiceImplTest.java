@@ -32,12 +32,13 @@ public class JwtServiceImplTest {
   private static final long TOLERANCE_SECONDS = 1;
 
   @Mock private JwtProperties jwtProperties;
+  @Mock private JwtBlacklistService blacklistService;
 
   private JwtServiceImpl totest;
 
   @BeforeEach
   void setUp() {
-    totest = new JwtServiceImpl(TEST_SECRET_KEY, jwtProperties);
+    totest = new JwtServiceImpl(TEST_SECRET_KEY, jwtProperties, blacklistService);
   }
 
   private void setUpJwtProperties() {
