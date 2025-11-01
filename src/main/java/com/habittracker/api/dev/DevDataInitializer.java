@@ -67,7 +67,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 if (user.getUserProfile() != null) {
                   UserProfileDTO userProfileDTO =
                       new UserProfileDTO(null, "Regular", "User", 25, "UTC");
-                  userProfileService.update(user.getUserProfile(), userProfileDTO);
+                  userProfileService.update(user.getId(), userProfileDTO);
                 }
               });
 
@@ -84,7 +84,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 if (user.getUserProfile() != null) {
                   UserProfileDTO userProfileDTO =
                       new UserProfileDTO(null, "Admin", "User", 30, "UTC");
-                  userProfileService.update(user.getUserProfile(), userProfileDTO);
+                  userProfileService.update(user.getId(), userProfileDTO);
                 }
               });
     }

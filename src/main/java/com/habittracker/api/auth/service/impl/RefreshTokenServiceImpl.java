@@ -10,6 +10,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +22,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   private Duration refreshTokenExpiration;
 
   @Override
-  public String createRefreshToken(String email) {
+  @Transactional
+  public String createRefreshToken(UUID userId) {
     String token = UUID.randomUUID().toString();
     RefreshTokenEntity entity = new RefreshTokenEntity();
     entity.setToken(token);
-    entity.setEmail(email);
+    entity.setUserId(userId);
     entity.setExpiresAt(Instant.now().plus(refreshTokenExpiration));
     refreshTokenRepository.save(entity);
     return token;
@@ -38,11 +40,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public String getEmailFromRefreshToken(String refreshToken) {
-    return refreshTokenRepository
-        .findByToken(refreshToken)
-        .map(RefreshTokenEntity::getEmail)
-        .orElse(null);
+  public Optional<UUID> getUserIdFromRefreshToken(String refreshToken) {
+    return refreshTokenRepository.findByToken(refreshToken).map(RefreshTokenEntity::getUserId);
   }
 
   @Override
@@ -51,7 +50,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
   }
 
   @Override
-  public void revokeAllRefreshTokensForUser(String email) {
-    refreshTokenRepository.deleteAllByEmail(email);
+  public void revokeAllRefreshTokensForUser(UUID userId) {
+    refreshTokenRepository.deleteByUserId(userId);
   }
 }

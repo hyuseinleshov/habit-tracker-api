@@ -1,9 +1,10 @@
 package com.habittracker.api.habit.specs;
 
-import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.model.UserEntity_;
 import com.habittracker.api.core.entity.DeletableEntity_;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.model.HabitEntity_;
+import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
 public class HabitSpecs {
@@ -21,7 +22,8 @@ public class HabitSpecs {
     return (root, query, builder) -> builder.equal(root.get(HabitEntity_.archived), isArchived);
   }
 
-  public static Specification<HabitEntity> hasUser(UserEntity user) {
-    return (root, query, builder) -> builder.equal(root.get(HabitEntity_.user), user);
+  public static Specification<HabitEntity> hasUser(UUID userId) {
+    return (root, query, builder) ->
+        builder.equal(root.get(HabitEntity_.user).get(UserEntity_.id), userId);
   }
 }

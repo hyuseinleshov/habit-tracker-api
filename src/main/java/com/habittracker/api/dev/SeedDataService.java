@@ -1,6 +1,7 @@
 package com.habittracker.api.dev;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.habit.model.HabitEntity;
@@ -11,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -25,6 +27,7 @@ public class SeedDataService {
 
   private final HabitRepository habitRepository;
   private final CheckInRepository checkInRepository;
+  private final UserRepository userRepository;
   private final EntityManager entityManager;
   private final Random random = new Random();
 
@@ -58,9 +61,9 @@ public class SeedDataService {
   };
 
   @Transactional
-  public int seedHabitsForUser(UserEntity user, int count) {
+  public int seedHabitsForUser(UUID userId, int count) {
+    UserEntity user = userRepository.getReferenceById(userId);
     log.info("Seeding {} habits for user {}", count, user.getEmail());
-
     List<HabitEntity> habits = new ArrayList<>();
     for (int i = 0; i < count && i < HABIT_NAMES.length; i++) {
       HabitEntity habit = new HabitEntity();
@@ -77,7 +80,8 @@ public class SeedDataService {
   }
 
   @Transactional
-  public int seedCheckInsForUser(UserEntity user, int count, int daysBack) {
+  public int seedCheckInsForUser(UUID userId, int count, int daysBack) {
+    UserEntity user = userRepository.getReferenceById(userId);
     log.info("Seeding {} check-ins for user {} over {} days", count, user.getEmail(), daysBack);
 
     List<HabitEntity> userHabits =
@@ -87,7 +91,7 @@ public class SeedDataService {
 
     if (userHabits.isEmpty()) {
       log.warn("No habits found for user. Creating some first.");
-      seedHabitsForUser(user, 5);
+      seedHabitsForUser(user.getId(), 5);
       userHabits =
           habitRepository.findAll().stream()
               .filter(h -> h.getUser().getId().equals(user.getId()))
@@ -137,7 +141,8 @@ public class SeedDataService {
 
   @Transactional
   public SeedSummary seedFullDataForUser(
-      UserEntity user, int habitCount, int checkInCount, int daysBack) {
+      UUID userId, int habitCount, int checkInCount, int daysBack) {
+    UserEntity user = userRepository.getReferenceById(userId);
     log.info(
         "Seeding full data for user {}: {} habits, {} check-ins over {} days",
         user.getEmail(),
@@ -145,14 +150,15 @@ public class SeedDataService {
         checkInCount,
         daysBack);
 
-    int habitsCreated = seedHabitsForUser(user, habitCount);
-    int checkInsCreated = seedCheckInsForUser(user, checkInCount, daysBack);
+    int habitsCreated = seedHabitsForUser(user.getId(), habitCount);
+    int checkInsCreated = seedCheckInsForUser(user.getId(), checkInCount, daysBack);
 
     return new SeedSummary(habitsCreated, checkInsCreated);
   }
 
   @Transactional
-  public int clearUserData(UserEntity user) {
+  public int clearUserData(UUID userId) {
+    UserEntity user = userRepository.getReferenceById(userId);
     log.info("Clearing all data for user {}", user.getEmail());
 
     List<HabitEntity> userHabits =

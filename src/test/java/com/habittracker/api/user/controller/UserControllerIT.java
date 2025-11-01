@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.RoleTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
@@ -54,8 +55,8 @@ public class UserControllerIT {
 
   @Test
   public void test_getUserProfile_Return_ExpectedResult_With_JWT() throws Exception {
-    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(addJwt(jwt, get("/api/me")))
         .andExpect(status().isOk())
@@ -72,8 +73,8 @@ public class UserControllerIT {
   @MethodSource("com.habittracker.api.user.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
   public void test_Update_UserProfile_Return_Bad_InvalidBody(UserProfileDTO profileDTO)
       throws Exception {
-    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(
             addJwt(
@@ -96,8 +97,8 @@ public class UserControllerIT {
         new UserProfileDTO(
             UPDATED_EMAIL, UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
 
-    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(
             addJwt(
@@ -120,8 +121,8 @@ public class UserControllerIT {
 
   @Test
   public void test_Delete_UserProfile_DeleteUser_WithValid_JWT() throws Exception {
-    authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    String jwt = JwtTestUtils.generateValidToken(TEST_EMAIL, issuer, secretKey);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc.perform(addJwt(jwt, delete("/api/me"))).andExpect(status().isNoContent());
   }
 }

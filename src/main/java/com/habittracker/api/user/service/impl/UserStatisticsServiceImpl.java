@@ -2,7 +2,6 @@ package com.habittracker.api.user.service.impl;
 
 import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
 
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.repository.HabitRepository;
@@ -26,14 +25,14 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
 
   @Override
   @Transactional(readOnly = true)
-  @Cacheable(value = "userStatistics", key = "#user.id")
-  public UserStatisticsResponse calculateStatistics(UserEntity user) {
-    long totalCheckIns = checkInService.getUserCheckInsCount(user.getId());
-    HabitStatisticResponse.BestStreakData userBestStreak = getUserBestStreak(user.getId());
-    long activeStreaks = getUserActiveStreaks(user.getId());
-    LocalDate lastCheckInDate = checkInService.getUserLastCheckInDate(user.getId());
+  @Cacheable(value = "userStatistics", key = "#id")
+  public UserStatisticsResponse calculateStatistics(UUID id) {
+    long totalCheckIns = checkInService.getUserCheckInsCount(id);
+    HabitStatisticResponse.BestStreakData userBestStreak = getUserBestStreak(id);
+    long activeStreaks = getUserActiveStreaks(id);
+    LocalDate lastCheckInDate = checkInService.getUserLastCheckInDate(id);
     return new UserStatisticsResponse(
-        user.getId(), totalCheckIns, userBestStreak, activeStreaks, lastCheckInDate, Instant.now());
+        id, totalCheckIns, userBestStreak, activeStreaks, lastCheckInDate, Instant.now());
   }
 
   private long getUserActiveStreaks(UUID userId) {

@@ -1,6 +1,5 @@
 package com.habittracker.api.habit.service;
 
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.dto.UpdateHabitRequest;
@@ -12,9 +11,9 @@ import org.springframework.data.web.PagedModel;
 
 public interface HabitService {
 
-  HabitResponse createHabit(UserEntity user, CreateHabitRequest request);
+  HabitResponse createHabit(UUID userId, CreateHabitRequest request);
 
-  PagedModel<HabitResponse> getUserHabits(UserEntity user, Pageable pageable, boolean isArchived);
+  PagedModel<HabitResponse> getUserHabits(UUID userId, Pageable pageable, boolean isArchived);
 
   void delete(@NotNull UUID id);
 

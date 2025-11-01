@@ -56,6 +56,8 @@ public class AuthTestUtils {
     user.setEmail(email);
     user.setPassword(password);
     user.getRoles().add(role);
+    UserProfileEntity userProfile = new UserProfileEntity(user, "UTC", "", "", 0);
+    user.setUserProfile(userProfile);
     return user;
   }
 

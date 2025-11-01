@@ -61,6 +61,6 @@ CREATE TABLE refresh_tokens (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL,
     expires_at TIMESTAMP NOT NULL
 );

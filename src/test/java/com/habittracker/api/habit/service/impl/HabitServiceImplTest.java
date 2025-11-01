@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
@@ -37,6 +38,7 @@ import org.springframework.data.web.PagedModel;
 class HabitServiceImplTest {
 
   @Mock private HabitRepository habitRepository;
+  @Mock private UserRepository userRepository;
   @Mock private HabitMapper habitMapper;
   @Mock private HabitHelper habitHelper;
   @InjectMocks private HabitServiceImpl habitService;
@@ -77,8 +79,9 @@ class HabitServiceImplTest {
     void shouldCreateHabit_WhenValidRequest() {
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
+      when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
 
-      HabitResponse result = habitService.createHabit(testUser, validRequest);
+      HabitResponse result = habitService.createHabit(testUser.getId(), validRequest);
 
       assertThat(result).isEqualTo(testHabitResponse);
 
@@ -99,7 +102,7 @@ class HabitServiceImplTest {
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
-      habitService.createHabit(testUser, requestWithWhitespace);
+      habitService.createHabit(testUser.getId(), requestWithWhitespace);
 
       ArgumentCaptor<HabitEntity> habitCaptor = ArgumentCaptor.forClass(HabitEntity.class);
       verify(habitRepository).save(habitCaptor.capture());
@@ -116,7 +119,7 @@ class HabitServiceImplTest {
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
-      habitService.createHabit(testUser, requestWithNullDescription);
+      habitService.createHabit(testUser.getId(), requestWithNullDescription);
 
       ArgumentCaptor<HabitEntity> habitCaptor = ArgumentCaptor.forClass(HabitEntity.class);
       verify(habitRepository).save(habitCaptor.capture());
@@ -130,7 +133,7 @@ class HabitServiceImplTest {
       doThrow(new HabitNameAlreadyExistsException())
           .when(habitHelper)
           .isUniqueName(testUser.getId(), validRequest.name());
-      assertThatThrownBy(() -> habitService.createHabit(testUser, validRequest))
+      assertThatThrownBy(() -> habitService.createHabit(testUser.getId(), validRequest))
           .isInstanceOf(HabitNameAlreadyExistsException.class);
 
       verify(habitRepository, never()).save(any(HabitEntity.class));
@@ -144,7 +147,7 @@ class HabitServiceImplTest {
       doThrow(new HabitNameAlreadyExistsException())
           .when(habitHelper)
           .isUniqueName(testUser.getId(), HABIT_NAME_DIFFERENT_CASE);
-      assertThatThrownBy(() -> habitService.createHabit(testUser, requestWithDifferentCase))
+      assertThatThrownBy(() -> habitService.createHabit(testUser.getId(), requestWithDifferentCase))
           .isInstanceOf(HabitNameAlreadyExistsException.class);
     }
   }
@@ -165,7 +168,7 @@ class HabitServiceImplTest {
       when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
 
       PagedModel<HabitResponse> result =
-          habitService.getUserHabits(testUser, defaultPageable, false);
+          habitService.getUserHabits(testUser.getId(), defaultPageable, false);
 
       assertThat(result).isEqualTo(expectedResponses);
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
@@ -178,7 +181,7 @@ class HabitServiceImplTest {
           .thenReturn(Page.empty());
 
       PagedModel<HabitResponse> result =
-          habitService.getUserHabits(testUser, defaultPageable, false);
+          habitService.getUserHabits(testUser.getId(), defaultPageable, false);
 
       assertThat(result.getContent()).isEmpty();
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));

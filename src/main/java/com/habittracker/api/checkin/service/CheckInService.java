@@ -1,6 +1,5 @@
 package com.habittracker.api.checkin.service;
 
-import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.checkin.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import java.time.Instant;
@@ -11,13 +10,13 @@ import org.springframework.data.web.PagedModel;
 
 public interface CheckInService {
 
-  CheckInResponse checkIn(UUID habitId, UserEntity user);
+  CheckInResponse checkIn(UUID habitId, UUID userId);
 
   PagedModel<CheckInResponse> getCheckInsByHabit(
-      UUID habitId, UserEntity user, Instant from, Instant to, Pageable pageable);
+      UUID habitId, Instant from, Instant to, Pageable pageable);
 
   PagedModel<CheckInWithHabitResponse> getAllCheckIns(
-      UserEntity user, Instant from, Instant to, Pageable pageable);
+      UUID userId, Instant from, Instant to, Pageable pageable);
 
   long getHabitCheckInsCount(UUID habitId);
 
@@ -27,5 +26,5 @@ public interface CheckInService {
 
   LocalDate getUserLastCheckInDate(UUID userId);
 
-  void deleteCheckIn(UUID checkInId, UserEntity user);
+  void deleteCheckIn(UUID checkInId);
 }

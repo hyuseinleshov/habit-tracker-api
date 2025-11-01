@@ -3,6 +3,7 @@ package com.habittracker.api.habit.service.impl;
 import static com.habittracker.api.habit.specs.HabitSpecs.*;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.dto.UpdateHabitRequest;
@@ -29,16 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class HabitServiceImpl implements HabitService {
 
   private final HabitRepository habitRepository;
+  private final UserRepository userRepository;
   private final HabitMapper habitMapper;
   private final HabitHelper habitHelper;
 
   @Override
-  public HabitResponse createHabit(UserEntity user, CreateHabitRequest request) {
-    log.debug("Creating habit with name '{}' for user {}", request.name(), user.getId());
+  public HabitResponse createHabit(UUID userId, CreateHabitRequest request) {
+    log.debug("Creating habit with name '{}' for user {}", request.name(), userId);
 
     // Check if habit name already exists for this user
-    habitHelper.isUniqueName(user.getId(), request.name());
+    habitHelper.isUniqueName(userId, request.name());
 
+    UserEntity user = userRepository.getReferenceById(userId);
     HabitEntity habit = new HabitEntity();
     habit.setUser(user);
     habit.setName(request.name().trim());
@@ -50,7 +53,7 @@ public class HabitServiceImpl implements HabitService {
         "Created habit '{}' with ID {} for user {}",
         savedHabit.getName(),
         savedHabit.getId(),
-        user.getId());
+        userId);
 
     return habitMapper.toResponse(savedHabit);
   }
@@ -58,12 +61,12 @@ public class HabitServiceImpl implements HabitService {
   @Override
   @Transactional(readOnly = true)
   public PagedModel<HabitResponse> getUserHabits(
-      UserEntity user, Pageable pageable, boolean isArchived) {
-    log.debug("Fetching habits for user {}", user.getId());
+      UUID userId, Pageable pageable, boolean isArchived) {
+    log.debug("Fetching habits for user {}", userId);
 
     Page<HabitEntity> habits =
         habitRepository.findAll(
-            hasUser(user).and(isDeleted(false).and(isArchived(isArchived))), pageable);
+            hasUser(userId).and(isDeleted(false).and(isArchived(isArchived))), pageable);
 
     return new PagedModel<>(habits.map(habitMapper::toResponse));
   }

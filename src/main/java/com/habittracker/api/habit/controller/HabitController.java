@@ -31,8 +31,8 @@ public class HabitController {
       @Valid @RequestBody CreateHabitRequest request,
       @AuthenticationPrincipal UserDetailsImpl principal) {
 
-    log.info("Creating habit '{}' for user {}", request.name(), principal.getUser().getId());
-    HabitResponse response = habitService.createHabit(principal.getUser(), request);
+    log.info("Creating habit '{}' for user {}", request.name(), principal.id());
+    HabitResponse response = habitService.createHabit(principal.id(), request);
     return ResponseEntity.created(
             ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").build(response.id()))
         .body(response);
@@ -45,9 +45,9 @@ public class HabitController {
       @RequestParam(required = false, defaultValue = "false", name = "archived")
           boolean isArchived) {
 
-    log.debug("Fetching habits for user {}", principal.getUser().getId());
+    log.debug("Fetching habits for user {}", principal.id());
     PagedModel<HabitResponse> habits =
-        habitService.getUserHabits(principal.getUser(), pageable, isArchived);
+        habitService.getUserHabits(principal.id(), pageable, isArchived);
     return ResponseEntity.ok(habits);
   }
 
@@ -61,7 +61,7 @@ public class HabitController {
       @NotNull @PathVariable UUID id,
       @Valid @RequestBody UpdateHabitRequest updateRequest,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.ok(habitService.update(id, userDetails.getId(), updateRequest));
+    return ResponseEntity.ok(habitService.update(id, userDetails.id(), updateRequest));
   }
 
   @DeleteMapping("/{id}")

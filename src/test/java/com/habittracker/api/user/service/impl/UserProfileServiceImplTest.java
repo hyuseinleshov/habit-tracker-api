@@ -14,6 +14,7 @@ import com.habittracker.api.core.utils.TimeZoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
+import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -43,6 +44,7 @@ class UserProfileServiceImplTest {
       new UserProfileEntity(TEST_USER, TEST_TIMEZONE, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE);
 
   @Mock private UserProfileMapper profileMapper;
+  @Mock private UserProfileRepository userProfileRepository;
   @Mock private UserService userService;
   @Mock private Validator validator;
 
@@ -73,9 +75,10 @@ class UserProfileServiceImplTest {
 
   @Test
   void test_GetUserProfileById_Should_Return_ExpectedResult_With_Valid_Id() {
+    when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
     when(profileMapper.toUserProfileDTO(TEST_PROFILE)).thenReturn(TEST_USER_PROFILE_DTO);
 
-    UserProfileDTO profile = toTest.toProfileDTO(TEST_PROFILE);
+    UserProfileDTO profile = toTest.toProfileDTO(TEST_PROFILE.getId());
 
     verify(profileMapper).toUserProfileDTO(TEST_PROFILE);
 
@@ -91,7 +94,7 @@ class UserProfileServiceImplTest {
     HashSet<ConstraintViolation<Object>> mockSet = mock(HashSet.class);
     when(mockSet.isEmpty()).thenReturn(false);
     when(validator.validate(any())).thenReturn(mockSet);
-    assertThatThrownBy(() -> toTest.update(TEST_PROFILE, TEST_USER_PROFILE_DTO))
+    assertThatThrownBy(() -> toTest.update(TEST_PROFILE.getId(), TEST_USER_PROFILE_DTO))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
   }
@@ -108,7 +111,9 @@ class UserProfileServiceImplTest {
         new UserProfileDTO(
             UPDATED_EMAIL, UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
 
-    toTest.update(TEST_PROFILE, updatedProfileDTO);
+    when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
+
+    toTest.update(TEST_PROFILE.getId(), updatedProfileDTO);
 
     ArgumentCaptor<UserProfileEntity> captor = ArgumentCaptor.forClass(UserProfileEntity.class);
 

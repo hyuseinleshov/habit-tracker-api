@@ -27,8 +27,7 @@ public class CheckInController {
   public ResponseEntity<CheckInResponse> checkIn(
       @NotNull @PathVariable("id") UUID habitId,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.status(CREATED)
-        .body(checkInService.checkIn(habitId, userDetails.getUser()));
+    return ResponseEntity.status(CREATED).body(checkInService.checkIn(habitId, userDetails.id()));
   }
 
   @GetMapping("/api/habits/{id}/check-ins")
@@ -36,10 +35,8 @@ public class CheckInController {
       @NotNull @PathVariable("id") UUID habitId,
       @RequestParam(required = false) Instant from,
       @RequestParam(required = false) Instant to,
-      @PageableDefault(size = 20) Pageable pageable,
-      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.ok(
-        checkInService.getCheckInsByHabit(habitId, userDetails.getUser(), from, to, pageable));
+      @PageableDefault(size = 20) Pageable pageable) {
+    return ResponseEntity.ok(checkInService.getCheckInsByHabit(habitId, from, to, pageable));
   }
 
   @GetMapping("/api/check-ins")
@@ -48,14 +45,12 @@ public class CheckInController {
       @RequestParam(required = false) Instant to,
       @PageableDefault(size = 20) Pageable pageable,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.ok(
-        checkInService.getAllCheckIns(userDetails.getUser(), from, to, pageable));
+    return ResponseEntity.ok(checkInService.getAllCheckIns(userDetails.id(), from, to, pageable));
   }
 
   @DeleteMapping("/api/check-ins/{checkInId}")
-  public ResponseEntity<Void> deleteCheckIn(
-      @NotNull @PathVariable UUID checkInId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    checkInService.deleteCheckIn(checkInId, userDetails.getUser());
+  public ResponseEntity<Void> deleteCheckIn(@NotNull @PathVariable UUID checkInId) {
+    checkInService.deleteCheckIn(checkInId);
     return ResponseEntity.noContent().build();
   }
 }

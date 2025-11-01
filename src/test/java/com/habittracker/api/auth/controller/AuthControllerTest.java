@@ -14,8 +14,10 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.WebMvcTestWithoutSecurity;
+import jakarta.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -58,7 +60,9 @@ public class AuthControllerTest {
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
-          .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
+          .andExpect(cookie().value(REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
 
       verify(authService).register(any(RegisterRequest.class));
@@ -140,7 +144,9 @@ public class AuthControllerTest {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", is(JWT_TOKEN)))
-          .andExpect(jsonPath("$.refreshToken", is(REFRESH_TOKEN)))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
+          .andExpect(cookie().value(REFRESH_TOKEN_COOKIE_NAME, successLoginResponse.refreshToken()))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
 
       verify(authService).login(any(LoginRequest.class));
@@ -203,19 +209,24 @@ public class AuthControllerTest {
   class RefreshTokenTests {
     @Test
     void givenValidRefreshToken_whenRefresh_thenReturnNewTokens() throws Exception {
-      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(REFRESH_TOKEN);
       RefreshTokenResponse refreshResponse =
           new RefreshTokenResponse(NEW_ACCESS_TOKEN, NEW_REFRESH_TOKEN, REFRESH_SUCCESS_MESSAGE);
-      when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(refreshResponse);
+      when(authService.refreshToken(any(String.class))).thenReturn(refreshResponse);
+
+      Cookie refreshTokenCookie =
+          new Cookie(REFRESH_TOKEN_COOKIE_NAME, UUID.randomUUID().toString());
+      refreshTokenCookie.setHttpOnly(true);
 
       mockMvcTestUtils
-          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .performPostRequest(REFRESH_ENDPOINT, EMPTY_JSON, refreshTokenCookie)
           .andExpect(status().isOk())
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
+          .andExpect(cookie().value(REFRESH_TOKEN_COOKIE_NAME, NEW_REFRESH_TOKEN))
           .andExpect(jsonPath("$.accessToken", is(NEW_ACCESS_TOKEN)))
-          .andExpect(jsonPath("$.refreshToken", is(NEW_REFRESH_TOKEN)))
           .andExpect(jsonPath("$.message", is(REFRESH_SUCCESS_MESSAGE)));
 
-      verify(authService).refreshToken(any(RefreshTokenRequest.class));
+      verify(authService).refreshToken(any(String.class));
     }
   }
 }

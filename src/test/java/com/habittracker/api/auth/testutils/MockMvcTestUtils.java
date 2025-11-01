@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,13 +24,19 @@ public class MockMvcTestUtils {
     this.objectMapper = objectMapper;
   }
 
-  public <T> ResultActions performPostRequest(String endpoint, T body) throws Exception {
-    return performPostRequest(endpoint, objectMapper.writeValueAsString(body));
+  public <T> ResultActions performPostRequest(String endpoint, T body, Cookie... cookies)
+      throws Exception {
+    return performPostRequest(endpoint, objectMapper.writeValueAsString(body), cookies);
   }
 
-  public ResultActions performPostRequest(String endpoint, String jsonContent) throws Exception {
-    return mockMvc.perform(
-        post(endpoint).contentType(MediaType.APPLICATION_JSON).content(jsonContent));
+  public ResultActions performPostRequest(String endpoint, String jsonContent, Cookie... cookies)
+      throws Exception {
+    MockHttpServletRequestBuilder request =
+        post(endpoint).contentType(MediaType.APPLICATION_JSON).content(jsonContent);
+    if (cookies.length != 0) {
+      request.cookie(cookies);
+    }
+    return mockMvc.perform(request);
   }
 
   public static MockHttpServletRequestBuilder addJwt(

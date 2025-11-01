@@ -33,4 +33,8 @@ public class UserEntity extends DeletableEntity {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private Set<HabitEntity> habits = new HashSet<>();
+
+  public boolean isAdmin() {
+    return roles.stream().anyMatch(r -> r.getType().equals(RoleType.ADMIN));
+  }
 }
