@@ -1,7 +1,8 @@
-package com.habittracker.api.security.jwt.service;
+package com.habittracker.api.security.jwt.service.impl;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.security.jwt.config.JwtProperties;
+import com.habittracker.api.security.jwt.service.JwtService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import java.time.Instant;

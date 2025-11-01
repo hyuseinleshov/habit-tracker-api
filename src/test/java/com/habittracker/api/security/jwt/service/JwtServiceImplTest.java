@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.security.jwt.config.JwtProperties;
+import com.habittracker.api.security.jwt.service.impl.JwtServiceImpl;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
