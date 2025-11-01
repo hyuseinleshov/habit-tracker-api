@@ -1,6 +1,7 @@
 package com.habittracker.api.config.annotation;
 
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
+import com.habittracker.api.auth.utils.RefreshTokenCookieUtils;
 import com.habittracker.api.config.SecurityTestConfig;
 import com.habittracker.api.security.handlers.CustomAccessDeniedHandler;
 import com.habittracker.api.security.jwt.filter.JwtFilter;
@@ -17,7 +18,12 @@ import org.springframework.test.context.ActiveProfiles;
 @WebMvcTest(
     excludeFilters =
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtFilter.class))
-@Import({SecurityTestConfig.class, MockMvcTestUtils.class, CustomAccessDeniedHandler.class})
+@Import({
+  SecurityTestConfig.class,
+  MockMvcTestUtils.class,
+  CustomAccessDeniedHandler.class,
+  RefreshTokenCookieUtils.class
+})
 @ActiveProfiles("test")
 public @interface WebMvcTestWithoutSecurity {
 

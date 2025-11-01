@@ -45,7 +45,7 @@ public class HabitControllerIT {
   public void setUp() {
     testUser =
         authTestUtils.createAndSaveUser(TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_USER_TIMEZONE);
-    jwtToken = jwtService.generateToken(testUser.getEmail());
+    jwtToken = jwtService.generateToken(testUser);
     authToken = "Bearer " + jwtToken;
   }
 

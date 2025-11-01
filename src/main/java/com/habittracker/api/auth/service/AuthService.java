@@ -7,5 +7,5 @@ public interface AuthService {
 
   AuthResponse login(LoginRequest request);
 
-  RefreshTokenResponse refreshToken(RefreshTokenRequest request);
+  RefreshTokenResponse refreshToken(String refreshToken);
 }

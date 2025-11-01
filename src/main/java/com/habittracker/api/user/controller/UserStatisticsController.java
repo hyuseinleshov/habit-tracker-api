@@ -20,6 +20,6 @@ public class UserStatisticsController {
   @GetMapping
   public ResponseEntity<UserStatisticsResponse> getStatistics(
       @AuthenticationPrincipal UserDetailsImpl principal) {
-    return ResponseEntity.ok(statisticsService.calculateStatistics(principal.getUser()));
+    return ResponseEntity.ok(statisticsService.calculateStatistics(principal.id()));
   }
 }

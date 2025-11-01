@@ -1,13 +1,16 @@
 package com.habittracker.api.auth.service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 public interface RefreshTokenService {
-  String createRefreshToken(String email);
+  String createRefreshToken(UUID userId);
 
   boolean isValid(String refreshToken);
 
-  String getEmailFromRefreshToken(String refreshToken);
+  Optional<UUID> getUserIdFromRefreshToken(String refreshToken);
 
   void revokeRefreshToken(String refreshToken);
 
-  void revokeAllRefreshTokensForUser(String email);
+  void revokeAllRefreshTokensForUser(UUID userId);
 }

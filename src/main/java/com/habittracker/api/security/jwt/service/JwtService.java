@@ -1,12 +1,14 @@
 package com.habittracker.api.security.jwt.service;
 
+import com.habittracker.api.auth.model.UserEntity;
+import io.jsonwebtoken.Claims;
 import java.util.Optional;
 
 public interface JwtService {
 
-  String generateToken(String email);
+  String generateToken(UserEntity user);
 
   boolean isValid(String token);
 
-  Optional<String> extractSubject(String token);
+  Optional<Claims> getClaims(String token);
 }

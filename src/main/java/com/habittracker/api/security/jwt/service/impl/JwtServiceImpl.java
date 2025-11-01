@@ -1,12 +1,16 @@
-package com.habittracker.api.security.jwt.service;
+package com.habittracker.api.security.jwt.service.impl;
 
+import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.security.jwt.config.JwtProperties;
+import com.habittracker.api.security.jwt.service.JwtBlacklistService;
+import com.habittracker.api.security.jwt.service.JwtService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -59,33 +63,44 @@ public class JwtServiceImpl implements JwtService {
 
   private final SecretKey secretKey;
   private final JwtProperties jwtProperties;
+  private final JwtBlacklistService blacklistService;
 
-  public JwtServiceImpl(SecretKey secretKey, JwtProperties jwtProperties) {
+  public JwtServiceImpl(
+      SecretKey secretKey, JwtProperties jwtProperties, JwtBlacklistService blacklistService) {
     this.secretKey = secretKey;
     this.jwtProperties = jwtProperties;
+    this.blacklistService = blacklistService;
   }
 
-  public String generateToken(String email) {
+  public String generateToken(UserEntity user) {
     Instant now = Instant.now();
+    String jti = UUID.randomUUID().toString();
     String token =
         Jwts.builder()
             .header()
             .type("JWT")
             .and()
-            .subject(email)
+            .subject(user.getId().toString())
+            .id(jti)
+            .claim("email", user.getEmail())
+            .claim("isAdmin", Boolean.toString(user.isAdmin()))
+            .claim("timeZone", user.getUserProfile().getTimezone())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
             .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))
             .issuer(jwtProperties.getIssuer())
             .signWith(secretKey)
             .compact();
-    log.info("Generate token for user with email: {}", email);
+    blacklistService.recordActiveToken(user.getId(), jti);
+    log.info("Generate token for user with email: {}", user.getEmail());
     return token;
   }
 
   @Override
   public boolean isValid(String token) {
-    return extractClaims(token).isPresent();
+    return extractClaims(token)
+        .filter(claims -> !blacklistService.isBlacklisted(claims.getId()))
+        .isPresent();
   }
 
   private Optional<Claims> extractClaims(String token) {
@@ -108,7 +123,7 @@ public class JwtServiceImpl implements JwtService {
   }
 
   @Override
-  public Optional<String> extractSubject(String token) {
-    return extractClaims(token).map(Claims::getSubject);
+  public Optional<Claims> getClaims(String token) {
+    return extractClaims(token);
   }
 }

@@ -8,9 +8,11 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
+import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserProfileService;
 import com.habittracker.api.user.service.UserService;
 import jakarta.validation.Validator;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -24,6 +26,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
   private final UserService userService;
   private final UserProfileMapper userProfileMapper;
+  private final UserProfileRepository userProfileRepository;
   private final Validator validator;
 
   @Override
@@ -38,19 +41,20 @@ public class UserProfileServiceImpl implements UserProfileService {
   }
 
   @Override
-  @Cacheable(value = "userProfiles", key = "#userProfile.id")
+  @Cacheable(value = "userProfiles", key = "#userId")
   @Transactional(readOnly = true)
-  public UserProfileDTO toProfileDTO(UserProfileEntity userProfile) {
-    return userProfileMapper.toUserProfileDTO(userProfile);
+  public UserProfileDTO toProfileDTO(UUID userId) {
+    return userProfileMapper.toUserProfileDTO(userProfileRepository.getReferenceById(userId));
   }
 
   @Override
   @Transactional
-  @CacheEvict(value = "userProfiles", key = "#profile.id")
-  public UserProfileDTO update(UserProfileEntity profile, UserProfileDTO userProfileDTO) {
+  @CacheEvict(value = "userProfiles", key = "#userId")
+  public UserProfileDTO update(UUID userId, UserProfileDTO userProfileDTO) {
     if (!validator.validate(userProfileDTO).isEmpty()) {
       throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
     }
+    UserProfileEntity profile = userProfileRepository.getReferenceById(userId);
     if (userProfileDTO.email() != null) {
       userService.updateEmail(profile.getUser(), userProfileDTO.email());
     }

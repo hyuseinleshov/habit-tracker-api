@@ -4,7 +4,10 @@ import static com.habittracker.api.config.constants.JwtTestConstant.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.security.jwt.config.JwtProperties;
+import com.habittracker.api.security.jwt.service.impl.JwtServiceImpl;
 import com.habittracker.api.security.jwt.testutils.JwtTestUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -12,6 +15,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +32,13 @@ public class JwtServiceImplTest {
   private static final long TOLERANCE_SECONDS = 1;
 
   @Mock private JwtProperties jwtProperties;
+  @Mock private JwtBlacklistService blacklistService;
 
   private JwtServiceImpl totest;
 
   @BeforeEach
   void setUp() {
-    totest = new JwtServiceImpl(TEST_SECRET_KEY, jwtProperties);
+    totest = new JwtServiceImpl(TEST_SECRET_KEY, jwtProperties, blacklistService);
   }
 
   private void setUpJwtProperties() {
@@ -43,13 +48,16 @@ public class JwtServiceImplTest {
   }
 
   @Test
-  public void generateToken_shouldBuildCorrectTokenWithTimestampsAndClaims() {
+  public void generateToken_shouldBuildCorrectTokenWithTimestampsAndGetClaims() {
     setUpJwtProperties();
-    String token = totest.generateToken(TEST_SUBJECT);
+    UserEntity testUser =
+        AuthTestUtils.createUser("testemail@gmail.com", "testPass", AuthTestUtils.createUserRole());
+    testUser.setId(UUID.randomUUID());
+    String token = totest.generateToken(testUser);
     Instant now = Instant.now();
     Claims claims =
         (Claims) Jwts.parser().verifyWith(TEST_SECRET_KEY).build().parse(token).getPayload();
-    assertEquals(TEST_SUBJECT, claims.getSubject());
+    assertEquals(testUser.getId().toString(), claims.getSubject());
     assertEquals(TEST_ISSUER, claims.getIssuer());
     assertTrue(secondsBetween(now, claims.getIssuedAt().toInstant()) <= TOLERANCE_SECONDS);
     assertTrue(
@@ -82,20 +90,20 @@ public class JwtServiceImplTest {
 
   @ParameterizedTest
   @MethodSource("com.habittracker.api.security.jwt.testutils.JwtTestUtils#getInvalidTokens")
-  public void extractSubject_shouldReturnEmpty_forGivenTokens(String token) {
+  public void getClaims_shouldReturnEmpty_forGivenTokens(String token) {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
-    assertTrue(totest.extractSubject(token).isEmpty());
+    assertTrue(totest.getClaims(token).isEmpty());
   }
 
   @Test
-  public void extractSubject_shouldReturnSubject_whenTokenIsValid() {
+  public void getClaims_whenTokenIsValid() {
     when(jwtProperties.getIssuer()).thenReturn(TEST_ISSUER);
     when(jwtProperties.getClockSkewSeconds()).thenReturn(20);
     String token = JwtTestUtils.generateValidToken(TEST_SUBJECT, TEST_ISSUER, TEST_SECRET_KEY);
-    Optional<String> subjectOptional = totest.extractSubject(token);
+    Optional<Claims> subjectOptional = totest.getClaims(token);
     assertTrue(subjectOptional.isPresent());
-    String subject = subjectOptional.get();
+    String subject = subjectOptional.get().getSubject();
     assertEquals(TEST_SUBJECT, subject);
   }
 }

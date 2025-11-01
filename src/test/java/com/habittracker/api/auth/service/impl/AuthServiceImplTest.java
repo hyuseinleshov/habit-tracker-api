@@ -19,18 +19,17 @@ import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.user.service.UserProfileService;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +37,6 @@ class AuthServiceImplTest {
 
   @Mock private UserRepository userRepository;
   @Mock private RoleRepository roleRepository;
-  @Mock private AuthenticationManager authManager;
   @Mock private JwtService jwtService;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private RefreshTokenService refreshTokenService;
@@ -104,33 +102,10 @@ class AuthServiceImplTest {
 
     @Test
     void givenInvalidCredentials_whenLoggingIn_thenThrowsException() {
-      when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-          .thenThrow(new BadCredentialsException(INVALID_CREDENTIALS_ERROR));
 
       assertThatThrownBy(() -> authService.login(validLoginRequest))
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage(INVALID_CREDENTIALS_ERROR);
-    }
-
-    @Test
-    void givenValidCredentialsButNotAuthenticated_whenLoggingIn_thenThrowsException() {
-      Authentication auth = mock(Authentication.class);
-      when(authManager.authenticate(any())).thenReturn(auth);
-      when(auth.isAuthenticated()).thenReturn(false);
-
-      assertThatThrownBy(() -> authService.login(validLoginRequest))
-          .isInstanceOf(BadCredentialsException.class);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"", " ", "invalid"})
-    void givenInvalidEmail_whenLoggingIn_thenThrowsException(String invalidEmail) {
-      LoginRequest invalidRequest = new LoginRequest(invalidEmail, TEST_PASSWORD);
-
-      when(authManager.authenticate(any())).thenThrow(BadCredentialsException.class);
-
-      assertThatThrownBy(() -> authService.login(invalidRequest))
-          .isInstanceOf(BadCredentialsException.class);
     }
   }
 
@@ -142,15 +117,17 @@ class AuthServiceImplTest {
 
     UserEntity savedUser = createUser(TEST_EMAIL, ENCODED_PASSWORD, role);
     when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);
-    when(jwtService.generateToken(TEST_EMAIL)).thenReturn(JWT_TOKEN);
-    when(refreshTokenService.createRefreshToken(TEST_EMAIL)).thenReturn(REFRESH_TOKEN);
+    when(jwtService.generateToken(savedUser)).thenReturn(JWT_TOKEN);
+    when(refreshTokenService.createRefreshToken(savedUser.getId())).thenReturn(REFRESH_TOKEN);
   }
 
   private void setupForSuccessfulAuthentication() {
-    Authentication auth = mock(Authentication.class);
-    when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
-    when(auth.isAuthenticated()).thenReturn(true);
-    when(jwtService.generateToken(TEST_EMAIL)).thenReturn(JWT_TOKEN);
-    when(refreshTokenService.createRefreshToken(TEST_EMAIL)).thenReturn(REFRESH_TOKEN);
+    UserEntity testUser = createUser("testUser", "testPass", createUserRole());
+    testUser.setId(UUID.randomUUID());
+    when(userRepository.findByEmailAndDeletedAtIsNull(anyString()))
+        .thenReturn(Optional.of(testUser));
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    when(jwtService.generateToken(testUser)).thenReturn(JWT_TOKEN);
+    when(refreshTokenService.createRefreshToken(testUser.getId())).thenReturn(REFRESH_TOKEN);
   }
 }

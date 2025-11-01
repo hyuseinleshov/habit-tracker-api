@@ -14,12 +14,20 @@ public final class JwtTestUtils {
   private JwtTestUtils() {}
 
   private static String generateTestToken(
-      String subject, String issuer, Instant expiration, Instant notBefore, SecretKey key) {
+      String subject,
+      String email,
+      String issuer,
+      Instant expiration,
+      Instant notBefore,
+      SecretKey key) {
     return Jwts.builder()
         .header()
         .type("JWT")
         .and()
         .subject(subject)
+        .claim("email", email)
+        .claim("isAdmin", Boolean.toString(false))
+        .claim("timeZone", "UTC")
         .issuer(issuer)
         .expiration(Date.from(expiration))
         .notBefore(Date.from(notBefore))
@@ -29,20 +37,28 @@ public final class JwtTestUtils {
 
   public static Stream<String> getInvalidTokens() {
     final String DUMMY_ISSUER = "dummy issuer";
+    final String DUMMY_EMAIL = "dummy@gmail.dummy";
     Instant now = Instant.now();
     return Stream.of(
         "mailFormedJwt",
         tokenWithInvalidSignature(),
         generateTestToken(
-            TEST_SUBJECT, DUMMY_ISSUER, now.minus(2, ChronoUnit.MINUTES), now, TEST_SECRET_KEY),
+            TEST_SUBJECT,
+            DUMMY_EMAIL,
+            DUMMY_ISSUER,
+            now.minus(2, ChronoUnit.MINUTES),
+            now,
+            TEST_SECRET_KEY),
         generateTestToken(
             TEST_SUBJECT,
+            DUMMY_EMAIL,
             DUMMY_ISSUER,
             now.plus(20, ChronoUnit.MINUTES),
             now.plus(5, ChronoUnit.MINUTES),
             TEST_SECRET_KEY),
         generateTestToken(
             TEST_SUBJECT,
+            DUMMY_EMAIL,
             DUMMY_ISSUER,
             now.plus(20, ChronoUnit.MINUTES),
             now.minus(5, ChronoUnit.SECONDS),
@@ -58,6 +74,11 @@ public final class JwtTestUtils {
   public static String generateValidToken(String subject, String issuer, SecretKey key) {
     Instant now = Instant.now();
     return generateTestToken(
-        subject, issuer, now.plus(5, ChronoUnit.MINUTES), now.minus(5, ChronoUnit.SECONDS), key);
+        subject,
+        "test-eamil@gmail.abv",
+        issuer,
+        now.plus(5, ChronoUnit.MINUTES),
+        now.minus(5, ChronoUnit.SECONDS),
+        key);
   }
 }

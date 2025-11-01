@@ -3,16 +3,15 @@ package com.habittracker.api.auth.controller;
 import static com.habittracker.api.auth.utils.AuthConstants.*;
 import static com.habittracker.api.config.constants.AuthTestConstants.*;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.habittracker.api.auth.dto.RefreshTokenRequest;
 import com.habittracker.api.auth.dto.RegisterRequest;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
+import jakarta.servlet.http.Cookie;
 import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneId;
@@ -54,7 +53,8 @@ public class AuthControllerIT {
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(NEW_USER_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
-          .andExpect(jsonPath("$.refreshToken", notNullValue()))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
     }
 
@@ -133,7 +133,8 @@ public class AuthControllerIT {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
           .andExpect(jsonPath("$.token", notNullValue()))
-          .andExpect(jsonPath("$.refreshToken", notNullValue()))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
     }
 
@@ -180,47 +181,53 @@ public class AuthControllerIT {
     @Test
     public void givenValidRefreshToken_whenRefresh_thenSuccess() throws Exception {
       RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-      String loginResponse =
+      String refreshToken =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)
+              .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+              .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
               .andReturn()
               .getResponse()
-              .getContentAsString();
-      String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
+              .getCookie(REFRESH_TOKEN_COOKIE_NAME)
+              .getValue();
 
-      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
+      Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+      refreshTokenCookie.setHttpOnly(true);
+
       mockMvcTestUtils
-          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .performPostRequest(REFRESH_ENDPOINT, EMPTY_JSON, refreshTokenCookie)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.accessToken", notNullValue()))
-          .andExpect(jsonPath("$.refreshToken", notNullValue()))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
           .andExpect(jsonPath("$.message", is(REFRESH_SUCCESS_MESSAGE)));
     }
 
     @Test
     public void givenUsedRefreshToken_whenRefreshAgain_thenUnauthorized() throws Exception {
       RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-      String loginResponse =
+      String refreshToken =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)
+              .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+              .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
               .andReturn()
               .getResponse()
-              .getContentAsString();
-      String refreshToken = new ObjectMapper().readTree(loginResponse).get("refreshToken").asText();
+              .getCookie(REFRESH_TOKEN_COOKIE_NAME)
+              .getValue();
 
-      RefreshTokenRequest refreshRequest = new RefreshTokenRequest(refreshToken);
-      String refreshResponse =
-          mockMvcTestUtils
-              .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
-              .andExpect(status().isOk())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-      String newRefreshToken =
-          new ObjectMapper().readTree(refreshResponse).get("refreshToken").asText();
+      Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+      refreshTokenCookie.setHttpOnly(true);
 
       mockMvcTestUtils
-          .performPostRequest(REFRESH_ENDPOINT, refreshRequest)
+          .performPostRequest(REFRESH_ENDPOINT, EMPTY_JSON, refreshTokenCookie)
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      mockMvcTestUtils
+          .performPostRequest(REFRESH_ENDPOINT, EMPTY_JSON, refreshTokenCookie)
           .andExpect(status().isUnauthorized());
     }
   }
