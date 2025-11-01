@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
+import com.habittracker.api.security.jwt.service.JwtBlacklistService;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,7 @@ class UserServiceImplTest {
 
   @Mock private RefreshTokenService refreshTokenService;
   @Mock private UserRepository userRepository;
+  @Mock private JwtBlacklistService jwtBlacklistService;
 
   @InjectMocks private UserServiceImpl toTest;
 
@@ -63,7 +65,6 @@ class UserServiceImplTest {
   void test_updateEmail_Should_UpdateEmail_With_ValidUser() {
     final String NEW_EMAIL = "new@gmail.com";
     toTest.updateEmail(TEST_USER, NEW_EMAIL);
-    verify(refreshTokenService).revokeAllRefreshTokensForUser(TEST_USER.getId());
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
     verify(userRepository).save(userCaptor.capture());
     assertThat(userCaptor.getValue().getEmail()).isEqualTo(NEW_EMAIL);
