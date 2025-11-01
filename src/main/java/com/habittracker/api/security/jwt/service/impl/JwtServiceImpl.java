@@ -74,14 +74,14 @@ public class JwtServiceImpl implements JwtService {
 
   public String generateToken(UserEntity user) {
     Instant now = Instant.now();
-    String jid = UUID.randomUUID().toString();
+    String jti = UUID.randomUUID().toString();
     String token =
         Jwts.builder()
             .header()
             .type("JWT")
             .and()
             .subject(user.getId().toString())
-            .id(jid)
+            .id(jti)
             .claim("email", user.getEmail())
             .claim("isAdmin", Boolean.toString(user.isAdmin()))
             .claim("timeZone", user.getUserProfile().getTimezone())
@@ -91,7 +91,7 @@ public class JwtServiceImpl implements JwtService {
             .issuer(jwtProperties.getIssuer())
             .signWith(secretKey)
             .compact();
-    blacklistService.recordActiveToken(user.getId(), jid);
+    blacklistService.recordActiveToken(user.getId(), jti);
     log.info("Generate token for user with email: {}", user.getEmail());
     return token;
   }

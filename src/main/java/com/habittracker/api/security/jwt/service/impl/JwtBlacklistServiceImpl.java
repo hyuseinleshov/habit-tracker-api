@@ -24,8 +24,8 @@ public class JwtBlacklistServiceImpl implements JwtBlacklistService {
   }
 
   @Override
-  public void recordActiveToken(UUID userId, String jid) {
-    redis.opsForValue().set(String.format(ACTIVE_JWT_KEY, userId), jid, jwtExpirationDuration);
+  public void recordActiveToken(UUID userId, String jti) {
+    redis.opsForValue().set(String.format(ACTIVE_JWT_KEY, userId), jti, jwtExpirationDuration);
   }
 
   @Override
@@ -42,7 +42,7 @@ public class JwtBlacklistServiceImpl implements JwtBlacklistService {
   }
 
   @Override
-  public boolean isBlacklisted(String jid) {
-    return redis.opsForValue().get(String.format(BLACKLIST__KEY, jid)) != null;
+  public boolean isBlacklisted(String jti) {
+    return redis.opsForValue().get(String.format(BLACKLIST__KEY, jti)) != null;
   }
 }

@@ -4,9 +4,9 @@ import java.util.UUID;
 
 public interface JwtBlacklistService {
 
-  void recordActiveToken(UUID userId, String jid);
+  void recordActiveToken(UUID userId, String jti);
 
   void revokeActiveToken(UUID userId);
 
-  boolean isBlacklisted(String jid);
+  boolean isBlacklisted(String jti);
 }
