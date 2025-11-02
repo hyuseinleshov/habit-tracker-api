@@ -7,27 +7,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.habittracker.api.auth.model.RoleEntity;
 import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.model.UserEntity;
-import com.habittracker.api.auth.repository.RoleRepository;
-import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.RoleTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
 import com.habittracker.api.security.jwt.service.JwtService;
 import java.time.Instant;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @BaseIntegrationTest
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdminUserControllerIT {
 
   @Autowired private MockMvc mockMvc;
@@ -36,10 +30,6 @@ class AdminUserControllerIT {
 
   @Autowired private RoleTestUtils roleTestUtils;
 
-  @Autowired private RoleRepository roleRepository;
-
-  @Autowired private UserRepository userRepository;
-
   @Autowired private JwtService jwtService;
 
   private UserEntity adminUser;
@@ -47,20 +37,15 @@ class AdminUserControllerIT {
   private String adminJwt;
   private String regularUserJwt;
 
-  @BeforeAll
-  void setupRoles() {
-    roleTestUtils.setUpRoles();
-  }
-
   @BeforeEach
   void setUp() {
+    roleTestUtils.setUpRoles();
+
     regularUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
     regularUserJwt = jwtService.generateToken(regularUser);
 
-    adminUser = authTestUtils.createAndSaveUser(TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    RoleEntity adminRole = roleRepository.getByType(RoleType.ADMIN);
-    adminUser.getRoles().add(adminRole);
-    userRepository.save(adminUser);
+    adminUser =
+        authTestUtils.createAndSaveUser(TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIMEZONE, RoleType.ADMIN);
     adminJwt = jwtService.generateToken(adminUser);
   }
 

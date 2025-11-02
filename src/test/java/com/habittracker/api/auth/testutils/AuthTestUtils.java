@@ -36,9 +36,36 @@ public class AuthTestUtils {
     return roleRepository.getByType(RoleType.USER);
   }
 
+  public RoleEntity getAdminRoleFromRepository() {
+    if (roleRepository.getByType(RoleType.ADMIN) == null) {
+      RoleEntity adminRole = new RoleEntity();
+      adminRole.setType(RoleType.ADMIN);
+      roleRepository.save(adminRole);
+    }
+    return roleRepository.getByType(RoleType.ADMIN);
+  }
+
   public UserEntity createAndSaveUser(String email, String password, String timezone) {
     RoleEntity role = getUserRoleFromRepository();
     UserEntity user = createUser(email, passwordEncoder.encode(password), role);
+    UserProfileEntity userProfileEntity = new UserProfileEntity();
+    userProfileEntity.setTimezone(timezone);
+    userProfileEntity.setUser(user);
+    user.setUserProfile(userProfileEntity);
+    return userRepository.save(user);
+  }
+
+  public UserEntity createAndSaveUser(
+      String email, String password, String timezone, RoleType... additionalRoles) {
+    RoleEntity userRole = getUserRoleFromRepository();
+    UserEntity user = createUser(email, passwordEncoder.encode(password), userRole);
+
+    for (RoleType roleType : additionalRoles) {
+      RoleEntity role =
+          roleType == RoleType.ADMIN ? getAdminRoleFromRepository() : getUserRoleFromRepository();
+      user.getRoles().add(role);
+    }
+
     UserProfileEntity userProfileEntity = new UserProfileEntity();
     userProfileEntity.setTimezone(timezone);
     userProfileEntity.setUser(user);
