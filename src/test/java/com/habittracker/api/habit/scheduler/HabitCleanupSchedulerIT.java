@@ -19,8 +19,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 @BaseIntegrationTest
+@Transactional
 class HabitCleanupSchedulerIT {
 
   private static final Map<Integer, String> DAYS_SINCE_DELETION_TO_NAME_MAP =

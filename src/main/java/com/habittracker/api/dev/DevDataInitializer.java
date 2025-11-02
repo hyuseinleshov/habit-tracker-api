@@ -76,7 +76,7 @@ public class DevDataInitializer implements CommandLineRunner {
       authService.register(adminRequest);
       log.info("Created admin user: {}", adminRequest.email());
 
-      // Set profile info for admin user
+      // Set profile info and admin role for admin user
       userRepository
           .findByEmail(adminRequest.email())
           .ifPresent(
@@ -86,6 +86,12 @@ public class DevDataInitializer implements CommandLineRunner {
                       new UserProfileDTO(null, "Admin", "User", 30, "UTC");
                   userProfileService.update(user.getId(), userProfileDTO);
                 }
+
+                // Assign ADMIN role
+                RoleEntity adminRole = roleRepository.getByType(RoleType.ADMIN);
+                user.getRoles().add(adminRole);
+                userRepository.save(user);
+                log.info("Assigned ADMIN role to user: {}", user.getEmail());
               });
     }
   }

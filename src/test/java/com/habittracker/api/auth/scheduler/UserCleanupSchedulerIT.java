@@ -17,8 +17,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 @BaseIntegrationTest
+@Transactional
 class UserCleanupSchedulerIT {
 
   private static final Map<Integer, String> DAYS_SINCE_DELETION_TO_EMAIL_MAP =

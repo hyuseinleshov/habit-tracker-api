@@ -4,6 +4,7 @@ public final class AuthTestConstants {
 
   // Common test data
   public static final String TEST_EMAIL = "user@example.com";
+  public static final String TEST_ADMIN_EMAIL = "admin@test.com";
   public static final String TEST_PASSWORD = "password123";
   public static final String TEST_TIMEZONE = "Europe/Sofia";
   public static final String ENCODED_PASSWORD = "encodedPassword";
