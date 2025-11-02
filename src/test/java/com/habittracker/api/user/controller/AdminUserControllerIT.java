@@ -45,7 +45,8 @@ class AdminUserControllerIT {
     regularUserJwt = jwtService.generateToken(regularUser);
 
     adminUser =
-        authTestUtils.createAndSaveUser(TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIMEZONE, RoleType.ADMIN);
+        authTestUtils.createAndSaveUser(
+            TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIMEZONE, RoleType.ADMIN);
     adminJwt = jwtService.generateToken(adminUser);
   }
 
