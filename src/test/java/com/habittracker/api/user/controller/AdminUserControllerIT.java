@@ -61,21 +61,35 @@ class AdminUserControllerIT {
   }
 
   @Test
-  void getAllUsers_WithAdminUser_ShouldReturnAllUsers() throws Exception {
+  void getAllUsers_WithAdminUserAndNoParams_ShouldReturnOnlyActiveUsers() throws Exception {
     mockMvc
         .perform(addJwt(adminJwt, get("/api/users")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(2)))
         .andExpect(jsonPath("$.content[0].email").isNotEmpty())
-        .andExpect(jsonPath("$.content[0].timezone").isNotEmpty());
+        .andExpect(jsonPath("$.content[0].timezone").isNotEmpty())
+        .andExpect(jsonPath("$.content[0].deletedAt").doesNotExist())
+        .andExpect(jsonPath("$.content[1].deletedAt").doesNotExist());
   }
 
   @Test
-  void getAllUsers_WithAdminUser_ShouldIncludeDeletedUsers() throws Exception {
+  void getAllUsers_WithIncludeDeletedFalse_ShouldReturnOnlyActiveUsers() throws Exception {
     authTestUtils.softDelete(regularUser, Instant.now());
 
     mockMvc
-        .perform(addJwt(adminJwt, get("/api/users")))
+        .perform(addJwt(adminJwt, get("/api/users").param("includeDeleted", "false")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].email").value(TEST_ADMIN_EMAIL))
+        .andExpect(jsonPath("$.content[0].deletedAt").doesNotExist());
+  }
+
+  @Test
+  void getAllUsers_WithIncludeDeletedTrue_ShouldIncludeDeletedUsers() throws Exception {
+    authTestUtils.softDelete(regularUser, Instant.now());
+
+    mockMvc
+        .perform(addJwt(adminJwt, get("/api/users").param("includeDeleted", "true")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(2)))
         .andExpect(jsonPath("$.content[?(@.email == '" + TEST_EMAIL + "')].deletedAt").exists());

@@ -25,8 +25,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
   @Override
   @Transactional(readOnly = true)
-  public PagedModel<AdminUserDTO> getAllUsers(Pageable pageable) {
-    Page<UserEntity> users = userRepository.findAll(UserSpecs.includeDeleted(true), pageable);
+  public PagedModel<AdminUserDTO> getAllUsers(Pageable pageable, boolean includeDeleted) {
+    Page<UserEntity> users = userRepository.findAll(UserSpecs.includeDeleted(includeDeleted), pageable);
     return new PagedModel<>(users.map(adminUserMapper::toAdminUserDTO));
   }
 }

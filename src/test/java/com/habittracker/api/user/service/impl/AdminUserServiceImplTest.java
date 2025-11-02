@@ -33,7 +33,7 @@ class AdminUserServiceImplTest {
   @InjectMocks private AdminUserServiceImpl adminUserService;
 
   @Test
-  void getAllUsers_ShouldReturnPagedUsers() {
+  void getAllUsers_WithIncludeDeletedTrue_ShouldReturnAllUsers() {
     UserEntity user1 = createUser("user1@example.com", null);
     UserEntity user2 = createUser("user2@example.com", Instant.now());
 
@@ -47,7 +47,7 @@ class AdminUserServiceImplTest {
     when(adminUserMapper.toAdminUserDTO(user1)).thenReturn(dto1);
     when(adminUserMapper.toAdminUserDTO(user2)).thenReturn(dto2);
 
-    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable);
+    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable, true);
 
     assertThat(result.getContent()).hasSize(2);
     assertThat(result.getContent()).containsExactly(dto1, dto2);
@@ -55,20 +55,21 @@ class AdminUserServiceImplTest {
   }
 
   @Test
-  void getAllUsers_ShouldIncludeDeletedUsers() {
-    UserEntity deletedUser = createUser("deleted@example.com", Instant.now());
-    AdminUserDTO dto = createAdminUserDTO("deleted@example.com", Instant.now());
+  void getAllUsers_WithIncludeDeletedFalse_ShouldReturnOnlyActiveUsers() {
+    UserEntity activeUser = createUser("active@example.com", null);
+    AdminUserDTO dto = createAdminUserDTO("active@example.com", null);
 
-    Page<UserEntity> userPage = new PageImpl<>(List.of(deletedUser));
+    Page<UserEntity> userPage = new PageImpl<>(List.of(activeUser));
     Pageable pageable = PageRequest.of(0, 20);
 
     when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(userPage);
-    when(adminUserMapper.toAdminUserDTO(deletedUser)).thenReturn(dto);
+    when(adminUserMapper.toAdminUserDTO(activeUser)).thenReturn(dto);
 
-    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable);
+    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable, false);
 
     assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).deletedAt()).isNotNull();
+    assertThat(result.getContent().get(0).deletedAt()).isNull();
+    verify(userRepository).findAll(any(Specification.class), eq(pageable));
   }
 
   @Test
@@ -78,7 +79,7 @@ class AdminUserServiceImplTest {
 
     when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
 
-    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable);
+    PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable, false);
 
     assertThat(result.getContent()).isEmpty();
     verify(userRepository).findAll(any(Specification.class), eq(pageable));

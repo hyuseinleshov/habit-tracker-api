@@ -6,5 +6,5 @@ import org.springframework.data.web.PagedModel;
 
 public interface AdminUserService {
 
-  PagedModel<AdminUserDTO> getAllUsers(Pageable pageable);
+  PagedModel<AdminUserDTO> getAllUsers(Pageable pageable, boolean includeDeleted);
 }
