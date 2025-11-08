@@ -39,16 +39,17 @@ public class HabitStatisticsServiceImpl implements HabitStatisticsService {
         totalCheckins,
         new HabitStatisticResponse.StreakData(
             currentStreak,
-           buildBestStreak(habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
+            buildBestStreak(habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
         lastCheckInDate,
         Instant.now());
   }
 
   @Override
-  public  HabitStatisticResponse.BestStreakData buildBestStreak(int streak, LocalDate streakStartDate, UUID habitId) {
+  public HabitStatisticResponse.BestStreakData buildBestStreak(
+      int streak, LocalDate streakStartDate, UUID habitId) {
     LocalDate endDate = null;
     LocalDate today = LocalDate.now(AuthUtils.getUserTimeZone());
-    if(streakStartDate != null && today.isAfter((streakStartDate.plusDays(streak)))) {
+    if (streakStartDate != null && today.isAfter((streakStartDate.plusDays(streak)))) {
       endDate = streakStartDate.plusDays(streak - 1);
     }
     return new HabitStatisticResponse.BestStreakData(streak, streakStartDate, endDate, habitId);
