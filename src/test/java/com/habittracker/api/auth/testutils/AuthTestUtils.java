@@ -49,7 +49,7 @@ public class AuthTestUtils {
     RoleEntity role = getUserRoleFromRepository();
     UserEntity user = createUser(email, passwordEncoder.encode(password), role);
     UserProfileEntity userProfileEntity = new UserProfileEntity();
-    userProfileEntity.setTimezone(timezone);
+    userProfileEntity.setTimeZone(timezone);
     userProfileEntity.setUser(user);
     user.setUserProfile(userProfileEntity);
     return userRepository.save(user);
@@ -67,7 +67,7 @@ public class AuthTestUtils {
     }
 
     UserProfileEntity userProfileEntity = new UserProfileEntity();
-    userProfileEntity.setTimezone(timezone);
+    userProfileEntity.setTimeZone(timezone);
     userProfileEntity.setUser(user);
     user.setUserProfile(userProfileEntity);
     return userRepository.save(user);

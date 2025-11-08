@@ -91,7 +91,7 @@ class AdminUserServiceImplTest {
     user.setDeletedAt(deletedAt);
 
     UserProfileEntity profile = new UserProfileEntity();
-    profile.setTimezone("UTC");
+    profile.setTimeZone("UTC");
     profile.setFirstName("Test");
     profile.setLastName("User");
     profile.setAge(25);

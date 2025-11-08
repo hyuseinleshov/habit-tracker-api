@@ -1,7 +1,7 @@
 package com.habittracker.api.auth.scheduler;
 
 import static com.habittracker.api.config.constants.AuthTestConstants.TEST_PASSWORD;
-import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
+import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIME_ZONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,7 +64,7 @@ class UserCleanupSchedulerIT {
   }
 
   private void deleteUser(String email, Instant deletedAt) {
-    UserEntity savedUser = authTestUtils.createAndSaveUser(email, TEST_PASSWORD, TEST_TIMEZONE);
+    UserEntity savedUser = authTestUtils.createAndSaveUser(email, TEST_PASSWORD, TEST_TIME_ZONE);
     authTestUtils.softDelete(savedUser, deletedAt);
     userRepository.save(savedUser);
   }

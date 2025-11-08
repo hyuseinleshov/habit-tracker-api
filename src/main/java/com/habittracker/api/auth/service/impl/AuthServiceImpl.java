@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     user.getRoles().add(role);
 
     log.info("Registering new user: {}", request.email());
-    UserProfileEntity profile = userProfileService.createProfile(user, request.timezone());
+    UserProfileEntity profile = userProfileService.createProfile(user, request.timeZone());
     user.setUserProfile(profile);
     UserEntity savedUser = userRepository.save(user);
 

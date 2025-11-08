@@ -9,7 +9,7 @@ public final class HabitTestConstants {
 
   public static final String OTHER_USER_EMAIL = "other@example.com";
   public static final String OTHER_USER_PASSWORD = "password123";
-  public static final String OTHER_USER_TIMEZONE = "UTC";
+  public static final String OTHER_USER_TIME_ZONE = "UTC";
 
   // Test habit names
   public static final String HABIT_NAME_READ_DAILY = "Read daily";

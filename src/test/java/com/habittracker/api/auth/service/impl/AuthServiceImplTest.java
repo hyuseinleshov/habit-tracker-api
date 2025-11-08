@@ -48,7 +48,7 @@ class AuthServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    validRegisterRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    validRegisterRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     validLoginRequest = new LoginRequest(TEST_EMAIL, TEST_PASSWORD);
   }
 
@@ -79,7 +79,7 @@ class AuthServiceImplTest {
 
       verify(userRepository).save(userCaptor.capture());
       UserEntity capturedUser = userCaptor.getValue();
-      verify(userProfileService).createProfile(capturedUser, TEST_TIMEZONE);
+      verify(userProfileService).createProfile(capturedUser, TEST_TIME_ZONE);
       assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
       assertThat(capturedUser.getPassword()).isEqualTo(ENCODED_PASSWORD);
       assertThat(capturedUser.getPassword()).isNotEqualTo(TEST_PASSWORD);

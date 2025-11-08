@@ -84,7 +84,7 @@ public class JwtServiceImpl implements JwtService {
             .id(jti)
             .claim("email", user.getEmail())
             .claim("isAdmin", Boolean.toString(user.isAdmin()))
-            .claim("timeZone", user.getUserProfile().getTimezone())
+            .claim("timeZone", user.getUserProfile().getTimeZone())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plus(jwtProperties.getExpirationDuration())))
             .notBefore(Date.from(now.minus(jwtProperties.getNotBeforeLeewayDuration())))

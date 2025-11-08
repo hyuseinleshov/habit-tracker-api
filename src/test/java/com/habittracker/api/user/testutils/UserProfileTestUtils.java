@@ -1,6 +1,6 @@
 package com.habittracker.api.user.testutils;
 
-import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
+import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIME_ZONE;
 
 import com.habittracker.api.user.dto.UserProfileDTO;
 import java.util.stream.Stream;
@@ -12,19 +12,19 @@ public final class UserProfileTestUtils {
   private static Stream<UserProfileDTO> invalidUserProfileDTOs() {
     return Stream.of(
         new UserProfileDTO("ethe", "Shenol", "test", 2, "Wrong"),
-        new UserProfileDTO("messi", "Shenol", "test", -61, TEST_TIMEZONE),
+        new UserProfileDTO("messi", "Shenol", "test", -61, TEST_TIME_ZONE),
         new UserProfileDTO(
             "test@gmail.com",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
             "Shengov",
             12,
-            TEST_TIMEZONE),
+            TEST_TIME_ZONE),
         new UserProfileDTO(
             "example@gmail.com",
             "Shenol",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",
             24,
-            TEST_TIMEZONE),
+            TEST_TIME_ZONE),
         new UserProfileDTO(
             "eeee",
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy",

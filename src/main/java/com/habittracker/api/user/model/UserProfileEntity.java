@@ -19,16 +19,16 @@ public class UserProfileEntity {
   private UserEntity user;
 
   @Column(nullable = false)
-  private String timezone;
+  private String timeZone;
 
   private String firstName;
   private String lastName;
   private Integer age;
 
   public UserProfileEntity(
-      UserEntity user, String timezone, String firstName, String lastName, Integer age) {
+      UserEntity user, String timeZone, String firstName, String lastName, Integer age) {
     this.user = user;
-    this.timezone = timezone;
+    this.timeZone = timeZone;
     this.firstName = firstName;
     this.lastName = lastName;
     this.age = age;

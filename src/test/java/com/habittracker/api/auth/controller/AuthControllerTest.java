@@ -42,7 +42,7 @@ public class AuthControllerTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    validRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     successRegisterResponse =
         new AuthResponse(TEST_EMAIL, JWT_TOKEN, REFRESH_TOKEN, REGISTER_SUCCESS_MESSAGE);
     successLoginResponse =
@@ -72,7 +72,7 @@ public class AuthControllerTest {
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     void givenInvalidEmail_whenRegister_thenReturnBadRequest(String invalidEmail) throws Exception {
       RegisterRequest invalidRequest =
-          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -83,7 +83,7 @@ public class AuthControllerTest {
 
     @Test
     void givenBlankEmail_whenRegister_thenReturnBadRequest() throws Exception {
-      RegisterRequest invalidRequest = new RegisterRequest("", TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest invalidRequest = new RegisterRequest("", TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -97,7 +97,7 @@ public class AuthControllerTest {
     void givenShortPassword_whenRegister_thenReturnBadRequest(String shortPassword)
         throws Exception {
       RegisterRequest invalidRequest =
-          new RegisterRequest(TEST_EMAIL, shortPassword, TEST_TIMEZONE);
+          new RegisterRequest(TEST_EMAIL, shortPassword, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, invalidRequest)
@@ -185,7 +185,7 @@ public class AuthControllerTest {
     @ValueSource(strings = {"invalid", "missing-at-sign.com", "user@", "@domain.com"})
     void givenInvalidEmail_whenLogin_thenReturnBadRequest(String invalidEmail) throws Exception {
       RegisterRequest invalidRequest =
-          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+          new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, invalidRequest)

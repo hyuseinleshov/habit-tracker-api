@@ -32,16 +32,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserProfileServiceImplTest {
 
-  private static final String TEST_TIMEZONE = "America/Santiago";
+  private static final String TEST_TIME_ZONE = "America/Santiago";
   private static final UserEntity TEST_USER =
       createUser("test@gmail.com", "pass", createUserRole());
   private static final String TEST_FIRST_NAME = "John";
   private static final String TEST_LAST_NAME = "Doe";
   private static final Integer TEST_AGE = 22;
   public static final UserProfileDTO TEST_USER_PROFILE_DTO =
-      new UserProfileDTO(null, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE, TEST_TIMEZONE);
+      new UserProfileDTO(null, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE, TEST_TIME_ZONE);
   private static final UserProfileEntity TEST_PROFILE =
-      new UserProfileEntity(TEST_USER, TEST_TIMEZONE, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE);
+      new UserProfileEntity(TEST_USER, TEST_TIME_ZONE, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_AGE);
 
   @Mock private UserProfileMapper profileMapper;
   @Mock private UserProfileRepository userProfileRepository;
@@ -52,7 +52,7 @@ class UserProfileServiceImplTest {
 
   @Test
   void test_CreateProfile_Should_ThrowException_When_User_isNull() {
-    assertThatThrownBy(() -> toTest.createProfile(null, TEST_TIMEZONE))
+    assertThatThrownBy(() -> toTest.createProfile(null, TEST_TIME_ZONE))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage(USER_CANT_BE_NULL_MESSAGE);
   }
@@ -63,13 +63,13 @@ class UserProfileServiceImplTest {
   void test_CreateProfile_Should_ThrowException_When_Timezone_Is_Invalid(String timezone) {
     assertThatThrownBy(() -> toTest.createProfile(TEST_USER, timezone))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(TimeZoneUtils.INVALID_TIMEZONE_MESSAGE);
+        .hasMessage(TimeZoneUtils.INVALID_TIME_ZONE_MESSAGE);
   }
 
   @Test
   void test_CreateProfile_Should_Return_ExpectedResult_WithValid_Arguments() {
-    UserProfileEntity savedProfile = toTest.createProfile(TEST_USER, TEST_TIMEZONE);
-    assertThat(savedProfile.getTimezone()).isEqualTo(TEST_TIMEZONE);
+    UserProfileEntity savedProfile = toTest.createProfile(TEST_USER, TEST_TIME_ZONE);
+    assertThat(savedProfile.getTimeZone()).isEqualTo(TEST_TIME_ZONE);
     assertThat(TEST_USER).isEqualTo(savedProfile.getUser());
   }
 
@@ -85,7 +85,7 @@ class UserProfileServiceImplTest {
     assertThat(profile.firstName()).isEqualTo(TEST_FIRST_NAME);
     assertThat(profile.lastName()).isEqualTo(TEST_LAST_NAME);
     assertThat(profile.age()).isEqualTo(TEST_AGE);
-    assertThat(profile.timezone()).isEqualTo(TEST_TIMEZONE);
+    assertThat(profile.timeZone()).isEqualTo(TEST_TIME_ZONE);
   }
 
   @Test
@@ -124,6 +124,6 @@ class UserProfileServiceImplTest {
     assertThat(updatedProfile.getFirstName()).isEqualTo(UPDATED_FIRST_NAME);
     assertThat(updatedProfile.getLastName()).isEqualTo(UPDATED_LAST_NAME);
     assertThat(updatedProfile.getAge()).isEqualTo(UPDATED_AGE);
-    assertThat(updatedProfile.getTimezone()).isEqualTo(UPDATED_TIMEZONE);
+    assertThat(updatedProfile.getTimeZone()).isEqualTo(UPDATED_TIMEZONE);
   }
 }

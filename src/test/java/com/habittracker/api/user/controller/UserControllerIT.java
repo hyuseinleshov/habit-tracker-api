@@ -55,12 +55,12 @@ public class UserControllerIT {
 
   @Test
   public void test_getUserProfile_Return_ExpectedResult_With_JWT() throws Exception {
-    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(addJwt(jwt, get("/api/me")))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.timezone").value(TEST_TIMEZONE))
+        .andExpect(jsonPath("$.timeZone").value(TEST_TIME_ZONE))
         .andExpect(jsonPath("$.email").value(TEST_EMAIL));
   }
 
@@ -73,7 +73,7 @@ public class UserControllerIT {
   @MethodSource("com.habittracker.api.user.testutils.UserProfileTestUtils#invalidUserProfileDTOs")
   public void test_Update_UserProfile_Return_Bad_InvalidBody(UserProfileDTO profileDTO)
       throws Exception {
-    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(
@@ -97,7 +97,7 @@ public class UserControllerIT {
         new UserProfileDTO(
             UPDATED_EMAIL, UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
 
-    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc
         .perform(
@@ -110,7 +110,7 @@ public class UserControllerIT {
         .andExpect(jsonPath("$.firstName").value(UPDATED_FIRST_NAME))
         .andExpect(jsonPath("$.lastName").value(UPDATED_LAST_NAME))
         .andExpect(jsonPath("$.age").value(UPDATED_AGE))
-        .andExpect(jsonPath("$.timezone").value(UPDATED_TIMEZONE))
+        .andExpect(jsonPath("$.timeZone").value(UPDATED_TIMEZONE))
         .andExpect(jsonPath("$.email").value(UPDATED_EMAIL));
   }
 
@@ -121,7 +121,7 @@ public class UserControllerIT {
 
   @Test
   public void test_Delete_UserProfile_DeleteUser_WithValid_JWT() throws Exception {
-    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    UserEntity user = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     String jwt = JwtTestUtils.generateValidToken(user.getId().toString(), issuer, secretKey);
     mockMvc.perform(addJwt(jwt, delete("/api/me"))).andExpect(status().isNoContent());
   }

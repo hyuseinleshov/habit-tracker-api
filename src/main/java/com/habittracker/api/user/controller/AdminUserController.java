@@ -27,7 +27,7 @@ public class AdminUserController {
    *
    * <p>This endpoint is restricted to administrators and returns user accounts based on the
    * includeDeleted parameter. By default, only active users are returned. Each user record includes
-   * essential information such as email, timezone, profile details, and deletion status.
+   * essential information such as email, timeZone, profile details, and deletion status.
    *
    * @param pageable pagination parameters (page number, size, and sorting)
    * @param includeDeleted whether to include soft-deleted users in the results (default: false)

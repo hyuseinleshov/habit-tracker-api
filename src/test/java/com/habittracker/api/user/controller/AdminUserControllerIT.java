@@ -41,12 +41,12 @@ class AdminUserControllerIT {
   void setUp() {
     roleTestUtils.setUpRoles();
 
-    regularUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    regularUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
     regularUserJwt = jwtService.generateToken(regularUser);
 
     adminUser =
         authTestUtils.createAndSaveUser(
-            TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIMEZONE, RoleType.ADMIN);
+            TEST_ADMIN_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE, RoleType.ADMIN);
     adminJwt = jwtService.generateToken(adminUser);
   }
 
@@ -67,7 +67,7 @@ class AdminUserControllerIT {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(2)))
         .andExpect(jsonPath("$.content[0].email").isNotEmpty())
-        .andExpect(jsonPath("$.content[0].timezone").isNotEmpty())
+        .andExpect(jsonPath("$.content[0].timeZone").isNotEmpty())
         .andExpect(jsonPath("$.content[0].deletedAt").doesNotExist())
         .andExpect(jsonPath("$.content[1].deletedAt").doesNotExist());
   }
@@ -97,8 +97,8 @@ class AdminUserControllerIT {
 
   @Test
   void getAllUsers_WithPagination_ShouldReturnPagedResults() throws Exception {
-    authTestUtils.createAndSaveUser("user3@example.com", TEST_PASSWORD, TEST_TIMEZONE);
-    authTestUtils.createAndSaveUser("user4@example.com", TEST_PASSWORD, TEST_TIMEZONE);
+    authTestUtils.createAndSaveUser("user3@example.com", TEST_PASSWORD, TEST_TIME_ZONE);
+    authTestUtils.createAndSaveUser("user4@example.com", TEST_PASSWORD, TEST_TIME_ZONE);
 
     mockMvc
         .perform(addJwt(adminJwt, get("/api/users").param("page", "0").param("size", "2")))

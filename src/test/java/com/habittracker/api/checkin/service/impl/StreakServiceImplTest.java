@@ -70,7 +70,7 @@ class StreakServiceImplTest {
     testUser.setId(UUID.randomUUID());
 
     testUserProfile = new UserProfileEntity();
-    testUserProfile.setTimezone("America/New_York");
+    testUserProfile.setTimeZone("America/New_York");
     testUser.setUserProfile(testUserProfile);
 
     testHabit = new HabitEntity();
@@ -358,12 +358,12 @@ class StreakServiceImplTest {
 
     @Test
     void shouldSetCorrectTTL_ForDifferentTimezones_Yesterday() {
-      testUserProfile.setTimezone("Asia/Tokyo");
+      testUserProfile.setTimeZone("Asia/Tokyo");
       ZoneId tokyoTz = ZoneId.of("Asia/Tokyo");
 
       when(valueOperations.get("streak:" + testUserId + ":" + testHabitId)).thenReturn(null);
 
-      // Last check-in was yesterday in Tokyo timezone
+      // Last check-in was yesterday in Tokyo timeZone
       CheckInEntity yesterdayCheckIn =
           createCheckIn(ZonedDateTime.now(tokyoTz).minusDays(1).toInstant());
       when(checkInRepository.findFirstByHabitIdOrderByCreatedAtDesc(testHabitId))
@@ -397,7 +397,7 @@ class StreakServiceImplTest {
 
     @Test
     void shouldRespectTokyoTimezone() {
-      testUserProfile.setTimezone("Asia/Tokyo");
+      testUserProfile.setTimeZone("Asia/Tokyo");
       ZoneId tokyoTz = ZoneId.of("Asia/Tokyo");
       utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(tokyoTz);
 
@@ -417,7 +417,7 @@ class StreakServiceImplTest {
 
     @Test
     void shouldRespectLondonTimezone() {
-      testUserProfile.setTimezone("Europe/London");
+      testUserProfile.setTimeZone("Europe/London");
       ZoneId londonTz = ZoneId.of("Europe/London");
       utilsMock.when(AuthUtils::getUserTimeZone).thenReturn(londonTz);
 
