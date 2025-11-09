@@ -6,6 +6,7 @@ import com.habittracker.api.auth.model.RoleType;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
+import com.habittracker.api.auth.service.RefreshTokenService;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.service.UserProfileService;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,7 @@ public class DevDataInitializer implements CommandLineRunner {
   private final UserRepository userRepository;
   private final AuthService authService;
   private final UserProfileService userProfileService;
+  private final RefreshTokenService refreshTokenService;
 
   @Override
   @Transactional
@@ -69,6 +71,7 @@ public class DevDataInitializer implements CommandLineRunner {
                       new UserProfileDTO(null, "Regular", "User", 25, "UTC");
                   userProfileService.update(user.getId(), userProfileDTO);
                 }
+                  refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
               });
 
       // Create admin user
@@ -92,6 +95,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 user.getRoles().add(adminRole);
                 userRepository.save(user);
                 log.info("Assigned ADMIN role to user: {}", user.getEmail());
+                refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
               });
     }
   }
