@@ -71,7 +71,7 @@ public class DevDataInitializer implements CommandLineRunner {
                       new UserProfileDTO(null, "Regular", "User", 25, "UTC");
                   userProfileService.update(user.getId(), userProfileDTO);
                 }
-                  refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
+                refreshTokenService.revokeAllRefreshTokensForUser(user.getId());
               });
 
       // Create admin user

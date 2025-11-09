@@ -71,7 +71,6 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public RefreshTokenResponse refreshToken(String refreshToken) {
     if (!refreshTokenService.isValid(refreshToken)) {
       throw new BadCredentialsException(INVALID_REFRESH_TOKEN_MESSAGE);
