@@ -1,6 +1,6 @@
 package com.habittracker.api.habit.scheduler;
 
-import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIMEZONE;
+import static com.habittracker.api.config.constants.AuthTestConstants.TEST_TIME_ZONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -51,7 +51,7 @@ class HabitCleanupSchedulerIT {
 
   @BeforeEach
   void setUp() {
-    this.testUser = authTestUtils.createAndSaveUser("tneohoeu@gmail.com", "pass", TEST_TIMEZONE);
+    this.testUser = authTestUtils.createAndSaveUser("tneohoeu@gmail.com", "pass", TEST_TIME_ZONE);
   }
 
   @Test

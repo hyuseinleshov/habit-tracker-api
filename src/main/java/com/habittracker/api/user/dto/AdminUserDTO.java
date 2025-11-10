@@ -4,7 +4,7 @@ import java.time.Instant;
 
 public record AdminUserDTO(
     String email,
-    String timezone,
+    String timeZone,
     String firstName,
     String lastName,
     Integer age,

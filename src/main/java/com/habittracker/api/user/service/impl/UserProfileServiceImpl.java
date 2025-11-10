@@ -36,7 +36,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     parseTimeZone(timezone);
     UserProfileEntity userProfile = new UserProfileEntity();
     userProfile.setUser(user);
-    userProfile.setTimezone(timezone);
+    userProfile.setTimeZone(timezone);
     return userProfile;
   }
 

@@ -38,7 +38,7 @@ public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, St
               } else {
                 String deleteDate =
                     u.getDeletedAt()
-                        .atZone(ZoneId.of(u.getUserProfile().getTimezone()))
+                        .atZone(ZoneId.of(u.getUserProfile().getTimeZone()))
                         .plus(userRetention)
                         .format(DateTimeFormatter.ISO_LOCAL_DATE);
                 String message = String.format(EMAIL_DELETED_MESSAGE, deleteDate);

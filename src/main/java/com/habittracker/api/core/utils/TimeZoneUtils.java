@@ -11,7 +11,7 @@ public final class TimeZoneUtils {
   private TimeZoneUtils() {}
 
   private static final Set<String> VALID_ZONE_IDS = ZoneId.getAvailableZoneIds();
-  public static final String INVALID_TIMEZONE_MESSAGE = "Specified timezone is not valid.";
+  public static final String INVALID_TIME_ZONE_MESSAGE = "Specified time zone is not valid.";
 
   public static boolean isValidTimeZone(String timezone) {
     if (timezone == null) return false;
@@ -20,7 +20,7 @@ public final class TimeZoneUtils {
 
   public static ZoneId parseTimeZone(String timeZone) {
     if (!isValidTimeZone(timeZone)) {
-      throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+      throw new IllegalArgumentException(INVALID_TIME_ZONE_MESSAGE);
     }
     return ZoneId.of(timeZone);
   }

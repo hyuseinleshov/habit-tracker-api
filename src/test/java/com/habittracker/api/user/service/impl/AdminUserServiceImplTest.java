@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PagedModel;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class AdminUserServiceImplTest {
 
   @Mock private UserRepository userRepository;
@@ -68,7 +69,7 @@ class AdminUserServiceImplTest {
     PagedModel<AdminUserDTO> result = adminUserService.getAllUsers(pageable, false);
 
     assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).deletedAt()).isNull();
+    assertThat(result.getContent().getFirst().deletedAt()).isNull();
     verify(userRepository).findAll(any(Specification.class), eq(pageable));
   }
 
@@ -91,7 +92,7 @@ class AdminUserServiceImplTest {
     user.setDeletedAt(deletedAt);
 
     UserProfileEntity profile = new UserProfileEntity();
-    profile.setTimezone("UTC");
+    profile.setTimeZone("UTC");
     profile.setFirstName("Test");
     profile.setLastName("User");
     profile.setAge(25);

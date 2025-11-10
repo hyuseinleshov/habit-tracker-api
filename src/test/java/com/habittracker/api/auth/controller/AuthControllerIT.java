@@ -38,15 +38,15 @@ public class AuthControllerIT {
 
   @BeforeEach
   public void setUp() {
-    testUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
-    authTestUtils.createAndSaveUser(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+    testUser = authTestUtils.createAndSaveUser(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
+    authTestUtils.createAndSaveUser(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
   }
 
   @Nested
   class RegisterTests {
     @Test
     public void givenValidDetails_whenRegister_thenSuccess() throws Exception {
-      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -60,7 +60,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenExistingEmail_whenRegister_thenError() throws Exception {
-      RegisterRequest request = new RegisterRequest(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(EXISTING_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -70,11 +70,11 @@ public class AuthControllerIT {
 
     @Test
     public void givenDeletedEmail_whenRegister_thenError() throws Exception {
-      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
       authTestUtils.softDelete(testUser, Instant.now());
       String deleteDate =
           Instant.now()
-              .atZone(ZoneId.of(TEST_TIMEZONE))
+              .atZone(ZoneId.of(TEST_TIME_ZONE))
               .plus(userRetention)
               .format(DateTimeFormatter.ISO_LOCAL_DATE);
       mockMvcTestUtils
@@ -88,7 +88,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"invalid-email", "user@", "@domain.com", "user.domain.com"})
     public void givenInvalidEmail_whenRegister_thenValidationError(String invalidEmail)
         throws Exception {
-      RegisterRequest request = new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(invalidEmail, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -99,7 +99,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenBlankEmail_whenRegister_thenValidationError() throws Exception {
-      RegisterRequest request = new RegisterRequest("", TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest("", TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -112,7 +112,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"12345", "short", "tiny"})
     public void givenShortPassword_whenRegister_thenValidationError(String shortPassword)
         throws Exception {
-      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, shortPassword, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(NEW_USER_EMAIL, shortPassword, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(REGISTER_ENDPOINT, request)
@@ -126,7 +126,7 @@ public class AuthControllerIT {
   class LoginTests {
     @Test
     public void givenValidCredentials_whenLogin_thenSuccess() throws Exception {
-      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -140,7 +140,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenInvalidPassword_whenLogin_thenUnauthorized() throws Exception {
-      RegisterRequest request = new RegisterRequest(TEST_EMAIL, WRONG_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, WRONG_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -151,7 +151,7 @@ public class AuthControllerIT {
     @Test
     public void givenNonexistentUser_whenLogin_thenUnauthorized() throws Exception {
       RegisterRequest request =
-          new RegisterRequest(NONEXISTENT_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+          new RegisterRequest(NONEXISTENT_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -163,7 +163,7 @@ public class AuthControllerIT {
     @ValueSource(strings = {"", " "})
     public void givenBlankPassword_whenLogin_thenValidationError(String blankPassword)
         throws Exception {
-      RegisterRequest request = new RegisterRequest(TEST_EMAIL, blankPassword, TEST_TIMEZONE);
+      RegisterRequest request = new RegisterRequest(TEST_EMAIL, blankPassword, TEST_TIME_ZONE);
 
       mockMvcTestUtils
           .performPostRequest(LOGIN_ENDPOINT, request)
@@ -180,7 +180,7 @@ public class AuthControllerIT {
   class RefreshTokenTests {
     @Test
     public void givenValidRefreshToken_whenRefresh_thenSuccess() throws Exception {
-      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
       String refreshToken =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)
@@ -205,7 +205,7 @@ public class AuthControllerIT {
 
     @Test
     public void givenUsedRefreshToken_whenRefreshAgain_thenUnauthorized() throws Exception {
-      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIMEZONE);
+      RegisterRequest loginRequest = new RegisterRequest(TEST_EMAIL, TEST_PASSWORD, TEST_TIME_ZONE);
       String refreshToken =
           mockMvcTestUtils
               .performPostRequest(LOGIN_ENDPOINT, loginRequest)

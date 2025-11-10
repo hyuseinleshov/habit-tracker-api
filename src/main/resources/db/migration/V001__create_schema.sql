@@ -27,7 +27,7 @@ CREATE TABLE users_roles (
 -- Note: With @MapsId, the id column IS the foreign key column (user_id)
 CREATE TABLE user_profiles (
     user_id UUID PRIMARY KEY,
-    timezone VARCHAR(255) NOT NULL,
+    time_zone VARCHAR(255) NOT NULL,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     age INTEGER,

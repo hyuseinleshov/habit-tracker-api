@@ -183,7 +183,7 @@ public class HabitControllerIT {
     public void shouldOnlyReturnCurrentUserHabits_WhenMultipleUsersHaveHabits() throws Exception {
       UserEntity otherUser =
           authTestUtils.createAndSaveUser(
-              OTHER_USER_EMAIL, OTHER_USER_PASSWORD, OTHER_USER_TIMEZONE);
+              OTHER_USER_EMAIL, OTHER_USER_PASSWORD, OTHER_USER_TIME_ZONE);
       habitTestUtils.createAndSaveHabit(testUser, HABIT_NAME_MY_HABIT);
       habitTestUtils.createAndSaveHabit(otherUser, HABIT_NAME_OTHERS_HABIT);
 
