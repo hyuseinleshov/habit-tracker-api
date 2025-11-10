@@ -13,10 +13,5 @@ public record HabitStatisticResponse(
     Instant calculatedAt) {
   public record StreakData(long currentDays, BestStreakData best) {}
 
-  public record BestStreakData(int days, LocalDate startDate, LocalDate endDate, UUID habitId) {
-    public static BestStreakData of(int days, LocalDate startDate, UUID habitId) {
-      LocalDate endDate = startDate != null ? startDate.plusDays(days - 1) : null;
-      return new BestStreakData(days, startDate, endDate, habitId);
-    }
-  }
+  public record BestStreakData(int days, LocalDate startDate, LocalDate endDate, UUID habitId) {}
 }

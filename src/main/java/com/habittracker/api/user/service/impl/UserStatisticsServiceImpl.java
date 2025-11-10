@@ -5,6 +5,7 @@ import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
 import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.repository.HabitRepository;
+import com.habittracker.api.habit.service.HabitStatisticsService;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
 import java.time.Instant;
@@ -22,6 +23,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
 
   private final CheckInService checkInService;
   private final HabitRepository habitRepository;
+  private final HabitStatisticsService habitStatisticsService;
 
   @Override
   @Transactional(readOnly = true)
@@ -47,8 +49,8 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
         .findBestStreakByUserId(userId)
         .map(
             habit ->
-                HabitStatisticResponse.BestStreakData.of(
+                habitStatisticsService.buildBestStreak(
                     habit.getBestStreak(), habit.getBestStreakStartDate(), habit.getId()))
-        .orElse(HabitStatisticResponse.BestStreakData.of(0, null, null));
+        .orElse(new HabitStatisticResponse.BestStreakData(0, null, null, null));
   }
 }
