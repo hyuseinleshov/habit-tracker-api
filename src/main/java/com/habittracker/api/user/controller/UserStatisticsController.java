@@ -2,6 +2,7 @@ package com.habittracker.api.user.controller;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
+import com.habittracker.api.user.dto.WeeklySummaryResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,15 +12,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/stats/overview")
+@RequestMapping("/api/stats")
 @RequiredArgsConstructor
 public class UserStatisticsController {
 
   private final UserStatisticsService statisticsService;
 
-  @GetMapping
+  @GetMapping("/overview")
   public ResponseEntity<UserStatisticsResponse> getStatistics(
       @AuthenticationPrincipal UserDetailsImpl principal) {
     return ResponseEntity.ok(statisticsService.calculateStatistics(principal.id()));
+  }
+
+  @GetMapping("/weekly")
+  public ResponseEntity<WeeklySummaryResponse> getWeeklySummary(
+          @AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(statisticsService.getWeeklySummary(principal.id()));
   }
 }
