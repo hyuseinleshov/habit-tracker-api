@@ -11,7 +11,7 @@ import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.checkin.service.DailyCheckInService;
-import com.habittracker.api.checkin.service.StreakService;
+import com.habittracker.api.habit.streak.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.*;

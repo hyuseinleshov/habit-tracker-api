@@ -1,17 +1,20 @@
 package com.habittracker.api.user.service.impl;
 
-import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
-
 import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.service.CheckInService;
-import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.repository.HabitRepository;
-import com.habittracker.api.habit.service.HabitStatisticsService;
+import com.habittracker.api.habit.streak.dto.BestStreakData;
+import com.habittracker.api.habit.streak.service.StreakService;
 import com.habittracker.api.user.dto.DailyCheckinSummary;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.dto.WeeklySummaryResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -20,10 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +32,14 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
 
   private final CheckInService checkInService;
   private final HabitRepository habitRepository;
-  private final HabitStatisticsService habitStatisticsService;
+  private final StreakService streakService;
 
   @Override
   @Transactional(readOnly = true)
   @Cacheable(value = "userStatistics", key = "#id")
   public UserStatisticsResponse calculateStatistics(UUID id) {
     long totalCheckIns = checkInService.getUserCheckInsCount(id);
-    HabitStatisticResponse.BestStreakData userBestStreak = getUserBestStreak(id);
+    BestStreakData userBestStreak = getUserBestStreak(id);
     long activeStreaks = getUserActiveStreaks(id);
     LocalDate lastCheckInDate = checkInService.getUserLastCheckInDate(id);
     return new UserStatisticsResponse(
@@ -76,13 +77,13 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
     return habitRepository.countHabitsWithRecentCheckIns(userId, since);
   }
 
-  private HabitStatisticResponse.BestStreakData getUserBestStreak(UUID userId) {
+  private BestStreakData getUserBestStreak(UUID userId) {
     return habitRepository
         .findBestStreakByUserId(userId)
         .map(
             habit ->
-                habitStatisticsService.buildBestStreak(
+                streakService.buildBestStreak(
                     habit.getBestStreak(), habit.getBestStreakStartDate(), habit.getId()))
-        .orElse(new HabitStatisticResponse.BestStreakData(0, null, null, null));
+        .orElse(new BestStreakData(0, null, null, null));
   }
 }

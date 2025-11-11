@@ -1,4 +1,4 @@
-package com.habittracker.api.checkin.service.impl;
+package com.habittracker.api.habit.streak.service.impl;
 
 import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
 import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
@@ -9,8 +9,6 @@ import com.habittracker.api.checkin.dto.StreakCalculationResult;
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
-import com.habittracker.api.checkin.service.StreakCalculator;
-import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import java.time.Instant;
@@ -20,6 +18,10 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+
+import com.habittracker.api.habit.streak.StreakCalculator;
+import com.habittracker.api.habit.streak.dto.BestStreakData;
+import com.habittracker.api.habit.streak.service.StreakService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -59,6 +61,17 @@ public class StreakServiceImpl implements StreakService {
     LocalDate today = LocalDate.now(userTimeZone);
     cacheStreak(habit.getId(), newStreak, today, userTimeZone);
     log.debug("Incremented streak for habit ID: {} to {}", habit.getId(), newStreak);
+  }
+
+  @Override
+  public BestStreakData buildBestStreak(
+          int streak, LocalDate streakStartDate, UUID habitId) {
+    LocalDate endDate = null;
+    LocalDate today = LocalDate.now(AuthUtils.getUserTimeZone());
+    if (streakStartDate != null && today.isAfter((streakStartDate.plusDays(streak)))) {
+      endDate = streakStartDate.plusDays(streak - 1);
+    }
+    return new BestStreakData(streak, streakStartDate, endDate, habitId);
   }
 
   private void updateBestStreakIfNeeded(HabitEntity habit, int newStreak, ZoneId userTimeZone) {

@@ -1,20 +1,21 @@
 package com.habittracker.api.habit.service.impl;
 
-import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.service.CheckInService;
-import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.service.HabitStatisticsService;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
+import com.habittracker.api.habit.streak.dto.StreakData;
+import com.habittracker.api.habit.streak.service.StreakService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,21 +38,10 @@ public class HabitStatisticsServiceImpl implements HabitStatisticsService {
         habitId,
         habit.getName(),
         totalCheckins,
-        new HabitStatisticResponse.StreakData(
+        new StreakData(
             currentStreak,
-            buildBestStreak(habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
+            streakService.buildBestStreak(habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
         lastCheckInDate,
         Instant.now());
-  }
-
-  @Override
-  public HabitStatisticResponse.BestStreakData buildBestStreak(
-      int streak, LocalDate streakStartDate, UUID habitId) {
-    LocalDate endDate = null;
-    LocalDate today = LocalDate.now(AuthUtils.getUserTimeZone());
-    if (streakStartDate != null && today.isAfter((streakStartDate.plusDays(streak)))) {
-      endDate = streakStartDate.plusDays(streak - 1);
-    }
-    return new HabitStatisticResponse.BestStreakData(streak, streakStartDate, endDate, habitId);
   }
 }
