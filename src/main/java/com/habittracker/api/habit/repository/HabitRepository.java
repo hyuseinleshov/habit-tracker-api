@@ -32,4 +32,6 @@ public interface HabitRepository
   boolean existsByIdAndUserId(UUID id, UUID userId);
 
   long deleteAllByDeletedAtBefore(Instant deleteBefore);
+
+  long countByUserId(UUID id);
 }

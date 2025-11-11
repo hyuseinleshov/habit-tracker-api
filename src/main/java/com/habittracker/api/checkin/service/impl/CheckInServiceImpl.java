@@ -14,8 +14,8 @@ import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.checkin.service.StreakService;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,9 @@ public class CheckInServiceImpl implements CheckInService {
   @Caching(
       evict = {
         @CacheEvict(value = "habitStatistics", key = "#habitId"),
-        @CacheEvict(value = "userStatistics", key = "#userId")
+        @CacheEvict(
+            value = {"userStatistics", "weeklySummary"},
+            key = "#userId"),
       })
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UUID userId) {
@@ -124,6 +126,24 @@ public class CheckInServiceImpl implements CheckInService {
     // TODO
     // FIX
     streakService.calculateStreak(habitId);
+  }
+
+  @Override
+  public long getCheckInsToday(UUID userId) {
+    ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(AuthUtils.getUserTimeZone());
+    ZonedDateTime endOfDay = startOfDay.plusDays(1);
+    return checkInRepository
+        .findByHabitUserIdAndCreatedAtBetween(userId, startOfDay.toInstant(), endOfDay.toInstant())
+        .size();
+  }
+
+  @Override
+  public Set<CheckInEntity> getCheckInsFor(UUID userId, LocalDate startDate, LocalDate endDate) {
+    ZoneId userTimeZone = AuthUtils.getUserTimeZone();
+    return checkInRepository.findByHabitUserIdAndCreatedAtBetween(
+        userId,
+        startDate.atStartOfDay(userTimeZone).toInstant(),
+        endDate.plusDays(1).atStartOfDay(userTimeZone).toInstant());
   }
 
   private Specification<CheckInEntity> buildSpecificationWithDateRange(
