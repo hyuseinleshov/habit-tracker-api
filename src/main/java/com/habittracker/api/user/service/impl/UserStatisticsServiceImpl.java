@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -47,10 +46,11 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   }
 
   @Override
-  public WeeklySummaryResponse getWeeklySummary(UUID userId) {
-    long habitCount = habitRepository.countByUserId(userId);
-    long todayCheckins = checkInService.getCheckInsToday(userId);
-    List<DailyCheckinSummary> weeklyStats = getWeeklyStats(userId);
+  @Cacheable(value = "weeklySummary", key = "#id")
+  public WeeklySummaryResponse getWeeklySummary(UUID id) {
+    long habitCount = habitRepository.countByUserId(id);
+    long todayCheckins = checkInService.getCheckInsToday(id);
+    List<DailyCheckinSummary> weeklyStats = getWeeklyStats(id);
     return new WeeklySummaryResponse(habitCount, todayCheckins, weeklyStats);
   }
 
@@ -61,14 +61,13 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
 
     Set<CheckInEntity> checkIns = checkInService.getCheckInsFor(userId, startDate, endDate);
     return checkIns.stream()
-            .collect(Collectors.groupingBy(c -> c.getCreatedAt().atZone(userTimeZone).toLocalDate()))
-            .entrySet()
-            .stream()
-            .map(e -> new DailyCheckinSummary(e.getKey(), e.getValue().size()))
-            .sorted(Comparator.comparing(DailyCheckinSummary::date))
-            .toList();
+        .collect(Collectors.groupingBy(c -> c.getCreatedAt().atZone(userTimeZone).toLocalDate()))
+        .entrySet()
+        .stream()
+        .map(e -> new DailyCheckinSummary(e.getKey(), e.getValue().size()))
+        .sorted(Comparator.comparing(DailyCheckinSummary::date))
+        .toList();
   }
-
 
   private long getUserActiveStreaks(UUID userId) {
     ZoneId userTimeZone = getUserTimeZone();

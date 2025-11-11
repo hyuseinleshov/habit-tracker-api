@@ -26,7 +26,7 @@ public class UserStatisticsController {
 
   @GetMapping("/weekly")
   public ResponseEntity<WeeklySummaryResponse> getWeeklySummary(
-          @AuthenticationPrincipal UserDetailsImpl principal) {
+      @AuthenticationPrincipal UserDetailsImpl principal) {
     return ResponseEntity.ok(statisticsService.getWeeklySummary(principal.id()));
   }
 }

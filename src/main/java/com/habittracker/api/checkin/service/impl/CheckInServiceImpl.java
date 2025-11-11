@@ -45,7 +45,8 @@ public class CheckInServiceImpl implements CheckInService {
   @Caching(
       evict = {
         @CacheEvict(value = "habitStatistics", key = "#habitId"),
-        @CacheEvict(value = "userStatistics", key = "#userId")
+        @CacheEvict(value = "userStatistics", key = "#userId"),
+        @CacheEvict(value = "weeklySummary", key = "#userId"),
       })
   @Transactional
   public CheckInResponse checkIn(UUID habitId, UUID userId) {
