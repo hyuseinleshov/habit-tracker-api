@@ -11,6 +11,9 @@ import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.repository.CheckInRepository;
 import com.habittracker.api.habit.helpers.HabitHelper;
 import com.habittracker.api.habit.model.HabitEntity;
+import com.habittracker.api.habit.streak.StreakCalculator;
+import com.habittracker.api.habit.streak.dto.BestStreakData;
+import com.habittracker.api.habit.streak.service.StreakService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,10 +21,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-
-import com.habittracker.api.habit.streak.StreakCalculator;
-import com.habittracker.api.habit.streak.dto.BestStreakData;
-import com.habittracker.api.habit.streak.service.StreakService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -64,8 +63,7 @@ public class StreakServiceImpl implements StreakService {
   }
 
   @Override
-  public BestStreakData buildBestStreak(
-          int streak, LocalDate streakStartDate, UUID habitId) {
+  public BestStreakData buildBestStreak(int streak, LocalDate streakStartDate, UUID habitId) {
     LocalDate endDate = null;
     LocalDate today = LocalDate.now(AuthUtils.getUserTimeZone());
     if (streakStartDate != null && today.isAfter((streakStartDate.plusDays(streak)))) {

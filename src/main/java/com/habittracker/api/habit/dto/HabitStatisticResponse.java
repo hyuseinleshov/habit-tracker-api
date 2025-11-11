@@ -1,7 +1,6 @@
 package com.habittracker.api.habit.dto;
 
 import com.habittracker.api.habit.streak.dto.StreakData;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -12,5 +11,4 @@ public record HabitStatisticResponse(
     long totalCheckIns,
     StreakData streaks,
     LocalDate lastCheckin,
-    Instant calculatedAt) {
-}
+    Instant calculatedAt) {}

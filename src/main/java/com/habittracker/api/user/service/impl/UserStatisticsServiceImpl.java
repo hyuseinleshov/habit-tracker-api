@@ -1,5 +1,7 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
+
 import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.checkin.service.CheckInService;
@@ -10,11 +12,6 @@ import com.habittracker.api.user.dto.DailyCheckinSummary;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.dto.WeeklySummaryResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -23,8 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.habittracker.api.auth.utils.AuthUtils.getUserTimeZone;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +38,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   @Cacheable(value = "userStatistics", key = "#id")
   public UserStatisticsResponse calculateStatistics(UUID id) {
     long totalCheckIns = checkInService.getUserCheckInsCount(id);
-    BestStreakData userBestStreak = getUserBestStreak(id);
+    BestStreakData userBestStreak = getBestStreak(id);
     long activeStreaks = getUserActiveStreaks(id);
     LocalDate lastCheckInDate = checkInService.getUserLastCheckInDate(id);
     return new UserStatisticsResponse(
@@ -53,6 +52,17 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
     long todayCheckins = checkInService.getCheckInsToday(id);
     List<DailyCheckinSummary> weeklyStats = getWeeklyStats(id);
     return new WeeklySummaryResponse(habitCount, todayCheckins, weeklyStats);
+  }
+
+  @Override
+  public BestStreakData getBestStreak(UUID userId) {
+    return habitRepository
+        .findBestStreakByUserId(userId)
+        .map(
+            habit ->
+                streakService.buildBestStreak(
+                    habit.getBestStreak(), habit.getBestStreakStartDate(), habit.getId()))
+        .orElse(new BestStreakData(0, null, null, null));
   }
 
   private List<DailyCheckinSummary> getWeeklyStats(UUID userId) {
@@ -75,15 +85,5 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
     LocalDate yesterday = LocalDate.now(userTimeZone).minusDays(1);
     Instant since = yesterday.atStartOfDay(userTimeZone).toInstant();
     return habitRepository.countHabitsWithRecentCheckIns(userId, since);
-  }
-
-  private BestStreakData getUserBestStreak(UUID userId) {
-    return habitRepository
-        .findBestStreakByUserId(userId)
-        .map(
-            habit ->
-                streakService.buildBestStreak(
-                    habit.getBestStreak(), habit.getBestStreakStartDate(), habit.getId()))
-        .orElse(new BestStreakData(0, null, null, null));
   }
 }

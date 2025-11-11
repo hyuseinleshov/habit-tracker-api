@@ -7,15 +7,14 @@ import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.service.HabitStatisticsService;
 import com.habittracker.api.habit.streak.dto.StreakData;
 import com.habittracker.api.habit.streak.service.StreakService;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,8 @@ public class HabitStatisticsServiceImpl implements HabitStatisticsService {
         totalCheckins,
         new StreakData(
             currentStreak,
-            streakService.buildBestStreak(habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
+            streakService.buildBestStreak(
+                habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
         lastCheckInDate,
         Instant.now());
   }

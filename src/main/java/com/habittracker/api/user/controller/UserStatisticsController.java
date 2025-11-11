@@ -1,6 +1,7 @@
 package com.habittracker.api.user.controller;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
+import com.habittracker.api.habit.streak.dto.BestStreakData;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.dto.WeeklySummaryResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
@@ -28,5 +29,11 @@ public class UserStatisticsController {
   public ResponseEntity<WeeklySummaryResponse> getWeeklySummary(
       @AuthenticationPrincipal UserDetailsImpl principal) {
     return ResponseEntity.ok(statisticsService.getWeeklySummary(principal.id()));
+  }
+
+  @GetMapping("/best-streak")
+  public ResponseEntity<BestStreakData> bestStreak(
+      @AuthenticationPrincipal UserDetailsImpl principal) {
+    return ResponseEntity.ok(statisticsService.getBestStreak(principal.id()));
   }
 }
