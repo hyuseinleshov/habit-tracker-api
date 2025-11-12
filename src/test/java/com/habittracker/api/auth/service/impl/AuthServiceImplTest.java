@@ -17,6 +17,7 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.RefreshTokenService;
+import com.habittracker.api.security.jwt.service.JwtBlacklistService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.user.service.UserProfileService;
 import java.util.Optional;
@@ -41,6 +42,7 @@ class AuthServiceImplTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private RefreshTokenService refreshTokenService;
   @Mock private UserProfileService userProfileService;
+  @Mock private JwtBlacklistService jwtBlacklistService;
   @InjectMocks private AuthServiceImpl authService;
 
   private RegisterRequest validRegisterRequest;
@@ -106,6 +108,37 @@ class AuthServiceImplTest {
       assertThatThrownBy(() -> authService.login(validLoginRequest))
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage(INVALID_CREDENTIALS_ERROR);
+    }
+  }
+
+  @Nested
+  class Logout {
+    @Test
+    void logout_ShouldRevokeRefreshTokens() {
+      UUID userId = UUID.randomUUID();
+
+      authService.logout(userId);
+
+      verify(refreshTokenService).revokeAllRefreshTokensForUser(userId);
+    }
+
+    @Test
+    void logout_ShouldBlacklistActiveJwt() {
+      UUID userId = UUID.randomUUID();
+
+      authService.logout(userId);
+
+      verify(jwtBlacklistService).revokeActiveToken(userId);
+    }
+
+    @Test
+    void logout_ShouldRevokeRefreshTokensAndBlacklistJwt() {
+      UUID userId = UUID.randomUUID();
+
+      authService.logout(userId);
+
+      verify(refreshTokenService).revokeAllRefreshTokensForUser(userId);
+      verify(jwtBlacklistService).revokeActiveToken(userId);
     }
   }
 
