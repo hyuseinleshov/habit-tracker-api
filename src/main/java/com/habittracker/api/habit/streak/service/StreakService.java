@@ -1,7 +1,9 @@
-package com.habittracker.api.checkin.service;
+package com.habittracker.api.habit.streak.service;
 
 import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.habit.model.HabitEntity;
+import com.habittracker.api.habit.streak.dto.BestStreakData;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public interface StreakService {
@@ -26,4 +28,6 @@ public interface StreakService {
    * @param habit the habit
    */
   void incrementStreak(HabitEntity habit);
+
+  BestStreakData buildBestStreak(int streak, LocalDate streakStartDate, UUID habitId);
 }

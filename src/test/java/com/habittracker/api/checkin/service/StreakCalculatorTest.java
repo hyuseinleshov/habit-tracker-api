@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.habittracker.api.checkin.model.CheckInEntity;
+import com.habittracker.api.habit.streak.StreakCalculator;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;

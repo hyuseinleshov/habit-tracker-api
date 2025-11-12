@@ -1,4 +1,4 @@
-package com.habittracker.api.checkin.service;
+package com.habittracker.api.habit.streak;
 
 import com.habittracker.api.checkin.model.CheckInEntity;
 import java.time.LocalDate;
