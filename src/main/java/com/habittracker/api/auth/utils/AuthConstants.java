@@ -6,11 +6,13 @@ public final class AuthConstants {
   public static final String REGISTER_ENDPOINT = "/api/auth/register";
   public static final String LOGIN_ENDPOINT = "/api/auth/login";
   public static final String REFRESH_ENDPOINT = "/api/auth/refresh";
+  public static final String LOGOUT_ENDPOINT = "/api/auth/logout";
 
   // Response messages
   public static final String REGISTER_SUCCESS_MESSAGE = "Register successful";
   public static final String LOGIN_SUCCESS_MESSAGE = "Login successful";
   public static final String REFRESH_SUCCESS_MESSAGE = "Token refreshed successfully";
+  public static final String LOGOUT_SUCCESS_MESSAGE = "Logout successful";
 
   // Exception and error messages
   public static final String EMAIL_EXISTS_MESSAGE = "Email already exists";
