@@ -11,6 +11,7 @@ import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.testutils.AuthTestUtils;
 import com.habittracker.api.auth.testutils.MockMvcTestUtils;
 import com.habittracker.api.config.annotation.BaseIntegrationTest;
+import com.habittracker.api.security.jwt.service.JwtService;
 import jakarta.servlet.http.Cookie;
 import java.time.Instant;
 import java.time.Period;
@@ -31,6 +32,7 @@ public class AuthControllerIT {
 
   @Autowired private AuthTestUtils authTestUtils;
   @Autowired private MockMvcTestUtils mockMvcTestUtils;
+  @Autowired private JwtService jwtService;
   private UserEntity testUser;
 
   @Value("${user.cleanup.retention-period}")
@@ -228,6 +230,54 @@ public class AuthControllerIT {
 
       mockMvcTestUtils
           .performPostRequest(REFRESH_ENDPOINT, EMPTY_JSON, refreshTokenCookie)
+          .andExpect(status().isUnauthorized());
+    }
+  }
+
+  @Nested
+  class LogoutTests {
+    @Test
+    public void logout_WithValidToken_ShouldReturnSuccess() throws Exception {
+      String jwtToken = jwtService.generateToken(testUser);
+      String authToken = "Bearer " + jwtToken;
+
+      mockMvcTestUtils
+          .performAuthenticatedPostRequest(LOGOUT_ENDPOINT, EMPTY_JSON, authToken)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.message", is(LOGOUT_SUCCESS_MESSAGE)))
+          .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
+          .andExpect(cookie().maxAge(REFRESH_TOKEN_COOKIE_NAME, 0));
+    }
+
+    @Test
+    public void logout_WithBlacklistedToken_ShouldReturnUnauthorized() throws Exception {
+      String jwtToken = jwtService.generateToken(testUser);
+      String authToken = "Bearer " + jwtToken;
+
+      // First logout - should succeed
+      mockMvcTestUtils
+          .performAuthenticatedPostRequest(LOGOUT_ENDPOINT, EMPTY_JSON, authToken)
+          .andExpect(status().isOk());
+
+      // Second logout with same token - should fail (token is blacklisted)
+      mockMvcTestUtils
+          .performAuthenticatedPostRequest(LOGOUT_ENDPOINT, EMPTY_JSON, authToken)
+          .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void logout_WithoutToken_ShouldReturnUnauthorized() throws Exception {
+      mockMvcTestUtils
+          .performUnauthenticatedPostRequest(LOGOUT_ENDPOINT, EMPTY_JSON)
+          .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void logout_WithInvalidToken_ShouldReturnUnauthorized() throws Exception {
+      String authToken = "Bearer invalid.jwt.token";
+
+      mockMvcTestUtils
+          .performAuthenticatedPostRequest(LOGOUT_ENDPOINT, EMPTY_JSON, authToken)
           .andExpect(status().isUnauthorized());
     }
   }
