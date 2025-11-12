@@ -10,10 +10,12 @@ import com.habittracker.api.auth.repository.RoleRepository;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.service.RefreshTokenService;
+import com.habittracker.api.security.jwt.service.JwtBlacklistService;
 import com.habittracker.api.security.jwt.service.JwtService;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.service.UserProfileService;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
   private final UserProfileService userProfileService;
+  private final JwtBlacklistService jwtBlacklistService;
 
   @Override
   public AuthResponse register(@Valid RegisterRequest request) {
@@ -87,5 +90,12 @@ public class AuthServiceImpl implements AuthService {
     refreshTokenService.revokeRefreshToken(refreshToken);
     String newRefreshToken = refreshTokenService.createRefreshToken(userEntity.getId());
     return new RefreshTokenResponse(newAccessToken, newRefreshToken, REFRESH_SUCCESS_MESSAGE);
+  }
+
+  @Override
+  public void logout(UUID userId) {
+    log.info("Logging out user with ID: {}", userId);
+    refreshTokenService.revokeAllRefreshTokensForUser(userId);
+    jwtBlacklistService.revokeActiveToken(userId);
   }
 }

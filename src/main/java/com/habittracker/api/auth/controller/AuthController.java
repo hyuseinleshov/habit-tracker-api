@@ -1,6 +1,9 @@
 package com.habittracker.api.auth.controller;
 
+import static com.habittracker.api.auth.utils.AuthConstants.LOGOUT_SUCCESS_MESSAGE;
+
 import com.habittracker.api.auth.dto.*;
+import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.auth.service.AuthService;
 import com.habittracker.api.auth.utils.RefreshTokenCookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,6 +12,7 @@ import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -45,5 +49,14 @@ public class AuthController {
     log.info("Refresh token used successfully");
     refreshTokenCookieUtils.addRefreshTokenCookie(response.refreshToken(), httpResponse);
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<LogoutResponse> logout(
+      @AuthenticationPrincipal UserDetailsImpl principal, HttpServletResponse httpResponse) {
+    userService.logout(principal.id());
+    log.info("User with ID - {}, logged out successfully", principal.id());
+    refreshTokenCookieUtils.clearRefreshTokenCookie(httpResponse);
+    return ResponseEntity.ok(new LogoutResponse(LOGOUT_SUCCESS_MESSAGE));
   }
 }
