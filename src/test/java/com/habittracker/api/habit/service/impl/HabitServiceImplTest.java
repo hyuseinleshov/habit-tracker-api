@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
+import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
@@ -18,6 +19,8 @@ import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.Frequency;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
+import com.habittracker.api.habit.streak.service.StreakService;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,11 +44,15 @@ class HabitServiceImplTest {
   @Mock private UserRepository userRepository;
   @Mock private HabitMapper habitMapper;
   @Mock private HabitHelper habitHelper;
+  @Mock private StreakService streakService;
   @InjectMocks private HabitServiceImpl habitService;
+
+  private static final int TEST_CURRENT_STREAK = 20;
 
   private UserEntity testUser;
   private CreateHabitRequest validRequest;
   private HabitEntity testHabitEntity;
+
   private HabitResponse testHabitResponse;
   private Pageable defaultPageable;
 
@@ -69,7 +76,15 @@ class HabitServiceImplTest {
             testHabitEntity.getName(),
             testHabitEntity.getDescription(),
             Frequency.DAILY,
+            Instant.now(),
+            TEST_CURRENT_STREAK,
             EXPECTED_ARCHIVED);
+  }
+
+  private void setUpStreakService() {
+    when(streakService.calculateStreak(testHabitEntity.getId()))
+        .thenReturn(
+            new StreakResponse(testHabitEntity.getId(), TEST_CURRENT_STREAK, Instant.now()));
   }
 
   @Nested
@@ -77,8 +92,10 @@ class HabitServiceImplTest {
 
     @Test
     void shouldCreateHabit_WhenValidRequest() {
+      setUpStreakService();
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+          .thenReturn(testHabitResponse);
       when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
 
       HabitResponse result = habitService.createHabit(testUser.getId(), validRequest);
@@ -97,10 +114,12 @@ class HabitServiceImplTest {
 
     @Test
     void shouldTrimWhitespace_WhenCreatingHabit() {
+      setUpStreakService();
       CreateHabitRequest requestWithWhitespace =
           new CreateHabitRequest(HABIT_NAME_WHITESPACE, HABIT_DESCRIPTION_WHITESPACE);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+          .thenReturn(testHabitResponse);
 
       habitService.createHabit(testUser.getId(), requestWithWhitespace);
 
@@ -114,10 +133,12 @@ class HabitServiceImplTest {
 
     @Test
     void shouldHandleNullDescription_WhenCreatingHabit() {
+      setUpStreakService();
       CreateHabitRequest requestWithNullDescription =
           new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+          .thenReturn(testHabitResponse);
 
       habitService.createHabit(testUser.getId(), requestWithNullDescription);
 
@@ -137,7 +158,7 @@ class HabitServiceImplTest {
           .isInstanceOf(HabitNameAlreadyExistsException.class);
 
       verify(habitRepository, never()).save(any(HabitEntity.class));
-      verify(habitMapper, never()).toResponse(any(HabitEntity.class));
+      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt());
     }
 
     @Test
@@ -158,6 +179,7 @@ class HabitServiceImplTest {
 
     @Test
     void shouldReturnUserHabits_WhenHabitsExist() {
+      setUpStreakService();
       Page<HabitEntity> habitEntities =
           new PageImpl<>(List.of(testHabitEntity), defaultPageable, 1);
       PagedModel<HabitResponse> expectedResponses =
@@ -165,14 +187,15 @@ class HabitServiceImplTest {
 
       when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
           .thenReturn(habitEntities);
-      when(habitMapper.toResponse(testHabitEntity)).thenReturn(testHabitResponse);
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+          .thenReturn(testHabitResponse);
 
       PagedModel<HabitResponse> result =
           habitService.getUserHabits(testUser.getId(), defaultPageable, false);
 
       assertThat(result).isEqualTo(expectedResponses);
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
-      verify(habitMapper).toResponse(testHabitEntity);
+      verify(habitMapper).toResponse(testHabitEntity, TEST_CURRENT_STREAK);
     }
 
     @Test
@@ -185,7 +208,7 @@ class HabitServiceImplTest {
 
       assertThat(result.getContent()).isEmpty();
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
-      verify(habitMapper, never()).toResponse(any(HabitEntity.class));
+      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt());
     }
   }
 
