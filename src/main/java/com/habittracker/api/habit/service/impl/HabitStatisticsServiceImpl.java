@@ -42,6 +42,7 @@ public class HabitStatisticsServiceImpl implements HabitStatisticsService {
             streakService.buildBestStreak(
                 habit.getBestStreak(), habit.getBestStreakStartDate(), habitId)),
         lastCheckInDate,
+        habit.getCreatedAt(),
         Instant.now());
   }
 }

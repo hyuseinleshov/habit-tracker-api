@@ -11,4 +11,5 @@ public record HabitStatisticResponse(
     long totalCheckIns,
     StreakData streaks,
     LocalDate lastCheckin,
+    Instant createdAt,
     Instant calculatedAt) {}

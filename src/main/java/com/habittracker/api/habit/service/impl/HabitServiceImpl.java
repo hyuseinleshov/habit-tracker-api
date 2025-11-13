@@ -4,6 +4,7 @@ import static com.habittracker.api.habit.specs.HabitSpecs.*;
 
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
+import com.habittracker.api.checkin.dto.StreakResponse;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.dto.UpdateHabitRequest;
@@ -12,6 +13,7 @@ import com.habittracker.api.habit.mapper.HabitMapper;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.service.HabitService;
+import com.habittracker.api.habit.streak.service.StreakService;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class HabitServiceImpl implements HabitService {
   private final UserRepository userRepository;
   private final HabitMapper habitMapper;
   private final HabitHelper habitHelper;
+  private final StreakService streakService;
 
   @Override
   public HabitResponse createHabit(UUID userId, CreateHabitRequest request) {
@@ -55,7 +58,7 @@ public class HabitServiceImpl implements HabitService {
         savedHabit.getId(),
         userId);
 
-    return habitMapper.toResponse(savedHabit);
+    return toResponse(savedHabit);
   }
 
   @Override
@@ -68,14 +71,14 @@ public class HabitServiceImpl implements HabitService {
         habitRepository.findAll(
             hasUser(userId).and(isDeleted(false).and(isArchived(isArchived))), pageable);
 
-    return new PagedModel<>(habits.map(habitMapper::toResponse));
+    return new PagedModel<>(habits.map(this::toResponse));
   }
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#id, principal.id)")
   public HabitResponse getById(UUID id) {
     HabitEntity habit = habitHelper.getNotDeletedOrThrow(id);
-    return habitMapper.toResponse(habit);
+    return toResponse(habit);
   }
 
   @Override
@@ -90,7 +93,11 @@ public class HabitServiceImpl implements HabitService {
   public HabitResponse update(UUID id, UUID userId, UpdateHabitRequest updateRequest) {
     HabitEntity toUpdate = habitHelper.getNotDeletedOrThrow(id);
     if (updateRequest.name() != null) habitHelper.isUniqueName(userId, updateRequest.name());
-    return habitMapper.toResponse(
-        habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate));
+    return toResponse(habitMapper.updateHabitFromUpdateRequest(updateRequest, toUpdate));
+  }
+
+  private HabitResponse toResponse(HabitEntity entity) {
+    StreakResponse streak = streakService.calculateStreak(entity.getId());
+    return habitMapper.toResponse(entity, streak.currentStreak());
   }
 }
