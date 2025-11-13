@@ -63,7 +63,7 @@ class AuthServiceImplTest {
       AuthResponse response = authService.register(validRegisterRequest);
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
-      assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.accessToken()).isEqualTo(JWT_TOKEN);
       assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
       assertThat(response.message()).isEqualTo(REGISTER_SUCCESS_MESSAGE);
       verify(userRepository).save(any(UserEntity.class));
@@ -97,7 +97,7 @@ class AuthServiceImplTest {
       AuthResponse response = authService.login(validLoginRequest);
 
       assertThat(response.email()).isEqualTo(TEST_EMAIL);
-      assertThat(response.token()).isEqualTo(JWT_TOKEN);
+      assertThat(response.accessToken()).isEqualTo(JWT_TOKEN);
       assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
       assertThat(response.message()).isEqualTo(LOGIN_SUCCESS_MESSAGE);
     }

@@ -92,7 +92,7 @@ public class JwtServiceImpl implements JwtService {
             .signWith(secretKey)
             .compact();
     blacklistService.recordActiveToken(user.getId(), jti);
-    log.info("Generate token for user with email: {}", user.getEmail());
+    log.info("Generate accessToken for user with email: {}", user.getEmail());
     return token;
   }
 
