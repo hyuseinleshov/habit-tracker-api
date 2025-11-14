@@ -54,7 +54,7 @@ public class AuthControllerIT {
           .performPostRequest(REGISTER_ENDPOINT, request)
           .andExpect(status().isCreated())
           .andExpect(jsonPath("$.email", is(NEW_USER_EMAIL)))
-          .andExpect(jsonPath("$.token", notNullValue()))
+          .andExpect(jsonPath("$.accessToken", notNullValue()))
           .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
           .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
           .andExpect(jsonPath("$.message", is(REGISTER_SUCCESS_MESSAGE)));
@@ -134,7 +134,7 @@ public class AuthControllerIT {
           .performPostRequest(LOGIN_ENDPOINT, request)
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.email", is(TEST_EMAIL)))
-          .andExpect(jsonPath("$.token", notNullValue()))
+          .andExpect(jsonPath("$.accessToken", notNullValue()))
           .andExpect(cookie().exists(REFRESH_TOKEN_COOKIE_NAME))
           .andExpect(cookie().httpOnly(REFRESH_TOKEN_COOKIE_NAME, true))
           .andExpect(jsonPath("$.message", is(LOGIN_SUCCESS_MESSAGE)));
