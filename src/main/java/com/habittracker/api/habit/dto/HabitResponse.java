@@ -10,5 +10,6 @@ public record HabitResponse(
     String description,
     Frequency frequency,
     Instant createdAt,
+    boolean checkedInToday,
     int currentStreak,
     boolean archived) {}
