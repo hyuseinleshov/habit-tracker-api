@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface DailyCheckInService {
 
   void registerTodayCheckin(HabitEntity habit, UUID userId, ZoneId userTimeZone);
+
+  boolean isCheckedInToday(UUID habitId);
 }

@@ -5,6 +5,7 @@ import static com.habittracker.api.habit.specs.HabitSpecs.*;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.checkin.dto.StreakResponse;
+import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.dto.UpdateHabitRequest;
@@ -36,6 +37,7 @@ public class HabitServiceImpl implements HabitService {
   private final HabitMapper habitMapper;
   private final HabitHelper habitHelper;
   private final StreakService streakService;
+  private final DailyCheckInService dailyCheckInService;
 
   @Override
   public HabitResponse createHabit(UUID userId, CreateHabitRequest request) {
@@ -98,6 +100,7 @@ public class HabitServiceImpl implements HabitService {
 
   private HabitResponse toResponse(HabitEntity entity) {
     StreakResponse streak = streakService.calculateStreak(entity.getId());
-    return habitMapper.toResponse(entity, streak.currentStreak());
+    boolean checkedInToday = dailyCheckInService.isCheckedInToday(entity.getId());
+    return habitMapper.toResponse(entity, streak.currentStreak(), checkedInToday);
   }
 }

@@ -1,5 +1,6 @@
 package com.habittracker.api.checkin.service.impl;
 
+import com.habittracker.api.auth.utils.AuthUtils;
 import com.habittracker.api.checkin.exception.DuplicateCheckinException;
 import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.core.utils.TimeZoneUtils;
@@ -28,5 +29,11 @@ public class DailyCheckInServiceImpl implements DailyCheckInService {
     redisTemplate
         .opsForValue()
         .set(key, "1", TimeZoneUtils.calculateDurationUntilMidnight(userTimeZone));
+  }
+
+  @Override
+  public boolean isCheckedInToday(UUID habitId) {
+    String key = "check-in:" + AuthUtils.getUserId() + ":" + habitId;
+    return redisTemplate.hasKey(key);
   }
 }
