@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 import com.habittracker.api.auth.model.UserEntity;
 import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.checkin.dto.StreakResponse;
+import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.habit.dto.CreateHabitRequest;
 import com.habittracker.api.habit.dto.HabitResponse;
 import com.habittracker.api.habit.exception.HabitNameAlreadyExistsException;
@@ -45,6 +46,7 @@ class HabitServiceImplTest {
   @Mock private HabitMapper habitMapper;
   @Mock private HabitHelper habitHelper;
   @Mock private StreakService streakService;
+  @Mock private DailyCheckInService dailyCheckInService;
   @InjectMocks private HabitServiceImpl habitService;
 
   private static final int TEST_CURRENT_STREAK = 20;
@@ -77,6 +79,7 @@ class HabitServiceImplTest {
             testHabitEntity.getDescription(),
             Frequency.DAILY,
             Instant.now(),
+            false,
             TEST_CURRENT_STREAK,
             EXPECTED_ARCHIVED);
   }
@@ -94,7 +97,7 @@ class HabitServiceImplTest {
     void shouldCreateHabit_WhenValidRequest() {
       setUpStreakService();
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK, false))
           .thenReturn(testHabitResponse);
       when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
 
@@ -118,7 +121,7 @@ class HabitServiceImplTest {
       CreateHabitRequest requestWithWhitespace =
           new CreateHabitRequest(HABIT_NAME_WHITESPACE, HABIT_DESCRIPTION_WHITESPACE);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK, false))
           .thenReturn(testHabitResponse);
 
       habitService.createHabit(testUser.getId(), requestWithWhitespace);
@@ -137,7 +140,7 @@ class HabitServiceImplTest {
       CreateHabitRequest requestWithNullDescription =
           new CreateHabitRequest(HABIT_NAME_READ_DAILY, null);
       when(habitRepository.save(any(HabitEntity.class))).thenReturn(testHabitEntity);
-      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK, false))
           .thenReturn(testHabitResponse);
 
       habitService.createHabit(testUser.getId(), requestWithNullDescription);
@@ -158,7 +161,7 @@ class HabitServiceImplTest {
           .isInstanceOf(HabitNameAlreadyExistsException.class);
 
       verify(habitRepository, never()).save(any(HabitEntity.class));
-      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt());
+      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt(), anyBoolean());
     }
 
     @Test
@@ -187,7 +190,7 @@ class HabitServiceImplTest {
 
       when(habitRepository.findAll(any(Specification.class), eq(defaultPageable)))
           .thenReturn(habitEntities);
-      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK))
+      when(habitMapper.toResponse(testHabitEntity, TEST_CURRENT_STREAK, false))
           .thenReturn(testHabitResponse);
 
       PagedModel<HabitResponse> result =
@@ -195,7 +198,7 @@ class HabitServiceImplTest {
 
       assertThat(result).isEqualTo(expectedResponses);
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
-      verify(habitMapper).toResponse(testHabitEntity, TEST_CURRENT_STREAK);
+      verify(habitMapper).toResponse(testHabitEntity, TEST_CURRENT_STREAK, false);
     }
 
     @Test
@@ -208,7 +211,7 @@ class HabitServiceImplTest {
 
       assertThat(result.getContent()).isEmpty();
       verify(habitRepository).findAll(any(Specification.class), eq(defaultPageable));
-      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt());
+      verify(habitMapper, never()).toResponse(any(HabitEntity.class), anyInt(), anyBoolean());
     }
   }
 

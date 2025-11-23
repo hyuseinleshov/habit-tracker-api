@@ -17,7 +17,8 @@ public interface HabitMapper {
       target = "frequency",
       expression = "java(com.habittracker.api.habit.model.Frequency.DAILY)")
   @Mapping(target = "currentStreak", source = "currentStreak")
-  HabitResponse toResponse(HabitEntity entity, int currentStreak);
+  @Mapping(target = "checkedInToday", source = "checkedInToday")
+  HabitResponse toResponse(HabitEntity entity, int currentStreak, boolean checkedInToday);
 
   HabitEntity updateHabitFromUpdateRequest(
       UpdateHabitRequest updateHabitRequest, @MappingTarget HabitEntity habit);
