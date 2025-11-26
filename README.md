@@ -115,8 +115,7 @@ Follow these instructions to run the project locally.
 
 ### Prerequisites
 
-* Java 21+
-* Gradle (optional — you can use the included `./gradlew` wrapper)
+* Docker and Docker Compose
 
 ### Installation
 
@@ -127,25 +126,40 @@ Follow these instructions to run the project locally.
     cd habit-tracker-api
     ```
 
-2. Set up the required environment variables (see [Environment Variables](#environment-variables) section).
-
-3. Start the required infrastructure services using Docker:
+2. Create a `.env` file with required environment variables (see [Environment Variables](#environment-variables) section or copy from `.env.example`):
 
     ```bash
-    docker-compose up -d
+    cp .env.example .env
+    # Edit .env and set your JWT_SECRET
     ```
 
-4. Build and run the application:
+3. Start the entire application stack:
 
     ```bash
-    ./gradlew bootRun
+    docker compose up --build
     ```
 
-5. The API will be available at:
+4. The API will be available at `http://localhost:8080`
 
-    ```
-    http://localhost:8080/
-    ```
+**Common Docker Commands:**
+
+```bash
+# Start services
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop services
+docker compose down
+
+# Rebuild after code changes
+docker compose up --build app
+
+# Clean restart (removes volumes and data)
+docker compose down -v
+docker compose up --build
+```
 
 ### Environment Variables
 
@@ -162,14 +176,25 @@ The application uses environment variables for configuration. Here are the essen
 
 #### Configuration Example
 
-Create a `.env` file in the project root directory:
+Create a `.env` file in the project root directory (or copy from `.env.example`):
 
+```bash
+# Database Configuration
+POSTGRES_USER=habittracker
+POSTGRES_PASSWORD=your-secure-password
+POSTGRES_DB=habittracker_db
+
+# JWT Configuration (REQUIRED - must be base64-encoded)
+JWT_SECRET=bXlTdXBlclNlY3JldEtleUZvckRldmVsb3BtZW50T25seURvTm90VXNlSW5Qcm9kdWN0aW9uMTIzNDU2Nzg5MA==
+
+# Application Configuration
+SPRING_PROFILES_ACTIVE=dev
 ```
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=password
-POSTGRES_DB=habittracker
-JWT_SECRET=your-secret-key
-```
+
+> **Important**: The `JWT_SECRET` must be a base64-encoded string. You can generate one using:
+> ```bash
+> echo -n "your-secret-key-at-least-256-bits-long" | base64
+> ```
 
 > **Note**: The application has many configurable options with sensible defaults. For a complete list of configuration properties and their default values, refer to:
 >

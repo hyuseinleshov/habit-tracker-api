@@ -44,3 +44,12 @@ jwt:
  clock-skew-seconds: ${JWT_CLOCK_SKEW_SECONDS:25}
 refresh-token:
  expiration-duration: ${REFRESH_TOKEN_EXPIRATION_DURATION:P7D}
+
+management:
+ endpoints:
+  web:
+   exposure:
+    include: health,info
+ endpoint:
+  health:
+   show-details: when-authorized
