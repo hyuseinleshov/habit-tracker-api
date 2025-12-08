@@ -34,7 +34,7 @@ public class HabitHelper {
   }
 
   public void isUniqueName(UUID userId, String habitName) {
-    if (habitRepository.existsByNameIgnoreCaseAndUserId(habitName, userId)) {
+    if (habitRepository.existsByNameIgnoreCaseAndDeletedAtIsNullAndUserId(habitName, userId)) {
       log.warn("Attempt to create habit with duplicate name '{}' for user {}", habitName, userId);
       throw new HabitNameAlreadyExistsException();
     }
