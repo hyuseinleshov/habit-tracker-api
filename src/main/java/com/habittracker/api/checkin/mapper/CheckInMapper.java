@@ -15,7 +15,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface CheckInMapper {
 
   @Mapping(target = "habitId", source = "habit.id")
-  @Mapping(target = "createdAt", expression = "java(Instant.now())")
   CheckInResponse toResponse(CheckInEntity entity);
 
   @Mapping(target = "habitId", source = "habit.id")
