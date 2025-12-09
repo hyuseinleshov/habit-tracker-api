@@ -27,7 +27,7 @@ public interface HabitRepository
           + "EXISTS (SELECT 1 FROM CheckInEntity c WHERE c.habit = h AND c.createdAt >= :since)")
   long countHabitsWithRecentCheckIns(@Param("userId") UUID userId, @Param("since") Instant since);
 
-  boolean existsByNameIgnoreCaseAndUserId(String name, UUID userId);
+  boolean existsByNameIgnoreCaseAndDeletedAtIsNullAndUserId(String name, UUID userId);
 
   boolean existsByIdAndUserId(UUID id, UUID userId);
 
