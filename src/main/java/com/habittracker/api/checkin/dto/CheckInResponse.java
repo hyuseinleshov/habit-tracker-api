@@ -1,4 +1,4 @@
-package com.habittracker.api.checkin;
+package com.habittracker.api.checkin.dto;
 
 import java.time.Instant;
 import java.util.UUID;

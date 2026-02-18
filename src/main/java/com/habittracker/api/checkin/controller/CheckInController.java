@@ -3,7 +3,7 @@ package com.habittracker.api.checkin.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.habittracker.api.auth.model.UserDetailsImpl;
-import com.habittracker.api.checkin.CheckInResponse;
+import com.habittracker.api.checkin.dto.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.service.CheckInService;
 import jakarta.validation.constraints.NotNull;
