@@ -57,7 +57,7 @@ public class JwtServiceImpl implements JwtService {
           .filter(e -> e.getExceptionType().equals(exceptionType))
           .map(JwtValidationError::getMessage)
           .findFirst()
-          .orElse("Unknow JWT error");
+          .orElse("Unknown JWT error");
     }
   }
 
