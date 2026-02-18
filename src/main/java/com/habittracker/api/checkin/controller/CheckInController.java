@@ -25,8 +25,7 @@ public class CheckInController {
 
   @PostMapping("/habits/{habitId}/check-ins")
   public ResponseEntity<CheckInResponse> checkIn(
-      @NotNull @PathVariable UUID habitId,
-      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+      @NotNull @PathVariable UUID habitId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
     CheckInResponse response = checkInService.checkIn(habitId, userDetails.id());
     URI location = URI.create("/api/habits/" + habitId + "/check-ins/" + response.id());
     return ResponseEntity.created(location).body(response);
