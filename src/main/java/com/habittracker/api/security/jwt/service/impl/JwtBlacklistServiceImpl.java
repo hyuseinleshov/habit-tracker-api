@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class JwtBlacklistServiceImpl implements JwtBlacklistService {
 
   private static final String ACTIVE_JWT_KEY = "active:%s";
-  private static final String BLACKLIST__KEY = "blacklist:%s";
+  private static final String BLACKLIST_KEY = "blacklist:%s";
 
   private final StringRedisTemplate redis;
   private final Duration jwtExpirationDuration;
@@ -38,11 +38,11 @@ public class JwtBlacklistServiceImpl implements JwtBlacklistService {
   }
 
   private void addToBlacklist(String jid) {
-    redis.opsForValue().set(String.format(BLACKLIST__KEY, jid), "1", jwtExpirationDuration);
+    redis.opsForValue().set(String.format(BLACKLIST_KEY, jid), "1", jwtExpirationDuration);
   }
 
   @Override
   public boolean isBlacklisted(String jti) {
-    return redis.opsForValue().get(String.format(BLACKLIST__KEY, jti)) != null;
+    return redis.opsForValue().get(String.format(BLACKLIST_KEY, jti)) != null;
   }
 }
