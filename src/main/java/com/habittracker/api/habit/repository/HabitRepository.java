@@ -2,7 +2,7 @@ package com.habittracker.api.habit.repository;
 
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.projections.HabitStatusProjection;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
