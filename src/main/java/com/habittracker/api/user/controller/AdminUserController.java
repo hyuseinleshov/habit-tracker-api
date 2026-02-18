@@ -2,6 +2,7 @@ package com.habittracker.api.user.controller;
 
 import com.habittracker.api.user.dto.AdminUserDTO;
 import com.habittracker.api.user.service.AdminUserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
@@ -14,13 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class AdminUserController {
 
   private final AdminUserService adminUserService;
-
-  public AdminUserController(AdminUserService adminUserService) {
-    this.adminUserService = adminUserService;
-  }
 
   /**
    * Retrieves a paginated list of users in the system.

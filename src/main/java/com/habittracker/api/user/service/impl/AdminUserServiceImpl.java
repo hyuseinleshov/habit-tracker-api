@@ -6,6 +6,7 @@ import com.habittracker.api.user.dto.AdminUserDTO;
 import com.habittracker.api.user.mapper.AdminUserMapper;
 import com.habittracker.api.user.service.AdminUserService;
 import com.habittracker.api.user.specs.UserSpecs;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -13,15 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
   private final UserRepository userRepository;
   private final AdminUserMapper adminUserMapper;
-
-  public AdminUserServiceImpl(UserRepository userRepository, AdminUserMapper adminUserMapper) {
-    this.userRepository = userRepository;
-    this.adminUserMapper = adminUserMapper;
-  }
 
   @Override
   @Transactional(readOnly = true)
