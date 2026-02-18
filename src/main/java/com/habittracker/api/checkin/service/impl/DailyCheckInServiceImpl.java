@@ -1,7 +1,7 @@
 package com.habittracker.api.checkin.service.impl;
 
 import com.habittracker.api.auth.utils.AuthUtils;
-import com.habittracker.api.checkin.exception.DuplicateCheckinException;
+import com.habittracker.api.checkin.exception.DuplicateCheckInException;
 import com.habittracker.api.checkin.service.DailyCheckInService;
 import com.habittracker.api.core.utils.TimeZoneUtils;
 import com.habittracker.api.habit.model.HabitEntity;
@@ -24,7 +24,7 @@ public class DailyCheckInServiceImpl implements DailyCheckInService {
     String key = "check-in:" + userId + ":" + habit.getId();
     if (redisTemplate.hasKey(key)) {
       log.debug("Try to check in again today for habit with id {}", habit.getId());
-      throw new DuplicateCheckinException(habit.getId());
+      throw new DuplicateCheckInException(habit.getId());
     }
     redisTemplate
         .opsForValue()

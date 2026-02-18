@@ -4,8 +4,8 @@ import static com.habittracker.api.checkin.constants.CheckInConstants.DUPLICATIO
 
 import java.util.UUID;
 
-public class DuplicateCheckinException extends RuntimeException {
-  public DuplicateCheckinException(UUID habitId) {
+public class DuplicateCheckInException extends RuntimeException {
+  public DuplicateCheckInException(UUID habitId) {
     super(String.format(DUPLICATION_CHECK_IN_MESSAGE, habitId));
   }
 }
