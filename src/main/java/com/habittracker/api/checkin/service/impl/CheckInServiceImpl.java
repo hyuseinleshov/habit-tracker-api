@@ -123,8 +123,6 @@ public class CheckInServiceImpl implements CheckInService {
     UUID habitId = checkIn.getHabit().getId();
     checkInRepository.delete(checkIn);
 
-    // TODO
-    // FIX
     streakService.calculateStreak(habitId);
   }
 
