@@ -32,7 +32,7 @@ class UserCleanupSchedulerIT {
           14,
           "twoWeeks@gmail.com",
           30,
-          "moth@gmail.com",
+          "month@gmail.com",
           365,
           "year@gmail.com");
 
@@ -46,7 +46,7 @@ class UserCleanupSchedulerIT {
 
   @Test
   public void test_CleanupUsers_Deleted_Old_Users() {
-    setUpDeledUsers();
+    setUpDeletedUsers();
     long beforeCleanup = userRepository.count();
     totest.cleanupUsers();
     List<String> deletedEmails =
@@ -58,7 +58,7 @@ class UserCleanupSchedulerIT {
     deletedEmails.forEach(email -> assertTrue(userRepository.findByEmail(email).isEmpty()));
   }
 
-  private void setUpDeledUsers() {
+  private void setUpDeletedUsers() {
     DAYS_SINCE_DELETION_TO_EMAIL_MAP.forEach(
         (days, email) -> deleteUser(email, Instant.now().minus(days, ChronoUnit.DAYS)));
   }
