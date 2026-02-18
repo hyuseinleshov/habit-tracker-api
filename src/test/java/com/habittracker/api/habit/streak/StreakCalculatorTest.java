@@ -1,4 +1,4 @@
-package com.habittracker.api.checkin.service;
+package com.habittracker.api.habit.streak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
