@@ -6,7 +6,7 @@ import com.habittracker.api.habit.exception.HabitNotFoundException;
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.projections.HabitStatusProjection;
 import com.habittracker.api.habit.repository.HabitRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
