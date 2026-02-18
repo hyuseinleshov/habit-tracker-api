@@ -1,12 +1,11 @@
 package com.habittracker.api.checkin.controller;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
 import com.habittracker.api.auth.model.UserDetailsImpl;
 import com.habittracker.api.checkin.dto.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.service.CheckInService;
 import jakarta.validation.constraints.NotNull;
+import java.net.URI;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,9 @@ public class CheckInController {
   public ResponseEntity<CheckInResponse> checkIn(
       @NotNull @PathVariable UUID habitId,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.status(CREATED).body(checkInService.checkIn(habitId, userDetails.id()));
+    CheckInResponse response = checkInService.checkIn(habitId, userDetails.id());
+    URI location = URI.create("/api/habits/" + habitId + "/check-ins/" + response.id());
+    return ResponseEntity.created(location).body(response);
   }
 
   @GetMapping("/habits/{habitId}/check-ins")
