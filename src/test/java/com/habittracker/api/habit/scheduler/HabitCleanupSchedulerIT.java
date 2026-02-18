@@ -56,7 +56,7 @@ class HabitCleanupSchedulerIT {
 
   @Test
   public void test_CleanupHabits_Deleted_Old_Habits() {
-    setUpDeledHabits();
+    setUpDeletedHabits();
     long beforeCleanup = habitRepository.count();
     totest.cleanupHabits();
     List<String> deletedEmails =
@@ -72,7 +72,7 @@ class HabitCleanupSchedulerIT {
                     name, testUser.getId())));
   }
 
-  private void setUpDeledHabits() {
+  private void setUpDeletedHabits() {
     DAYS_SINCE_DELETION_TO_NAME_MAP.forEach(
         (days, name) -> deleteHabit(name, Instant.now().minus(days, ChronoUnit.DAYS)));
   }

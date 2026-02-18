@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AuthController {
 
-  private final AuthService userService;
+  private final AuthService authService;
   private final RefreshTokenCookieUtils refreshTokenCookieUtils;
 
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(
       @Valid @RequestBody RegisterRequest request, HttpServletResponse httpResponse) {
-    AuthResponse response = userService.register(request);
+    AuthResponse response = authService.register(request);
     log.info("User with email - {}, registered successfully", request.email());
     refreshTokenCookieUtils.addRefreshTokenCookie(response.refreshToken(), httpResponse);
     return ResponseEntity.created(URI.create("/api/me")).body(response);
@@ -36,7 +36,7 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> login(
       @Valid @RequestBody LoginRequest request, HttpServletResponse httpResponse) {
-    AuthResponse response = userService.login(request);
+    AuthResponse response = authService.login(request);
     log.info("User with email - {}, logged in successfully", request.email());
     refreshTokenCookieUtils.addRefreshTokenCookie(response.refreshToken(), httpResponse);
     return ResponseEntity.ok(response);
@@ -45,7 +45,7 @@ public class AuthController {
   @PostMapping("/refresh")
   public ResponseEntity<RefreshTokenResponse> refresh(
       @CookieValue("refreshToken") String refreshToken, HttpServletResponse httpResponse) {
-    RefreshTokenResponse response = userService.refreshToken(refreshToken);
+    RefreshTokenResponse response = authService.refreshToken(refreshToken);
     log.info("Refresh token used successfully");
     refreshTokenCookieUtils.addRefreshTokenCookie(response.refreshToken(), httpResponse);
     return ResponseEntity.ok(response);
@@ -54,7 +54,7 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<LogoutResponse> logout(
       @AuthenticationPrincipal UserDetailsImpl principal, HttpServletResponse httpResponse) {
-    userService.logout(principal.id());
+    authService.logout(principal.id());
     log.info("User with ID - {}, logged out successfully", principal.id());
     refreshTokenCookieUtils.clearRefreshTokenCookie(httpResponse);
     return ResponseEntity.ok(new LogoutResponse(LOGOUT_SUCCESS_MESSAGE));

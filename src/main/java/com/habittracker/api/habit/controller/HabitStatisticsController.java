@@ -2,8 +2,8 @@ package com.habittracker.api.habit.controller;
 
 import com.habittracker.api.habit.dto.HabitStatisticResponse;
 import com.habittracker.api.habit.service.HabitStatisticsService;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ public class HabitStatisticsController {
   private final HabitStatisticsService habitStatisticsService;
 
   @GetMapping
-  public ResponseEntity<HabitStatisticResponse> getStatistics(@PathVariable @NonNull UUID habitId) {
+  public ResponseEntity<HabitStatisticResponse> getStatistics(@PathVariable @NotNull UUID habitId) {
     return ResponseEntity.ok(habitStatisticsService.calculateStatistics(habitId));
   }
 }

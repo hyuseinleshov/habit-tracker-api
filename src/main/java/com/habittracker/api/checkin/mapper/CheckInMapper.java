@@ -1,6 +1,6 @@
 package com.habittracker.api.checkin.mapper;
 
-import com.habittracker.api.checkin.CheckInResponse;
+import com.habittracker.api.checkin.dto.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.model.CheckInEntity;
 import com.habittracker.api.habit.mapper.HabitMapper;

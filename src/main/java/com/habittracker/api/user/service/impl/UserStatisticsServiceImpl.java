@@ -8,7 +8,7 @@ import com.habittracker.api.checkin.service.CheckInService;
 import com.habittracker.api.habit.repository.HabitRepository;
 import com.habittracker.api.habit.streak.dto.BestStreakData;
 import com.habittracker.api.habit.streak.service.StreakService;
-import com.habittracker.api.user.dto.DailyCheckinSummary;
+import com.habittracker.api.user.dto.DailyCheckInSummary;
 import com.habittracker.api.user.dto.UserStatisticsResponse;
 import com.habittracker.api.user.dto.WeeklySummaryResponse;
 import com.habittracker.api.user.service.UserStatisticsService;
@@ -50,7 +50,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   public WeeklySummaryResponse getWeeklySummary(UUID id) {
     long habitCount = habitRepository.countByUserId(id);
     long todayCheckins = checkInService.getCheckInsToday(id);
-    List<DailyCheckinSummary> weeklyStats = getWeeklyStats(id);
+    List<DailyCheckInSummary> weeklyStats = getWeeklyStats(id);
     return new WeeklySummaryResponse(habitCount, todayCheckins, weeklyStats);
   }
 
@@ -65,7 +65,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
         .orElse(new BestStreakData(0, null, null, null));
   }
 
-  private List<DailyCheckinSummary> getWeeklyStats(UUID userId) {
+  private List<DailyCheckInSummary> getWeeklyStats(UUID userId) {
     ZoneId userTimeZone = AuthUtils.getUserTimeZone();
     LocalDate startDate = LocalDate.now(userTimeZone).minusDays(7);
     LocalDate endDate = LocalDate.now(userTimeZone).minusDays(1);
@@ -75,8 +75,8 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
         .collect(Collectors.groupingBy(c -> c.getCreatedAt().atZone(userTimeZone).toLocalDate()))
         .entrySet()
         .stream()
-        .map(e -> new DailyCheckinSummary(e.getKey(), e.getValue().size()))
-        .sorted(Comparator.comparing(DailyCheckinSummary::date))
+        .map(e -> new DailyCheckInSummary(e.getKey(), e.getValue().size()))
+        .sorted(Comparator.comparing(DailyCheckInSummary::date))
         .toList();
   }
 

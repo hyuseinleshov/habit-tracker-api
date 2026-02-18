@@ -1,12 +1,11 @@
 package com.habittracker.api.checkin.controller;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
 import com.habittracker.api.auth.model.UserDetailsImpl;
-import com.habittracker.api.checkin.CheckInResponse;
+import com.habittracker.api.checkin.dto.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.service.CheckInService;
 import jakarta.validation.constraints.NotNull;
+import java.net.URI;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -18,28 +17,30 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class CheckInController {
 
   private final CheckInService checkInService;
 
-  @PostMapping("/api/habits/{id}/check-ins")
+  @PostMapping("/habits/{habitId}/check-ins")
   public ResponseEntity<CheckInResponse> checkIn(
-      @NotNull @PathVariable("id") UUID habitId,
-      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    return ResponseEntity.status(CREATED).body(checkInService.checkIn(habitId, userDetails.id()));
+      @NotNull @PathVariable UUID habitId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    CheckInResponse response = checkInService.checkIn(habitId, userDetails.id());
+    URI location = URI.create("/api/habits/" + habitId + "/check-ins/" + response.id());
+    return ResponseEntity.created(location).body(response);
   }
 
-  @GetMapping("/api/habits/{id}/check-ins")
+  @GetMapping("/habits/{habitId}/check-ins")
   public ResponseEntity<PagedModel<CheckInResponse>> getCheckInsByHabit(
-      @NotNull @PathVariable("id") UUID habitId,
+      @NotNull @PathVariable UUID habitId,
       @RequestParam(required = false) Instant from,
       @RequestParam(required = false) Instant to,
       @PageableDefault(size = 20) Pageable pageable) {
     return ResponseEntity.ok(checkInService.getCheckInsByHabit(habitId, from, to, pageable));
   }
 
-  @GetMapping("/api/check-ins")
+  @GetMapping("/check-ins")
   public ResponseEntity<PagedModel<CheckInWithHabitResponse>> getAllCheckIns(
       @RequestParam(required = false) Instant from,
       @RequestParam(required = false) Instant to,
@@ -48,7 +49,7 @@ public class CheckInController {
     return ResponseEntity.ok(checkInService.getAllCheckIns(userDetails.id(), from, to, pageable));
   }
 
-  @DeleteMapping("/api/check-ins/{checkInId}")
+  @DeleteMapping("/check-ins/{checkInId}")
   public ResponseEntity<Void> deleteCheckIn(@NotNull @PathVariable UUID checkInId) {
     checkInService.deleteCheckIn(checkInId);
     return ResponseEntity.noContent().build();

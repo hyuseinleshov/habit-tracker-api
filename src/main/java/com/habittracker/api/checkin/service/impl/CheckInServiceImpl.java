@@ -3,7 +3,7 @@ package com.habittracker.api.checkin.service.impl;
 import static com.habittracker.api.checkin.specs.CheckInSpecs.*;
 
 import com.habittracker.api.auth.utils.AuthUtils;
-import com.habittracker.api.checkin.CheckInResponse;
+import com.habittracker.api.checkin.dto.CheckInResponse;
 import com.habittracker.api.checkin.dto.CheckInWithHabitResponse;
 import com.habittracker.api.checkin.exception.CheckInNotFoundException;
 import com.habittracker.api.checkin.mapper.CheckInMapper;
@@ -123,8 +123,6 @@ public class CheckInServiceImpl implements CheckInService {
     UUID habitId = checkIn.getHabit().getId();
     checkInRepository.delete(checkIn);
 
-    // TODO
-    // FIX
     streakService.calculateStreak(habitId);
   }
 

@@ -2,13 +2,13 @@ package com.habittracker.api.habit.repository;
 
 import com.habittracker.api.habit.model.HabitEntity;
 import com.habittracker.api.habit.projections.HabitStatusProjection;
-import io.lettuce.core.dynamic.annotation.Param;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface HabitRepository
     extends JpaRepository<HabitEntity, UUID>, JpaSpecificationExecutor<HabitEntity> {
