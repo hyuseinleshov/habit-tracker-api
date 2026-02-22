@@ -47,6 +47,7 @@ public class HabitServiceImpl implements HabitService {
   private final CacheManager cacheManager;
 
   @Override
+  @CacheEvict(value = "weeklySummary", key = "#userId")
   public HabitResponse createHabit(UUID userId, CreateHabitRequest request) {
     log.debug("Creating habit with name '{}' for user {}", request.name(), userId);
 
