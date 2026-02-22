@@ -1,20 +1,19 @@
 package com.habittracker.api.user.service.impl;
 
+import static com.habittracker.api.auth.utils.AuthConstants.EMAIL_EXISTS_MESSAGE;
 import static com.habittracker.api.core.utils.TimeZoneUtils.parseTimeZone;
 import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
-import static com.habittracker.api.user.constants.UserProfileConstants.USER_PROFILE_DATA_NOT_VALID_MESSAGE;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserProfileService;
 import com.habittracker.api.user.service.UserService;
-import jakarta.validation.Validator;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class UserProfileServiceImpl implements UserProfileService {
   private final UserService userService;
   private final UserProfileMapper userProfileMapper;
   private final UserProfileRepository userProfileRepository;
-  private final Validator validator;
+  private final UserRepository userRepository;
 
   @Override
   @Transactional
@@ -51,14 +50,26 @@ public class UserProfileServiceImpl implements UserProfileService {
   @Transactional
   @CacheEvict(value = "userProfiles", key = "#userId")
   public UserProfileDTO update(UUID userId, UserProfileDTO userProfileDTO) {
-    if (!validator.validate(userProfileDTO).isEmpty()) {
-      throw new IllegalArgumentException(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
-    }
     UserProfileEntity profile = userProfileRepository.getReferenceById(userId);
+
     if (userProfileDTO.email() != null) {
-      userService.updateEmail(profile.getUser(), userProfileDTO.email());
+      String currentEmail = profile.getUser().getEmail();
+      if (!currentEmail.equals(userProfileDTO.email())) {
+        assertEmailNotTaken(userProfileDTO.email());
+        userService.updateEmail(profile.getUser(), userProfileDTO.email());
+      }
     }
-    BeanUtils.copyProperties(userProfileDTO, profile);
+
+    userProfileMapper.updateProfileFromDto(userProfileDTO, profile);
     return userProfileMapper.toUserProfileDTO(profile);
+  }
+
+  private void assertEmailNotTaken(String email) {
+    userRepository
+        .findByEmailAndDeletedAtIsNull(email)
+        .ifPresent(
+            u -> {
+              throw new IllegalArgumentException(EMAIL_EXISTS_MESSAGE);
+            });
   }
 }

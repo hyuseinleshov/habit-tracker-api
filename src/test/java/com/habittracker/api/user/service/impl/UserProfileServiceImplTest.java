@@ -2,29 +2,26 @@ package com.habittracker.api.user.service.impl;
 
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUser;
 import static com.habittracker.api.auth.testutils.AuthTestUtils.createUserRole;
+import static com.habittracker.api.auth.utils.AuthConstants.EMAIL_EXISTS_MESSAGE;
 import static com.habittracker.api.user.constants.UserProfileConstants.USER_CANT_BE_NULL_MESSAGE;
-import static com.habittracker.api.user.constants.UserProfileConstants.USER_PROFILE_DATA_NOT_VALID_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.habittracker.api.auth.model.UserEntity;
+import com.habittracker.api.auth.repository.UserRepository;
 import com.habittracker.api.core.utils.TimeZoneUtils;
 import com.habittracker.api.user.dto.UserProfileDTO;
 import com.habittracker.api.user.mapper.UserProfileMapper;
 import com.habittracker.api.user.model.UserProfileEntity;
 import com.habittracker.api.user.repository.UserProfileRepository;
 import com.habittracker.api.user.service.UserService;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import java.util.HashSet;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,7 +43,7 @@ class UserProfileServiceImplTest {
   @Mock private UserProfileMapper profileMapper;
   @Mock private UserProfileRepository userProfileRepository;
   @Mock private UserService userService;
-  @Mock private Validator validator;
+  @Mock private UserRepository userRepository;
 
   @InjectMocks private UserProfileServiceImpl toTest;
 
@@ -89,41 +86,56 @@ class UserProfileServiceImplTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
-  void test_UpdateProfile_Should_Throw_WithInvalid_ProfileData() {
-    HashSet<ConstraintViolation<Object>> mockSet = mock(HashSet.class);
-    when(mockSet.isEmpty()).thenReturn(false);
-    when(validator.validate(any())).thenReturn(mockSet);
-    assertThatThrownBy(() -> toTest.update(TEST_PROFILE.getId(), TEST_USER_PROFILE_DTO))
+  void test_UpdateProfile_Should_Throw_When_Email_Already_Taken() {
+    String takenEmail = "taken@gmail.com";
+    UserProfileDTO dto = new UserProfileDTO(takenEmail, null, null, null, null);
+    UserEntity existingUser = createUser(takenEmail, "pass", createUserRole());
+
+    when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
+    when(userRepository.findByEmailAndDeletedAtIsNull(takenEmail))
+        .thenReturn(Optional.of(existingUser));
+
+    assertThatThrownBy(() -> toTest.update(TEST_PROFILE.getId(), dto))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(USER_PROFILE_DATA_NOT_VALID_MESSAGE);
+        .hasMessage(EMAIL_EXISTS_MESSAGE);
   }
 
   @Test
-  void test_UpdateProfile_Should_Update_UserProfile_With_Valid_Arguments() {
-    final String UPDATED_FIRST_NAME = "George";
-    final String UPDATED_EMAIL = "George";
-    final String UPDATED_LAST_NAME = "Ivanov";
-    final Integer UPDATED_AGE = 30;
-    final String UPDATED_TIMEZONE = "Africa/Nairobi";
+  void test_UpdateProfile_Should_Update_Email_When_Changed() {
+    String newEmail = "new@gmail.com";
+    UserProfileDTO dto = new UserProfileDTO(newEmail, null, null, null, null);
 
-    UserProfileDTO updatedProfileDTO =
-        new UserProfileDTO(
-            UPDATED_EMAIL, UPDATED_FIRST_NAME, UPDATED_LAST_NAME, UPDATED_AGE, UPDATED_TIMEZONE);
+    when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
+    when(userRepository.findByEmailAndDeletedAtIsNull(newEmail)).thenReturn(Optional.empty());
+
+    toTest.update(TEST_PROFILE.getId(), dto);
+
+    verify(userService).updateEmail(TEST_USER, newEmail);
+    verify(profileMapper).updateProfileFromDto(dto, TEST_PROFILE);
+    verify(profileMapper).toUserProfileDTO(TEST_PROFILE);
+  }
+
+  @Test
+  void test_UpdateProfile_Should_Not_Update_Email_When_Same() {
+    UserProfileDTO dto = new UserProfileDTO(TEST_USER.getEmail(), "NewFirst", null, null, null);
 
     when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
 
-    toTest.update(TEST_PROFILE.getId(), updatedProfileDTO);
+    toTest.update(TEST_PROFILE.getId(), dto);
 
-    ArgumentCaptor<UserProfileEntity> captor = ArgumentCaptor.forClass(UserProfileEntity.class);
+    verify(userService, never()).updateEmail(any(), any());
+    verify(profileMapper).updateProfileFromDto(dto, TEST_PROFILE);
+  }
 
-    verify(profileMapper).toUserProfileDTO(captor.capture());
-    verify(userService).updateEmail(TEST_USER, UPDATED_EMAIL);
-    UserProfileEntity updatedProfile = captor.getValue();
+  @Test
+  void test_UpdateProfile_Should_Not_Update_Email_When_Null() {
+    UserProfileDTO dto = new UserProfileDTO(null, "NewFirst", null, null, null);
 
-    assertThat(updatedProfile.getFirstName()).isEqualTo(UPDATED_FIRST_NAME);
-    assertThat(updatedProfile.getLastName()).isEqualTo(UPDATED_LAST_NAME);
-    assertThat(updatedProfile.getAge()).isEqualTo(UPDATED_AGE);
-    assertThat(updatedProfile.getTimeZone()).isEqualTo(UPDATED_TIMEZONE);
+    when(userProfileRepository.getReferenceById(TEST_PROFILE.getId())).thenReturn(TEST_PROFILE);
+
+    toTest.update(TEST_PROFILE.getId(), dto);
+
+    verify(userService, never()).updateEmail(any(), any());
+    verify(profileMapper).updateProfileFromDto(dto, TEST_PROFILE);
   }
 }
