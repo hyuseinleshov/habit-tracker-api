@@ -28,15 +28,17 @@ public class UserController {
     return ResponseEntity.ok(userProfileService.toProfileDTO(principal.id()));
   }
 
-  @PutMapping
+  @PatchMapping
   public ResponseEntity<UserProfileDTO> update(
       @RequestBody @Valid UserProfileDTO userProfileDTO,
       @AuthenticationPrincipal UserDetailsImpl principal,
       HttpServletResponse httpResponse) {
     UserProfileDTO response = userProfileService.update(principal.id(), userProfileDTO);
-    refreshTokenService.revokeAllRefreshTokensForUser(principal.id());
-    refreshTokenCookieUtils.addRefreshTokenCookie(
-        refreshTokenService.createRefreshToken(principal.id()), httpResponse);
+    if (userProfileDTO.email() != null) {
+      refreshTokenService.revokeAllRefreshTokensForUser(principal.id());
+      refreshTokenCookieUtils.addRefreshTokenCookie(
+          refreshTokenService.createRefreshToken(principal.id()), httpResponse);
+    }
     return ResponseEntity.ok(response);
   }
 

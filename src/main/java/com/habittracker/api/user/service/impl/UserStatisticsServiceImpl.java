@@ -48,7 +48,7 @@ public class UserStatisticsServiceImpl implements UserStatisticsService {
   @Override
   @Cacheable(value = "weeklySummary", key = "#id")
   public WeeklySummaryResponse getWeeklySummary(UUID id) {
-    long habitCount = habitRepository.countByUserId(id);
+    long habitCount = habitRepository.countByUserIdAndDeletedAtIsNull(id);
     long todayCheckins = checkInService.getCheckInsToday(id);
     List<DailyCheckInSummary> weeklyStats = getWeeklyStats(id);
     return new WeeklySummaryResponse(habitCount, todayCheckins, weeklyStats);

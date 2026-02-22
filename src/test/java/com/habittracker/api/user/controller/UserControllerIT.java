@@ -66,7 +66,7 @@ public class UserControllerIT {
 
   @Test
   public void test_Update_UserProfile_Return_Unauthorized_When_NotHave_Jwt() throws Exception {
-    mockMvc.perform(put("/api/me")).andExpect(status().isUnauthorized());
+    mockMvc.perform(patch("/api/me")).andExpect(status().isUnauthorized());
   }
 
   @ParameterizedTest
@@ -79,7 +79,7 @@ public class UserControllerIT {
         .perform(
             addJwt(
                 jwt,
-                put("/api/me")
+                patch("/api/me")
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content(objectMapper.writeValueAsString(profileDTO))))
         .andExpect(status().isBadRequest());
@@ -103,7 +103,7 @@ public class UserControllerIT {
         .perform(
             addJwt(
                 jwt,
-                put("/api/me")
+                patch("/api/me")
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .content(objectMapper.writeValueAsString(userProfileDTO))))
         .andExpect(status().isOk())

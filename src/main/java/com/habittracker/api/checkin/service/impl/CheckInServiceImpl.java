@@ -128,7 +128,8 @@ public class CheckInServiceImpl implements CheckInService {
 
   @Override
   public long getCheckInsToday(UUID userId) {
-    ZonedDateTime startOfDay = LocalDate.now().atStartOfDay(AuthUtils.getUserTimeZone());
+    ZonedDateTime startOfDay =
+        LocalDate.now(AuthUtils.getUserTimeZone()).atStartOfDay(AuthUtils.getUserTimeZone());
     ZonedDateTime endOfDay = startOfDay.plusDays(1);
     return checkInRepository
         .findByHabitUserIdAndCreatedAtBetween(userId, startOfDay.toInstant(), endOfDay.toInstant())

@@ -32,10 +32,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PagedModel;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +50,8 @@ class HabitServiceImplTest {
   @Mock private HabitHelper habitHelper;
   @Mock private StreakService streakService;
   @Mock private DailyCheckInService dailyCheckInService;
+  @Mock private RedisTemplate<String, Object> redisTemplate;
+  @Mock private CacheManager cacheManager;
   @InjectMocks private HabitServiceImpl habitService;
 
   private static final int TEST_CURRENT_STREAK = 20;
@@ -229,10 +234,19 @@ class HabitServiceImplTest {
     }
 
     @Test
-    void shouldDeleteHabit() {
-      when(habitHelper.getNotDeletedOrThrow(testHabitEntity.getId())).thenReturn((testHabitEntity));
+    void shouldDeleteHabitAndEvictCaches() {
+      Cache mockCache = mock(Cache.class);
+      when(habitHelper.getNotDeletedOrThrow(testHabitEntity.getId())).thenReturn(testHabitEntity);
+      when(cacheManager.getCache("userStatistics")).thenReturn(mockCache);
+      when(cacheManager.getCache("weeklySummary")).thenReturn(mockCache);
 
       habitService.delete(testHabitEntity.getId());
+
+      assertThat(testHabitEntity.getDeletedAt()).isNotNull();
+      verify(cacheManager).getCache("userStatistics");
+      verify(cacheManager).getCache("weeklySummary");
+      verify(mockCache, times(2)).evict(testUser.getId());
+      verify(redisTemplate).delete(anyString());
     }
   }
 }

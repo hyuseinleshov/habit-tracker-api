@@ -9,6 +9,7 @@ public class ValidTimeZoneValidator implements ConstraintValidator<ValidTimeZone
 
   @Override
   public boolean isValid(String timezone, ConstraintValidatorContext context) {
+    if (timezone == null) return true;
     return TimeZoneUtils.isValidTimeZone(timezone);
   }
 }

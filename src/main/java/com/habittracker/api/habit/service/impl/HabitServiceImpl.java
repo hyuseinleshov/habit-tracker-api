@@ -1,5 +1,6 @@
 package com.habittracker.api.habit.service.impl;
 
+import static com.habittracker.api.checkin.constants.StreakConstants.STREAK_CACHE_KEY_PREFIX;
 import static com.habittracker.api.habit.specs.HabitSpecs.*;
 
 import com.habittracker.api.auth.model.UserEntity;
@@ -19,8 +20,12 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -38,8 +43,11 @@ public class HabitServiceImpl implements HabitService {
   private final HabitHelper habitHelper;
   private final StreakService streakService;
   private final DailyCheckInService dailyCheckInService;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final CacheManager cacheManager;
 
   @Override
+  @CacheEvict(value = "weeklySummary", key = "#userId")
   public HabitResponse createHabit(UUID userId, CreateHabitRequest request) {
     log.debug("Creating habit with name '{}' for user {}", request.name(), userId);
 
@@ -85,9 +93,27 @@ public class HabitServiceImpl implements HabitService {
 
   @Override
   @PreAuthorize("@habitHelper.isOwnedByUser(#id, principal.id)")
+  @Caching(
+      evict = {
+        @CacheEvict(value = "habitStatistics", key = "#id"),
+      })
   public void delete(UUID id) {
     HabitEntity toDelete = habitHelper.getNotDeletedOrThrow(id);
+    UUID userId = toDelete.getUser().getId();
     toDelete.setDeletedAt(Instant.now());
+
+    evictUserCaches(userId);
+    deleteStreakCache(userId, id);
+  }
+
+  private void evictUserCaches(UUID userId) {
+    cacheManager.getCache("userStatistics").evict(userId);
+    cacheManager.getCache("weeklySummary").evict(userId);
+  }
+
+  private void deleteStreakCache(UUID userId, UUID habitId) {
+    String streakKey = String.format("%s%s:%s", STREAK_CACHE_KEY_PREFIX, userId, habitId);
+    redisTemplate.delete(streakKey);
   }
 
   @Override
