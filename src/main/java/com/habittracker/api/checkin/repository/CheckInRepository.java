@@ -16,6 +16,8 @@ public interface CheckInRepository
 
   boolean existsByIdAndHabitUserId(UUID id, UUID userId);
 
+  boolean existsByHabitIdAndCreatedAtBetween(UUID habitId, Instant from, Instant to);
+
   List<CheckInEntity> findByHabitIdOrderByCreatedAtDesc(UUID habitId);
 
   long countByHabitId(UUID habitId);
