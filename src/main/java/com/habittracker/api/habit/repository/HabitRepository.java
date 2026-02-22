@@ -33,5 +33,5 @@ public interface HabitRepository
 
   long deleteAllByDeletedAtBefore(Instant deleteBefore);
 
-  long countByUserId(UUID id);
+  long countByUserIdAndDeletedAtIsNull(UUID id);
 }
