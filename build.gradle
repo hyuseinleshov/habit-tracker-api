@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.3'
+    id 'org.springframework.boot' version '3.5.9'
     id 'io.spring.dependency-management' version '1.1.7'
     id("com.diffplug.spotless") version "8.2.1"
 }
@@ -60,8 +60,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.2'
+    testImplementation 'org.testcontainers:testcontainers-postgresql:2.0.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
