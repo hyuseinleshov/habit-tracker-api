@@ -37,7 +37,9 @@ services:
       - habit-tracker-network
 
   app:
-    image: shenol10/habit-tracker-api-app:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: habit-tracker-api
     restart: always
     ports:
@@ -61,17 +63,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - habit-tracker-network
-
-  frontend:
-    image: shenol10/habit-tracker-frontend:1.0.0
-    container_name: habit-tracker-frontend
-    restart: always
-    ports:
-      - "5173:80"
-    depends_on:
-      - app
     networks:
       - habit-tracker-network
 
