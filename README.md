@@ -39,7 +39,8 @@
           <li><a href="#built-with">Built With</a></li>
         </ul>
     </li>
-    <li><a href="#getting-started">Getting Started</a>
+    <li><a href="#run-with-docker">Run with Docker (No Cloning Required)</a></li>
+    <li><a href="#getting-started">Getting Started (Development)</a>
         <ul>
           <li><a href="#prerequisites">Prerequisites</a></li>
           <li><a href="#installation">Installation</a></li>
@@ -84,7 +85,9 @@ Habit Tracker API is a Spring Boot backend that helps users manage daily and wee
 - Perform check‑ins per habit
 - View current streaks and historic stats
 
-This project is structured with clean architecture, Docker, CI pipelines, and full API documentation—all without a UI layer.
+This project is structured with clean architecture, Docker, CI pipelines, and full API documentation.
+
+> **Frontend**: The companion UI for this API is available at [habit-tracker-ui](https://github.com/ShenolShengov/habit-tracker-ui).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -108,10 +111,133 @@ This project is structured with clean architecture, Docker, CI pipelines, and fu
 
 
 
+<!-- RUN WITH DOCKER -->
+## Run with Docker
+
+You can run the full application (backend + frontend + database + cache) without cloning any repository. All you need is Docker.
+
+1. Create a `.env` file with the required environment variables (see [Environment Variables](#environment-variables)):
+
+    ```bash
+    # Database Configuration
+    POSTGRES_USER=habittracker
+    POSTGRES_PASSWORD=your-secure-password
+    POSTGRES_DB=habittracker_db
+
+    # JWT Configuration (REQUIRED - must be base64-encoded)
+    JWT_SECRET=bXlTdXBlclNlY3JldEtleUZvckRldmVsb3BtZW50T25seURvTm90VXNlSW5Qcm9kdWN0aW9uMTIzNDU2Nzg5MA==
+
+    # Application Configuration
+    SPRING_PROFILES_ACTIVE=dev
+    ```
+
+2. Create a `compose.yml` file in the same directory:
+
+    ```yaml
+    services:
+      postgres-db:
+        image: postgres:15-alpine
+        restart: always
+        container_name: postgres-db
+        environment:
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
+        ports:
+          - "5432:5432"
+        volumes:
+          - postgres-data:/var/lib/postgresql/data
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        networks:
+          - habit-tracker-network
+
+      redis:
+        image: redis:7-alpine
+        restart: always
+        container_name: redis
+        command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+        ports:
+          - "6379:6379"
+        volumes:
+          - redis-data:/data
+        healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        networks:
+          - habit-tracker-network
+
+      app:
+        image: shenol10/habit-tracker-api-app:1.0.0
+        container_name: habit-tracker-api
+        restart: always
+        ports:
+          - "8080:8080"
+        environment:
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
+          SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
+          SPRING_DATA_REDIS_HOST: redis
+          SPRING_DATA_REDIS_PORT: 6379
+          JWT_SECRET: ${JWT_SECRET}
+          JWT_ISSUER: ${JWT_ISSUER:-habit-tracker-api}
+          JWT_EXPIRATION_DURATION: ${JWT_EXPIRATION_DURATION:-PT10M}
+          REFRESH_TOKEN_EXPIRATION_DURATION: ${REFRESH_TOKEN_EXPIRATION_DURATION:-P7D}
+          HABIT_RETENTION_PERIOD: ${HABIT_RETENTION_PERIOD:-P14D}
+          USER_RETENTION_PERIOD: ${USER_RETENTION_PERIOD:-P14D}
+        depends_on:
+          postgres-db:
+            condition: service_healthy
+          redis:
+            condition: service_healthy
+        networks:
+          - habit-tracker-network
+
+      frontend:
+        image: shenol10/habit-tracker-frontend:1.0.0
+        container_name: habit-tracker-frontend
+        restart: always
+        ports:
+          - "5173:80"
+        depends_on:
+          - app
+        networks:
+          - habit-tracker-network
+
+    networks:
+      habit-tracker-network:
+        driver: bridge
+
+    volumes:
+      postgres-data:
+      redis-data:
+    ```
+
+3. Start everything:
+
+    ```bash
+    docker compose up -d
+    ```
+
+4. Access the application:
+    - **Frontend**: http://localhost:5173
+    - **API**: http://localhost:8080
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Follow these instructions to run the project locally.
+Follow these instructions to set up the project for local development.
 
 ### Prerequisites
 
@@ -133,10 +259,10 @@ Follow these instructions to run the project locally.
     # Edit .env and set your JWT_SECRET
     ```
 
-3. Start the entire application stack:
+3. Start the backend with infrastructure (builds from source):
 
     ```bash
-    docker compose up --build
+    docker compose -f compose-dev.yml up --build
     ```
 
 4. The API will be available at `http://localhost:8080`
@@ -144,21 +270,21 @@ Follow these instructions to run the project locally.
 **Common Docker Commands:**
 
 ```bash
-# Start services
-docker compose up -d
+# Start services in background
+docker compose -f compose-dev.yml up -d
 
 # View logs
-docker compose logs -f app
+docker compose -f compose-dev.yml logs -f app
 
 # Stop services
-docker compose down
+docker compose -f compose-dev.yml down
 
 # Rebuild after code changes
-docker compose up --build app
+docker compose -f compose-dev.yml up --build app
 
 # Clean restart (removes volumes and data)
-docker compose down -v
-docker compose up --build
+docker compose -f compose-dev.yml down -v
+docker compose -f compose-dev.yml up --build
 ```
 
 ### Environment Variables
