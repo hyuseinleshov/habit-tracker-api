@@ -3,6 +3,9 @@ spring:
   name: habit-tracker-api
  datasource:
   driver-class-name: org.postgresql.Driver
+  hikari:
+   data-source-properties:
+    prepareThreshold: 0
  jpa:
   open-in-view: false
   show-sql: true
@@ -16,14 +19,8 @@ spring:
   locations: classpath:db/migration
  data:
   redis:
-   host: localhost
-   port: 6379
+   url: ${REDIS_URL:redis://localhost:6379}
    timeout: 2000ms
-   lettuce:
-    pool:
-     max-active: 8
-     max-idle: 8
-     min-idle: 0
 
 habit:
  cleanup:
@@ -44,6 +41,9 @@ jwt:
  clock-skew-seconds: ${JWT_CLOCK_SKEW_SECONDS:25}
 refresh-token:
  expiration-duration: ${REFRESH_TOKEN_EXPIRATION_DURATION:P7D}
+
+cors:
+ allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:*}
 
 management:
  endpoints:
