@@ -3,6 +3,9 @@ spring:
   name: habit-tracker-api
  datasource:
   driver-class-name: org.postgresql.Driver
+  hikari:
+   data-source-properties:
+    prepareThreshold: 0
  jpa:
   open-in-view: false
   show-sql: true
@@ -38,6 +41,9 @@ jwt:
  clock-skew-seconds: ${JWT_CLOCK_SKEW_SECONDS:25}
 refresh-token:
  expiration-duration: ${REFRESH_TOKEN_EXPIRATION_DURATION:P7D}
+
+cors:
+ allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS:http://localhost:*}
 
 management:
  endpoints:
