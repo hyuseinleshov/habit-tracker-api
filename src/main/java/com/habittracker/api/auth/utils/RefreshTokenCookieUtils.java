@@ -32,7 +32,8 @@ public class RefreshTokenCookieUtils {
     return ResponseCookie.from(COOKIE_NAME, refreshToken)
         .httpOnly(true)
         .path("/")
-        .sameSite("Strict")
+        .secure(true)
+        .sameSite("None")
         .maxAge(maxAge)
         .build();
   }
