@@ -532,7 +532,7 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
 <!-- CONTACT -->
 ## Contact
 
-- **Hyusein Leshov** – hl.dev.acc@gmail.com
+- **Hyusein Leshov** – hyusein.leshov@gmail.com
 - **Shenol Shengov** – shenolshengov41@gmail.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
